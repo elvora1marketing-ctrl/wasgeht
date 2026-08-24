@@ -99,20 +99,8 @@ const Tag = reviews.profileUrl ? 'a' : 'div';
 }
 
 <style>
-  /* Unuebersehbar, aber klein: der Hinweis soll beim Gestalten nicht
-     stoeren und trotzdem verhindern, dass die Platzhalter unbemerkt
-     online gehen. */
-  .platzhalter-marke {
-    font-family: var(--font-mono);
-    font-size: 0.625rem;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 0.1875rem 0.4375rem;
-    border-radius: 0.25rem;
-    background: #b3261e;
-    color: #fff;
-  }
+  /* `platzhalter-marke` steht in global.css: dieselbe Marke sitzt auch am
+     Bewertungsabschnitt der Startseite. */
 
   /* --- Die grosse Fassung ------------------------------------------------ */
   .beleg-halter {

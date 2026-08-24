@@ -411,6 +411,20 @@ const wege = [
         kennung="Bewertungen"
         heading="Was Betriebe hinterher sagen"
       >
+        {/* Der Abschnitt trug bisher keinen Hinweis: die Marke sass nur am
+            Bewertungsbeleg. Solange die Stimmen erfunden sind, muss sie
+            auch hier stehen -- und zwar unabhaengig davon, ob die Texte
+            zufaellig noch mit „Platzhalter:" anfangen. */}
+        {reviews.platzhalter && (
+          <p class="stimmen-warnung">
+            <span class="platzhalter-marke">Beispieldaten</span>
+            <span>
+              Erfundene Stimmen zur Beurteilung der Gestaltung. Vor dem
+              Livegang durch echte Rückmeldungen ersetzen.
+            </span>
+          </p>
+        )}
+
         <ul class="stimmen">
           {reviews.items.map((stimme, i) => (
             <li class="stimme einblenden" style={`--verzug:${i}`}>
@@ -1120,6 +1134,16 @@ const wege = [
   }
 
   /* ===================== Bewertungen ===================== */
+  .stimmen-warnung {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    margin-block-end: clamp(1.5rem, 3vw, 2.25rem);
+    font-size: 0.875rem;
+    color: var(--color-ink-muted);
+  }
+
   .stimmen {
     display: grid;
     gap: clamp(2rem, 4vw, 3rem);

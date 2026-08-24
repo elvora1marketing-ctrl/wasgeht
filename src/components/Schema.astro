@@ -86,8 +86,17 @@ const betrieb: Record<string, unknown> = {
 };
 
 /* Bewertungen nur auszeichnen, wenn es sie wirklich gibt und sie auch
-   sichtbar auf der Seite stehen. */
-if (reviews.enabled && reviews.count > 0) {
+   sichtbar auf der Seite stehen.
+ *
+ * `reviews.platzhalter` MUSS hier mit geprueft werden. Ohne diese Bedingung
+ * ging die erfundene Musterbewertung als `aggregateRating` an Google -- auf
+ * jeder indexierbaren Seite, und anders als die sichtbare Auszeichnung ohne
+ * jeden Hinweis darauf, dass sie erfunden ist. Sichtbar trug sie die Marke
+ * „Beispieldaten", im JSON-LD stand sie blank als Tatsachenbehauptung.
+ *
+ * Das ist genau der Fall, den der Grundsatz oben ausschliesst, und
+ * zusaetzlich eine irrefuehrende geschaeftliche Handlung nach § 5 UWG. */
+if (reviews.enabled && !reviews.platzhalter && reviews.count > 0) {
   betrieb.aggregateRating = {
     '@type': 'AggregateRating',
     ratingValue: reviews.rating,

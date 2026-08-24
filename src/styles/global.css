@@ -324,6 +324,25 @@
   text-transform: uppercase;
 }
 
+/* Warnmarke fuer Platzhalter-Inhalte.
+   Unuebersehbar, aber klein: der Hinweis soll beim Gestalten nicht stoeren
+   und trotzdem verhindern, dass erfundene Angaben unbemerkt online gehen.
+   Steht hier und nicht in einer Komponente, weil ihn inzwischen mehrere
+   Stellen brauchen -- Astro kapselt Komponentenstile, eine zweite Kopie
+   waere frueher oder spaeter auseinandergelaufen. */
+@utility platzhalter-marke {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.1875rem 0.4375rem;
+  border-radius: 0.25rem;
+  background: var(--color-danger);
+  color: #fff;
+}
+
 /* Ziffern in gleicher Breite. Fuer Kennzahlen und Schrittnummern, damit
    nichts springt, wenn sich ein Wert aendert. */
 @utility ziffern {
