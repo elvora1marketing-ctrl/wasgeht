@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+  stroke="#5b6067" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <!--
+    Profilbild der Betriebe in den Vorfuehr-Verlaeufen.
+
+    BEWUSST EIN ZEICHEN UND KEIN GESICHT. Ein Portrait aus einem
+    Stock-Verzeichnis waere auf einer Seite, die Vertrauen aufbauen soll,
+    ein gefaelschter Beleg. Dieselbe Ueberlegung steht hinter den Initialen
+    der Bewerterkreise. Ein erfundenes Firmenlogo waere eine erfundene
+    Marke und damit genauso falsch.
+
+    Ein Haus passt zu jedem der gezeigten Gewerke, ohne einen Betrieb zu
+    behaupten, den es nicht gibt.
+
+    ACHTUNG: Das hier ist ein XML-Kommentar, kein CSS-Kommentar. Zwei
+    aufeinanderfolgende Bindestriche sind darin nicht erlaubt und machen
+    die ganze Datei ungueltig. Der Browser zeigt dann statt der Grafik das
+    Zeichen fuer ein kaputtes Bild.
+  -->
+  <path d="M3.2 10.2 12 3.8l8.8 6.4" />
+  <path d="M5.4 9.4V20h13.2V9.4" />
+  <path d="M9.9 20v-5.4h4.2V20" />
+</svg>

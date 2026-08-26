@@ -34,7 +34,7 @@ export const empfangGespraeche: Gespraech[] = [
     bild: mark.src,
     nachrichten: [
       { von: 'kunde', zeit: '21:37', text: 'Guten Abend, geht so ein Erstgespräch auch abends? Tagsüber steh ich aufm Gerüst.' },
-      { von: 'assistenz', zeit: '21:37', text: 'Guten Abend! Klar, geht auch früh oder abends. Diese Woche wäre Donnerstag 7:30 Uhr oder 18:00 Uhr frei.' },
+      { von: 'assistenz', zeit: '21:37', text: 'Guten Abend. Das geht, früh wie abends. Diese Woche wäre Donnerstag um 7:30 Uhr oder um 18:00 Uhr frei.' },
       { von: 'kunde', zeit: '21:39', text: 'dann donnerstag 18 uhr' },
       { von: 'assistenz', zeit: '21:39', text: 'Eingetragen: Donnerstag, 18:00 Uhr. Worum soll es vor allem gehen, damit Luan sich vorbereiten kann?' },
       { von: 'kunde', zeit: '21:40', text: 'Wir verpassen ständig Anrufe, wenn wir auf dem Dach stehen.' },
@@ -50,9 +50,9 @@ export const empfangGespraeche: Gespraech[] = [
     nachrichten: [
       { von: 'assistenz', zeit: '11:06', text: 'Guten Tag, hier ist die Assistenz von Elvora. Sie haben gerade angerufen, Luan sitzt bis 12 Uhr in einem Termin. Worum geht es?' },
       { von: 'kunde', zeit: '11:09', text: 'Ah ok. Unsere Website ist von 2016 und auf dem Handy völlig kaputt.' },
-      { von: 'assistenz', zeit: '11:09', text: 'Verstanden. Schicken Sie mir gern den Link, dann schaut Luan heute noch drauf und ruft Sie mit einer ehrlichen Einschätzung zurück.' },
+      { von: 'assistenz', zeit: '11:09', text: 'Verstanden. Schicken Sie mir gern den Link, dann sieht Luan ihn sich heute noch an und ruft Sie mit einer ehrlichen Einschätzung zurück.' },
       { von: 'kunde', zeit: '11:11', text: 'www.mustermann-haustechnik.de. Ab 14 Uhr bin ich erreichbar.' },
-      { von: 'assistenz', zeit: '11:11', text: 'Danke! Rückruf heute zwischen 14 und 15 Uhr an diese Nummer. Ist notiert.' },
+      { von: 'assistenz', zeit: '11:11', text: 'Danke, ist notiert. Der Rückruf kommt heute zwischen 14 und 15 Uhr an diese Nummer.' },
     ],
   },
   {
@@ -63,14 +63,11 @@ export const empfangGespraeche: Gespraech[] = [
     bild: mark.src,
     nachrichten: [
       { von: 'kunde', zeit: '14:23', text: 'Hallo, was kostet bei euch ungefähr eine Website? Malerbetrieb, 6 Leute.' },
-      { von: 'assistenz', zeit: '14:23', text: 'Hallo! Ehrliche Antwort: Das hängt vom Umfang ab. Luan nennt Preise erst nach einem kurzen Gespräch, dann aber fest und schriftlich, ohne Nachforderungen.' },
+      { von: 'assistenz', zeit: '14:23', text: 'Hallo. Ehrliche Antwort: das hängt vom Umfang ab. Luan nennt Preise erst nach einem kurzen Gespräch, dann aber fest und schriftlich, ohne Nachforderungen.' },
       { von: 'kunde', zeit: '14:26', text: 'ok, fair. Habt ihr Beispiele von anderen Betrieben?' },
-      { von: 'assistenz', zeit: '14:26', text: 'Ja, die zeigt er Ihnen im Gespräch. Passt morgen 8:00 Uhr, bevor Ihr Tag losgeht?' },
+      { von: 'assistenz', zeit: '14:26', text: 'Ja, die zeigt er Ihnen im Gespräch. Würde morgen um 8:00 Uhr passen, bevor Ihr Tag losgeht?' },
       { von: 'kunde', zeit: '14:27', text: 'passt 👍' },
-      { von: 'assistenz', zeit: '14:27', text: 'Steht! Morgen, 8:00 Uhr, Luan ruft Sie an. Bestätigung kommt gleich hier rein.' },
+      { von: 'assistenz', zeit: '14:27', text: 'Steht: morgen um 8:00 Uhr ruft Luan Sie an. Die Bestätigung kommt gleich hier herein.' },
     ],
   },
 ];
-
-/** Gemeinsames Tempo der Vorführung, etwas schneller als der Grundtakt. */
-export const EMPFANG_TEMPO = 0.85;

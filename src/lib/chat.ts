@@ -75,21 +75,30 @@ export interface GeplantesGespraech {
 
 /* --- Stellschrauben des Ablaufs, alles in Sekunden -------------------- */
 
+/* Der Ablauf lief zu hastig: die Blasen sprangen schneller herein, als man
+   sie lesen konnte, und wer den ersten Satz zu Ende gelesen hatte, stand
+   schon vor der Antwort. Ein Verlauf, den man nicht mitlesen kann, zeigt
+   nichts -- er flackert nur.
+
+   Alle Werte deshalb um rund ein Drittel gestreckt. Bewusst nicht mehr:
+   noch langsamer wirkt es zaeh, und die Aussage der Vorfuehrung ist ja
+   gerade, dass die Antwort schnell da ist. */
+
 /** Ruhe, bevor die erste Nachricht kommt. */
-const VORLAUF = 0.4;
+const VORLAUF = 0.55;
 /** Grundzeit der Tippanzeige, unabhängig von der Länge. */
-const TIPP_GRUND = 0.7;
+const TIPP_GRUND = 0.9;
 /** Zuschlag je Zeichen, damit ein langer Text nicht sofort fertig ist. */
-const TIPP_JE_ZEICHEN = 0.014;
+const TIPP_JE_ZEICHEN = 0.018;
 /** Deckel, sonst wartet man bei langen Antworten zu lange. */
-const TIPP_DECKEL = 2.2;
+const TIPP_DECKEL = 2.8;
 /** Pause, nachdem das Gegenüber geschrieben hat. */
-const PAUSE_LINKS = 1.0;
+const PAUSE_LINKS = 1.35;
 /** Pause, nachdem die eigene Seite geschrieben hat. */
-const PAUSE_RECHTS = 1.1;
+const PAUSE_RECHTS = 1.45;
 
 /** Wie lange ein fertiger Verlauf stehen bleibt, bevor der nächste kommt. */
-export const HALTEN = 1.5;
+export const HALTEN = 2.1;
 /** Dauer des Übergangs von einem Verlauf zum nächsten. */
 export const WECHSEL = 0.45;
 
