@@ -195,16 +195,44 @@ const vor = [1, 2, 0];
   .karussell-telefon-1,
   .karussell-telefon-2 { z-index: 1; pointer-events: none; }
 
+  /* Wie ein zurueckgetretenes Telefon aussieht.
+   *
+   * Stand vorher als dieselben zwei Zeilen in allen sechs Lageregeln
+   * darunter; die Werte liefen dadurch beim Nachjustieren auseinander.
+   * Jetzt einmal hier, die Lageregeln setzen nur noch die Lage.
+   *
+   * WARUM SO STARK WEICHGEZEICHNET UND MASKIERT: mit den frueheren Werten
+   * (Deckkraft 0.5, Weichzeichnung 1.5px) blieben die beiden hinteren
+   * Geraete klar umrissene helle Rechtecke. Nebeneinander verschmolzen sie
+   * zu EINER blassen Flaeche mit harten waagerechten Kanten oben und unten,
+   * und die las sich wie ein heller Kasten hinter dem vorderen Telefon --
+   * ein Kasten, den dort niemand haben wollte.
+   *
+   * Die Maske laesst sie nach aussen hin auslaufen, statt sie an einer
+   * Kante abzuschneiden. Damit gibt es keinen Umriss mehr, an dem sich das
+   * Auge festhaelt, und der Seitengrund bleibt ringsum sauber weiss.
+   *
+   * Die Maske steht bewusst NUR hier: ein Telefon, das nach vorn kommt,
+   * trifft diese Regeln nicht mehr und ist dadurch von selbst wieder
+   * unmaskiert. */
+  .karussell:has(.karussell-wahl:nth-of-type(1):checked) .karussell-telefon-1,
+  .karussell:has(.karussell-wahl:nth-of-type(1):checked) .karussell-telefon-2,
+  .karussell:has(.karussell-wahl:nth-of-type(2):checked) .karussell-telefon-0,
+  .karussell:has(.karussell-wahl:nth-of-type(2):checked) .karussell-telefon-2,
+  .karussell:has(.karussell-wahl:nth-of-type(3):checked) .karussell-telefon-0,
+  .karussell:has(.karussell-wahl:nth-of-type(3):checked) .karussell-telefon-1 {
+    opacity: 0.42;
+    filter: saturate(0.6) blur(6px);
+    -webkit-mask-image: radial-gradient(72% 64% at 50% 50%, #000 34%, transparent 82%);
+    mask-image: radial-gradient(72% 64% at 50% 50%, #000 34%, transparent 82%);
+  }
+
   /* Zustand 0 (Start): 0 vorn, 1 rechts, 2 links. */
   .karussell:has(.karussell-wahl:nth-of-type(1):checked) .karussell-telefon-1 {
     transform: perspective(1400px) translateX(64%) scale(0.76) rotateY(-22deg);
-    opacity: 0.5;
-    filter: saturate(0.75) blur(1.5px);
   }
   .karussell:has(.karussell-wahl:nth-of-type(1):checked) .karussell-telefon-2 {
     transform: perspective(1400px) translateX(-64%) scale(0.76) rotateY(22deg);
-    opacity: 0.5;
-    filter: saturate(0.75) blur(1.5px);
   }
 
   /* Zustand 1: 1 vorn, 2 rechts, 0 links. */
@@ -216,13 +244,9 @@ const vor = [1, 2, 0];
     z-index: 1;
     pointer-events: none;
     transform: perspective(1400px) translateX(-64%) scale(0.76) rotateY(22deg);
-    opacity: 0.5;
-    filter: saturate(0.75) blur(1.5px);
   }
   .karussell:has(.karussell-wahl:nth-of-type(2):checked) .karussell-telefon-2 {
     transform: perspective(1400px) translateX(64%) scale(0.76) rotateY(-22deg);
-    opacity: 0.5;
-    filter: saturate(0.75) blur(1.5px);
   }
 
   /* Zustand 2: 2 vorn, 0 rechts, 1 links. */
@@ -237,13 +261,9 @@ const vor = [1, 2, 0];
     z-index: 1;
     pointer-events: none;
     transform: perspective(1400px) translateX(64%) scale(0.76) rotateY(-22deg);
-    opacity: 0.5;
-    filter: saturate(0.75) blur(1.5px);
   }
   .karussell:has(.karussell-wahl:nth-of-type(3):checked) .karussell-telefon-1 {
     transform: perspective(1400px) translateX(-64%) scale(0.76) rotateY(22deg);
-    opacity: 0.5;
-    filter: saturate(0.75) blur(1.5px);
   }
 
   /* --- Steuerung -------------------------------------------------------- */
