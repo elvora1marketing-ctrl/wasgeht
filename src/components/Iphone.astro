@@ -85,11 +85,24 @@ const schirm = {
 
   .iphone-huelle {
     position: relative;
-    /* Zwei Lagen: ein enger dunkler Kern und ein weiter weicher Schleier.
-       Ein einzelner grosser Schatten sah nach Matsch aus, nicht nach
-       einem Geraet, das vor der Seite steht. */
-    filter: drop-shadow(0 2px 6px rgb(22 25 58 / 0.18))
-      drop-shadow(0 24px 48px rgb(22 25 58 / 0.16));
+    /* Zwei Lagen: ein enger dunkler Kern und ein zweiter, etwas weicherer
+       darunter. Ein einzelner grosser Schatten sah nach Matsch aus, nicht
+       nach einem Geraet, das vor der Seite steht.
+     *
+     * FARBE UND WEITE SIND HIER HEIKEL. Vorher stand hier
+     * rgb(22 25 58) auf 48 Pixel Weichzeichnung. Das war erstens deutlich
+     * blaustichig -- der Rest der Seite schattet mit rgb(25 29 33), also
+     * neutral -- und zweitens so weit gestreut, dass die Flaeche rund um
+     * das Geraet messbar grau wurde: #f1f1f2 statt der #ffffff, die
+     * ueberall sonst im Hero liegt. Im Karussell stehen drei Geraete
+     * nebeneinander, deren Schleier sich zusaetzlich addierten.
+     *
+     * Sichtbar war das als heller Kasten um die Telefone, der sich vom
+     * Seitengrund abhob. Jetzt neutral, enger und schwaecher: die Flaeche
+     * daneben misst wieder glatt #ffffff, das Geraet steht trotzdem vor
+     * der Seite und liegt nicht darauf. */
+    filter: drop-shadow(0 1px 2px rgb(25 29 33 / 0.08))
+      drop-shadow(0 6px 14px rgb(25 29 33 / 0.09));
   }
 
   /* Seitentasten. Reines CSS am Rand der Huelle: Lautstaerke links,
