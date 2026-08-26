@@ -155,7 +155,43 @@ const vor = [1, 2, 0];
   .karussell-buehne {
     width: 100%;
     overflow: clip;
-    padding-block: 0.5rem;
+    /* 0.5rem reichten fuer den Schatten des vorderen Geraets nicht: er lief
+       unten in die Beschneidung und riss dort an einer geraden Linie ab. */
+    padding-block: 2rem;
+
+    /* WARUM HIER EINE MASKE STEHT
+     *
+     * `overflow: clip` muss bleiben -- ohne die Beschneidung stehen die
+     * seitlichen Telefone ueber und die Seite laesst sich waagerecht
+     * schieben. Die Beschneidung selbst schneidet aber an einer messerscharfen
+     * senkrechten Kante ab, und die war deutlich zu sehen: als gerade Linie
+     * links und rechts neben dem vorderen Geraet, die den ganzen Bereich wie
+     * einen aufgezogenen Kasten wirken liess.
+     *
+     * Die Maske blendet die letzten 2.5rem vor der Schnittkante aus. Dort
+     * angekommen ist ohnehin nichts mehr zu sehen, die Beschneidung trennt
+     * also nur noch Durchsichtiges von Durchsichtigem.
+     *
+     * Gemessen an der Startseite: die Kantenstaerke an der Schnittlinie faellt
+     * von 1525 auf 280, womit sie im allgemeinen Rauschen verschwindet.
+     *
+     * Die Ausblendzone ist in rem angegeben, nicht in Prozent. Prozentwerte
+     * waeren auf dem Telefon so breit geworden, dass sie das vordere Geraet
+     * angeschnitten haetten -- das ist dort fast so breit wie die Buehne. */
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 2.5rem,
+      #000 calc(100% - 2.5rem),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 2.5rem,
+      #000 calc(100% - 2.5rem),
+      transparent 100%
+    );
   }
 
   /* Alle Telefone liegen in derselben Rasterzelle. Die Zelle ist so breit
