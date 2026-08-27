@@ -208,6 +208,20 @@ const kachelZeichen: Record<string, string> = {
         </div>
 
         <p class="hero-notiz">{cta.primary.note}</p>
+
+        {/* Steht NACH dem Aufruf, nicht davor.
+         *
+         * Wer schon geklickt hat, braucht sie nicht; wer noch zoegert,
+         * bekommt hier den einen Grund, den keine Agentur kopieren kann.
+         * In die Ueberschrift gehoert sie nicht -- dort zaehlt, was der
+         * Leser davon hat, nicht wer ich bin.
+         *
+         * Nebenbei traegt sie die linke Spalte: die war deutlich kuerzer
+         * als die Vorfuehrung rechts, und unten links klaffte Leere. */}
+        <p class="hero-herkunft">
+          <span class="hero-herkunft-marke" aria-hidden="true"></span>
+          Gelernter {owner.trade}. Ich weiß, wie Ihr Tag aussieht.
+        </p>
       </div>
 
       <div class="hero-geraet">
@@ -225,9 +239,8 @@ const kachelZeichen: Record<string, string> = {
             jeder auf seine Seite. Eine Antwort, die sichtbar um 6:12 Uhr
             herausgeht, muss man nicht glauben. */}
         <p class="hero-geraet-text">
-          Auf WhatsApp antwortet zuerst meine KI-Assistenz. Dieselbe, die ich
-          für Betriebe einrichte. Achten Sie auf die Uhrzeiten: früh um sechs
-          antwortet sie genauso wie spät am Abend.
+          Auf WhatsApp antwortet zuerst meine KI-Assistenz — dieselbe, die
+          ich für Betriebe einrichte. Achten Sie auf die Uhrzeiten.
         </p>
       </div>
     </div>
@@ -614,33 +627,57 @@ const kachelZeichen: Record<string, string> = {
   }
 
   /* --- Die Vorfuehrung im ersten Sichtbereich --------------------------- */
+  /* Klein, aber mit einem Punkt in der Akzentfarbe: eine reine Textzeile
+     waere hier untergegangen, ein Kasten haette mit dem Aufruf darueber
+     konkurriert. */
+  .hero-herkunft {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1.25rem 0 0;
+    font-size: 0.9375rem;
+    color: var(--color-ink-muted);
+  }
+
+  .hero-herkunft-marke {
+    width: 0.4rem;
+    height: 0.4rem;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: var(--color-accent);
+  }
+
+  /* Enger Abstand mit Absicht: die Bildunterschrift „Schematische
+     Darstellung" kommt aus dem Karussell, der Satz darunter aus dieser
+     Seite. Mit gleichem Abstand zu allem standen unter dem Geraet drei
+     lose Zeilen. Eng gesetzt lesen sich beide als EINE Bildunterschrift,
+     und die Punkte darueber haben wieder Luft. */
   .hero-geraet {
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1.25rem;
+    gap: 0.5rem;
   }
 
 
   .hero-geraet-text {
     margin: 0;
-    max-width: 30ch;
+    max-width: 38ch;
     font-size: 0.9375rem;
     line-height: 1.6;
     text-align: center;
     color: var(--color-ink-muted);
   }
 
-  @media (width >= 64rem) {
-    .hero-geraet {
-      align-items: flex-end;
-    }
-
-    .hero-geraet-text {
-      text-align: end;
-    }
-  }
+  /* FRUEHER STAND HIER `align-items: flex-end` UND `text-align: end`.
+   *
+   * Rechtsbuendiger Fliesstext hat links einen ausgefransten Rand; das
+   * Auge findet den Zeilenanfang nicht und ueberspringt den Absatz. Fuer
+   * drei Zeilen unter einer Vorfuehrung ist das der sichere Weg, dass sie
+   * niemand liest.
+   *
+   * Die Spalte bleibt jetzt auch am Rechner mittig unter dem Geraet. */
 
   @media (prefers-reduced-motion: no-preference) {
     .hero-kennung,
