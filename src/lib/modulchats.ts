@@ -29,6 +29,22 @@ import type { Gespraech } from '~/lib/chat';
  * seinen eigenen Laden. Zusammen mit der Bildunterschrift „Schematische
  * Darstellung" bleibt unmissverständlich, dass das eine Vorführung ist.
  *
+ * DIE UHRZEITEN SIND ABSICHT UND ABGESTIMMT
+ *
+ * 06:24, 19:42 und 23:51: früher Morgen, nach Feierabend, kurz vor
+ * Mitternacht. Zusammen mit den drei Verläufen auf der Startseite (22:41,
+ * 11:06, 06:12) ist damit der ganze Tag abgedeckt.
+ *
+ * Das ist der Beleg für die Rund-um-die-Uhr-Erreichbarkeit, und zwar ein
+ * gezeigter statt eines behaupteten. „Wir sind 24/7 für Sie da" schreibt
+ * jeder auf seine Seite; eine Terminverschiebung, die um 23:51 Uhr
+ * beantwortet wird, muss man nicht glauben, man sieht sie.
+ *
+ * WER DIE UHRZEIT ÄNDERT, MUSS DEN TEXT MITLESEN. Beides hängt zusammen:
+ * um 19:42 ist niemand mehr „bis mittags auf einer Baustelle", und um
+ * 06:24 sagt man nicht „Guten Tag". Genau solche Kleinigkeiten verraten
+ * eine gestellte Vorführung.
+ *
  * TONFALL DER ASSISTENZ: knapp, zugewandt, ohne Ausrufezeichen-Inflation.
  * Sie sagt, was sie tut, nennt Zeiten und fragt genau einmal nach. Wer
  * einen Betrieb anschreibt, will keine gute Laune, sondern eine Antwort.
@@ -37,24 +53,24 @@ export const modulGespraeche: Record<string, Gespraech> = {
   'whatsapp-assistenz': {
     name: 'Ihr Betrieb',
     status: 'online',
-    uhrzeit: '9:41',
+    uhrzeit: '06:24',
     stempel: 'WhatsApp-Assistenz',
     bild: betrieb.src,
     nachrichten: [
       {
         von: 'kunde',
-        zeit: '9:41',
-        text: 'Guten Tag, unser Heizkörper im Bad wird nicht mehr warm. Wechseln Sie auch einzelne Thermostate?',
+        zeit: '06:24',
+        text: 'Guten Morgen, unser Heizkörper im Bad wird nicht mehr warm. Wechseln Sie auch einzelne Thermostate?',
       },
       {
         von: 'assistenz',
-        zeit: '9:41',
-        text: 'Guten Tag. Ja, das machen wir regelmäßig. Schicken Sie mir bitte ein Foto vom Thermostat, dann bringt der Kollege das passende Ersatzteil gleich mit.',
+        zeit: '06:24',
+        text: 'Guten Morgen. Ja, das machen wir regelmäßig. Schicken Sie mir bitte ein Foto vom Thermostat, dann bringt der Kollege das passende Ersatzteil gleich mit.',
       },
-      { von: 'kunde', zeit: '9:43', text: 'Foto kommt gleich. Wäre nächste Woche etwas frei?' },
+      { von: 'kunde', zeit: '06:26', text: 'Foto kommt gleich. Wäre nächste Woche etwas frei?' },
       {
         von: 'assistenz',
-        zeit: '9:43',
+        zeit: '06:26',
         text: 'Dienstag um 8:30 Uhr wäre möglich. Soll ich den Termin für Sie eintragen?',
       },
     ],
@@ -62,48 +78,48 @@ export const modulGespraeche: Record<string, Gespraech> = {
   'anruf-retter': {
     name: 'Ihr Betrieb',
     status: 'online',
-    uhrzeit: '10:03',
+    uhrzeit: '19:42',
     stempel: 'Anruf-Retter',
     bild: betrieb.src,
     nachrichten: [
       {
         von: 'assistenz',
-        zeit: '10:03',
-        text: 'Guten Tag, Sie haben uns gerade angerufen. Wir sind bis mittags auf einer Baustelle. Worum geht es? Ich leite es direkt weiter.',
+        zeit: '19:42',
+        text: 'Guten Abend, Sie haben uns gerade angerufen. Wir sind für heute vom Hof. Worum geht es? Ich leite es direkt weiter.',
       },
       {
         von: 'kunde',
-        zeit: '10:06',
+        zeit: '19:45',
         text: 'Bei uns tropft es unter der Spüle, es wird langsam mehr.',
       },
       {
         von: 'assistenz',
-        zeit: '10:06',
-        text: 'Danke für die Rückmeldung, das sollte zügig angesehen werden. Stellen Sie bitte einen Eimer darunter und drehen Sie das Eckventil zu. Sie bekommen heute bis 13 Uhr einen Rückruf mit Terminvorschlag.',
+        zeit: '19:45',
+        text: 'Danke für die Rückmeldung, das sollte zügig angesehen werden. Stellen Sie bitte einen Eimer darunter und drehen Sie das Eckventil zu. Sie bekommen morgen früh bis 8 Uhr einen Rückruf mit Terminvorschlag.',
       },
     ],
   },
   terminbuchung: {
     name: 'Ihr Betrieb',
     status: 'online',
-    uhrzeit: '14:12',
+    uhrzeit: '23:51',
     stempel: 'Terminbuchung',
     bild: betrieb.src,
     nachrichten: [
       {
         von: 'kunde',
-        zeit: '14:12',
+        zeit: '23:51',
         text: 'Hallo, ich schaffe es morgen um 9 Uhr leider nicht. Lässt sich der Termin verschieben?',
       },
       {
         von: 'assistenz',
-        zeit: '14:12',
+        zeit: '23:51',
         text: 'Selbstverständlich. Frei wäre Donnerstag um 13:00 Uhr oder Freitag um 9:30 Uhr.',
       },
-      { von: 'kunde', zeit: '14:13', text: 'Freitag passt besser.' },
+      { von: 'kunde', zeit: '23:52', text: 'Freitag passt besser.' },
       {
         von: 'assistenz',
-        zeit: '14:13',
+        zeit: '23:52',
         text: 'Notiert: Freitag, 9:30 Uhr. Die alte Erinnerung ist gelöscht, die neue geht Donnerstag raus.',
       },
     ],
