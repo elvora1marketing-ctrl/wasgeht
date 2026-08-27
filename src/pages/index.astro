@@ -7,7 +7,6 @@ import Scramble from '~/components/Scramble.astro';
 import Sterne from '~/components/Sterne.astro';
 import ReviewBadge from '~/components/ReviewBadge.astro';
 import Telefonkarussell from '~/components/Telefonkarussell.astro';
-import Kanalkreise from '~/components/Kanalkreise.astro';
 import Textrolle from '~/components/Textrolle.astro';
 import Vormittag from '~/components/Vormittag.astro';
 import { empfangGespraeche } from '~/lib/empfang';
@@ -126,12 +125,6 @@ const kachelZeichen: Record<string, string> = {
   automatisierung: 'M4 17l1.4-3.6A7.5 7.5 0 1 1 8.2 16zM8.5 9h7M8.5 12h4.5',
 };
 
-const wege = [
-  { label: 'WhatsApp', href: contactLinks.whatsapp, symbol: 'chat' as const, extern: true },
-  { label: 'Telefon', href: contactLinks.tel, symbol: 'telefon' as const },
-  { label: 'E-Mail', href: contactLinks.mail, symbol: 'brief' as const },
-  { label: 'Termin', href: cta.primary.href, symbol: 'kalender' as const },
-];
 ---
 
 <Base title={title} description={description}>
@@ -455,50 +448,54 @@ const wege = [
   }
 
   {/* ===================== Abschluss =====================
-      Die einzige dunkle Flaeche der Seite. Genau deshalb faellt sie auf. */}
-  <Band ton="tief" kennung="Loslegen" heading="Klingt das nach Ihrem Betrieb?">
+      WARUM NICHT MEHR DUNKEL UND NICHT MEHR ZWEISPALTIG
+
+      Die Flaeche war die einzige dunkle der Seite und sollte genau deshalb
+      auffallen. Sie fiel auch auf, nur half das nichts: der Knopf steht in
+      der Akzentfarbe, und Magenta auf Anthrazit hat weniger Zug als
+      Magenta auf hellem Grund. Die auffaelligste Flaeche der Seite machte
+      damit ausgerechnet das Wichtigste darauf leiser.
+
+      Dazu standen hier fuenf Angebote nebeneinander: der Knopf rechts,
+      vier gleichrangige Kontaktwege links. Wer die Wahl zwischen fuenf
+      Dingen hat, trifft keine.
+
+      Jetzt eine Spalte, mittig, mit genau EINEM grossen Knopf. Die
+      Zusagen stehen als ruhige Zeile darunter, die anderen Kontaktwege
+      als eine einzige Zeile Text ganz zuletzt -- erreichbar fuer den, der
+      sie sucht, aber ohne mit dem Termin zu konkurrieren.
+
+      Der Verlauf hinter dem Knopf ist Zierde und traegt keinen Text. Auf
+      Verlaeufen steht auf dieser Seite nie welcher, sie erfuellen keine
+      Kontrastanforderung. */}
+  <Band ton="gedaempft" kennung="Loslegen" heading="Klingt das nach Ihrem Betrieb?">
     <div class="schluss">
-      <div class="schluss-text">
-        <p>
-          In einem kurzen Gespräch schauen wir, wo bei Ihnen gerade Anfragen
-          verloren gehen. Ohne Vorbereitung, ohne Verpflichtung. Und wenn ich
-          Ihnen nicht helfen kann, sage ich Ihnen das.
-        </p>
+      <p class="schluss-satz">
+        In einem kurzen Gespräch schauen wir, wo bei Ihnen gerade Anfragen
+        liegen bleiben. Ohne Vorbereitung, ohne Verpflichtung. Und wenn ich
+        Ihnen nicht helfen kann, sage ich Ihnen das.
+      </p>
 
-        <div class="schluss-wege">
-          <p class="schluss-wege-titel kennung">Alle Wege zu mir</p>
-          <Kanalkreise kanaele={wege} tone="inverse" />
-        </div>
-      </div>
-
-      <div class="schluss-handlung">
-        <Button href={cta.primary.href} size="lg" variant="aufFarbe" class="max-sm:w-full">
+      <div class="schluss-knopf">
+        <Button href={cta.primary.href} class="schluss-cta">
           {cta.primary.label}
         </Button>
-        {/* Beleg, Dauer und Antwortzeit als EINE Leiste statt vier
-            gestapelter Zeilen. An der Stelle der Entscheidung sollen die
-            drei Zusagen nebeneinander stehen, nicht untereinander
-            tropfen. */}
-        <ul class="schluss-beweise">
-          <li><ReviewBadge tone="inverse" /></li>
-          <li>
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"
-              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <circle cx="10" cy="10" r="7" />
-              <path d="M10 6v4l2.5 2" />
-            </svg>
-            Sofortige Antwort
-          </li>
-          <li>
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"
-              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <rect x="3" y="4.5" width="14" height="12" rx="2" />
-              <path d="M3 8.5h14M7 3v3M13 3v3" />
-            </svg>
-            15 Minuten, unverbindlich
-          </li>
-        </ul>
       </div>
+
+      <ul class="schluss-zusagen">
+        <li>15 Minuten</li>
+        <li>unverbindlich</li>
+        <li>ohne Verkaufsgespräch</li>
+      </ul>
+
+      <p class="schluss-direkt">
+        Lieber sofort schreiben oder anrufen?
+        <a href={contactLinks.whatsapp} target="_blank" rel="noopener noreferrer">WhatsApp</a>
+        <span aria-hidden="true">·</span>
+        <a href={contactLinks.tel}>Telefon</a>
+        <span aria-hidden="true">·</span>
+        <a href={contactLinks.mail}>E-Mail</a>
+      </p>
     </div>
   </Band>
 </Base>
@@ -1212,85 +1209,113 @@ const wege = [
 
   /* ===================== Abschluss ===================== */
   .schluss {
-    display: grid;
-    gap: clamp(2rem, 5vw, 4rem);
-    align-items: start;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: clamp(1.5rem, 3vw, 2.25rem);
   }
 
-  @media (width >= 64rem) {
-    .schluss {
-      /* Die Handlungsspalte ist gedeckelt, sonst zieht die Beweisleiste
-         sie in die Breite und quetscht den Text daneben zusammen. */
-      grid-template-columns: minmax(0, 1fr) minmax(0, 34rem);
+  .schluss-satz {
+    max-width: 46ch;
+    margin: 0;
+    color: var(--color-ink-muted);
+    font-size: clamp(1.0625rem, 1.6vw, 1.1875rem);
+  }
+
+  /* Traeger fuer den Schein hinter dem Knopf. Der Schein liegt in einem
+     eigenen Element, damit der Knopf selbst keinen Filter bekommt: ein
+     Filter auf einem Knopf zieht ihn in eine eigene Zeichenebene und
+     macht die Schrift darauf auf manchen Geraeten unscharf. */
+  .schluss-knopf {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .schluss-knopf::before {
+    content: '';
+    position: absolute;
+    inset: -2.75rem -3.5rem;
+    border-radius: 999px;
+    background: radial-gradient(
+      50% 50% at 50% 50%,
+      color-mix(in oklab, var(--color-brand-mid) 30%, transparent) 0%,
+      color-mix(in oklab, var(--color-brand-start) 14%, transparent) 55%,
+      transparent 72%
+    );
+    filter: blur(32px);
+    pointer-events: none;
+  }
+
+  /* Groesser als jedes andere Bedienelement der Seite. Das ist der Punkt:
+     am Ende soll es nur noch eine Sache zu tun geben, und die soll man
+     nicht suchen muessen. */
+  .schluss-cta {
+    position: relative;
+    height: 3.75rem;
+    padding-inline: 2.5rem;
+    font-size: 1.0625rem;
+    box-shadow: 0 2px 4px rgb(25 29 33 / 0.1), 0 14px 30px -12px rgb(178 58 148 / 0.55);
+  }
+
+  .schluss-cta:hover {
+    box-shadow: 0 2px 4px rgb(25 29 33 / 0.12), 0 18px 36px -12px rgb(178 58 148 / 0.65);
+  }
+
+  @media (width < 30rem) {
+    .schluss-knopf {
+      display: flex;
+      width: 100%;
+    }
+    .schluss-cta {
+      width: 100%;
+      padding-inline: 1.25rem;
     }
   }
 
-  .schluss-text {
-    display: flex;
-    flex-direction: column;
-    gap: clamp(1.75rem, 4vw, 2.5rem);
-    max-width: 48ch;
-  }
-
-  .schluss-text p {
-    margin: 0;
-    line-height: 1.65;
-    opacity: 0.92;
-  }
-
-  .schluss-beweise {
+  /* Die drei Zusagen als eine Zeile mit Trennpunkten. Untereinander
+     gestapelt sahen sie nach Bedingungen aus, nebeneinander nach dem,
+     was sie sind: Gruende, es einfach zu tun. */
+  .schluss-zusagen {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
-    gap: 0.6rem 0;
-    margin: 1.1rem 0 0;
+    justify-content: center;
+    gap: 0.35rem 0.9rem;
+    margin: 0;
     padding: 0;
     list-style: none;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-ink-faint);
   }
 
-  .schluss-beweise li {
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
-    font-size: 0.875rem;
-    color: rgb(255 255 255 / 0.78);
+  .schluss-zusagen li + li::before {
+    content: '\00B7';
+    margin-inline-end: 0.9rem;
+    color: var(--color-border-strong);
   }
 
-  /* Haarlinien als Trenner zwischen den Zusagen, keine Kaestchen. */
-  .schluss-beweise li + li {
-    margin-inline-start: 1rem;
-    padding-inline-start: 1rem;
-    border-inline-start: 1px solid rgb(255 255 255 / 0.22);
-  }
-
-  .schluss-beweise svg {
-    width: 1rem;
-    height: 1rem;
-    flex-shrink: 0;
-    color: rgb(255 255 255 / 0.55);
-  }
-
-  .schluss-wege {
-    display: flex;
-    flex-direction: column;
-    gap: 0.875rem;
-  }
-
-  .schluss-wege-titel {
+  .schluss-direkt {
     margin: 0;
-    opacity: 0.62;
+    font-size: 0.9375rem;
+    color: var(--color-ink-muted);
   }
 
-  .schluss-handlung {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.625rem;
+  .schluss-direkt a {
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    text-decoration-color: var(--color-border-strong);
   }
 
-  .schluss-notiz {
-    margin: 0;
-    font-size: 0.875rem;
-    opacity: 0.8;
+  .schluss-direkt a:hover {
+    text-decoration-color: var(--color-accent);
+  }
+
+  .schluss-direkt span {
+    margin-inline: 0.35rem;
+    color: var(--color-border-strong);
   }
 </style>
