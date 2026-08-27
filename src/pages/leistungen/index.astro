@@ -262,9 +262,6 @@ const reihenfolge = [
                 </svg>
               </span>
 
-              <span class="kachel-nummer ziffern" aria-hidden="true">
-                {String(i + 1).padStart(2, '0')}
-              </span>
             </a>
           </li>
         ))
@@ -720,16 +717,20 @@ const reihenfolge = [
     transform: rotate(-45deg);
   }
 
-  .kachel-nummer {
-    position: absolute;
-    z-index: -1;
-    inset-inline-end: 0.75rem;
-    inset-block-end: -1.5rem;
-    font-size: clamp(5rem, 9vw, 8rem);
-    line-height: 1;
-    color: rgb(255 255 255 / 0.14);
-    pointer-events: none;
-  }
+  /* HIER STANDEN EINMAL RIESENZIFFERN.
+   *
+   * Halbdurchsichtig, unten rechts, mit `inset-block-end: -1.5rem`
+   * absichtlich ueber die Kartenkante hinausgeschoben und dort
+   * abgeschnitten. Gedacht als Zierde, gelesen als Fehler.
+   *
+   * Vor allem aber nummerierten sie nichts. Ueber diesem Raster steht
+   * woertlich „Einzeln oder zusammen, in Ihrer Reihenfolge" -- und darauf
+   * klebten Nummern, die eine feste Reihenfolge behaupten. Die Ziffer
+   * widersprach dem Satz direkt darueber.
+   *
+   * Ziffern gibt es auf dieser Seite weiterhin, aber nur dort, wo sie
+   * etwas nummerieren: unter „So laeuft es ab" und in der empfohlenen
+   * Reihenfolge der Bausteine. */
 
   .gebiet {
     margin: clamp(2rem, 4vw, 3rem) 0 0;

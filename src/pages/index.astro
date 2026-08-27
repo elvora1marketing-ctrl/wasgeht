@@ -252,7 +252,6 @@ const kachelZeichen: Record<string, string> = {
             </span>
             <p class="verlust-titel">{v.titel}</p>
             <p class="verlust-text">{v.text}</p>
-            <span class="verlust-nummer ziffern" aria-hidden="true">{`0${i + 1}`}</span>
           </li>
         ))
       }
@@ -297,9 +296,6 @@ const kachelZeichen: Record<string, string> = {
                 </svg>
               </span>
 
-              <span class="kachel-nummer ziffern" aria-hidden="true">
-                {String(services.indexOf(service) + 1).padStart(2, '0')}
-              </span>
             </a>
           </li>
         ))
@@ -741,16 +737,6 @@ const kachelZeichen: Record<string, string> = {
 
   /* Die grosse Ziffer laeuft unten aus der Karte heraus. Zier, kein
      Inhalt: die Zaehlung steckt schon in der Reihenfolge. */
-  .verlust-nummer {
-    position: absolute;
-    inset-inline-end: 0.5rem;
-    inset-block-end: -1.4rem;
-    font-size: 5.5rem;
-    line-height: 1;
-    color: color-mix(in oklab, var(--farbe) 16%, transparent);
-    pointer-events: none;
-  }
-
   /* ===================== Leistungen =====================
      Bento-Raster: die KI-Automatisierung als grosse Kachel, Webdesign und
      SEO gestapelt daneben, Branding als breite Kachel darunter. Jede
@@ -932,16 +918,20 @@ const kachelZeichen: Record<string, string> = {
 
   /* Die Wasserzeichen-Ziffer, wie auf den Verlust-Karten: Zier, die die
      Flaeche fuellt, ohne Inhalt zu sein. */
-  .kachel-nummer {
-    position: absolute;
-    z-index: -1;
-    inset-inline-end: 0.75rem;
-    inset-block-end: -1.5rem;
-    font-size: clamp(5rem, 9vw, 8rem);
-    line-height: 1;
-    color: rgb(255 255 255 / 0.14);
-    pointer-events: none;
-  }
+  /* HIER STANDEN EINMAL RIESENZIFFERN.
+   *
+   * Halbdurchsichtig, unten rechts, mit `inset-block-end: -1.5rem`
+   * absichtlich ueber die Kartenkante hinausgeschoben und dort
+   * abgeschnitten. Gedacht als Zierde, gelesen als Fehler.
+   *
+   * Vor allem aber nummerierten sie nichts. Ueber diesem Raster steht
+   * woertlich „Einzeln oder zusammen, in Ihrer Reihenfolge" -- und darauf
+   * klebten Nummern, die eine feste Reihenfolge behaupten. Die Ziffer
+   * widersprach dem Satz direkt darueber.
+   *
+   * Ziffern gibt es auf dieser Seite weiterhin, aber nur dort, wo sie
+   * etwas nummerieren: unter „So laeuft es ab" und in der empfohlenen
+   * Reihenfolge der Bausteine. */
 
   /* Der Aufruf mitten auf der Seite. Bewusst eine Zeile mit Haarlinie und
      kein zweiter farbiger Kasten: das Schlussband weiter unten ist der
