@@ -17,6 +17,19 @@ interface Props {
   variant?: 'primary' | 'secondary' | 'quiet' | 'aufFarbe';
   size?: 'md' | 'lg';
   fullWidth?: boolean;
+  /**
+   * Laufender Markenverlauf als Rahmen.
+   *
+   * NUR FÜR DEN EINEN ABSCHLUSS-AUFRUF. Bewegung zieht das Auge, und
+   * genau deshalb funktioniert sie nur, wenn sie einmal vorkommt. Säßen
+   * drei laufende Rahmen auf einer Seite, hätte keiner mehr Vorrang und
+   * die Seite flackerte bloß.
+   *
+   * Ohne JavaScript und ohne Bibliothek: ein Kegelverlauf auf einer
+   * übergroßen Fläche, die sich dreht und vom Rahmen beschnitten wird.
+   * Das läuft im Compositor und kostet nichts.
+   */
+  ring?: boolean;
   class?: string;
   [key: string]: unknown;
 }
@@ -27,6 +40,7 @@ const {
   variant = 'primary',
   size = 'md',
   fullWidth = false,
+  ring = false,
   class: className = '',
   ...rest
 } = Astro.props;
@@ -63,10 +77,103 @@ const classes = [
 const Tag = href ? 'a' : 'button';
 ---
 
-<Tag
-  class={classes}
-  {...href ? { href } : { type }}
-  {...rest}
->
-  <slot />
-</Tag>
+{
+  ring ? (
+    <span class="knopf-ring">
+      <Tag class={classes} {...(href ? { href } : { type })} {...rest}>
+        <slot />
+      </Tag>
+    </span>
+  ) : (
+    <Tag class={classes} {...(href ? { href } : { type })} {...rest}>
+      <slot />
+    </Tag>
+  )
+}
+
+<style>
+  /* Der laufende Rahmen.
+   *
+   * Aufbau: eine uebergrosse Flaeche mit Kegelverlauf dreht sich hinter
+   * dem Knopf, der Rahmen beschneidet sie auf seine Form. Uebrig bleiben
+   * drei Pixel Verlauf ringsum, die wandern.
+   *
+   * `inset: -140%` ist kein Zierwert: die Flaeche muss beim Drehen in
+   * jeder Stellung die ganze Ecke abdecken, sonst blitzt beim Drehen der
+   * Grund durch. Die Diagonale eines Rechtecks ist immer laenger als
+   * seine Seiten, deshalb deutlich mehr als 100%.
+   *
+   * Der Radius rechnet die drei Pixel Rahmen auf den Knopfradius drauf.
+   * Gleiche Werte saehen an den Ecken aus, als sei der Knopf zu klein
+   * geraten. */
+  .knopf-ring {
+    position: relative;
+    display: inline-flex;
+    padding: 3px;
+    border-radius: calc(var(--radius-button) + 3px);
+    overflow: hidden;
+  }
+
+  .knopf-ring:has(.w-full) {
+    display: flex;
+  }
+
+  /* OHNE DIE MITTLERE MARKENFARBE. Der Verlauf der Marke geht von Indigo
+   * ueber Magenta nach Orange -- und Magenta ist genau die Farbe des
+   * Knopfes. Mit ihr im Ring war der Ring auf halber Strecke unsichtbar:
+   * er wurde gezeichnet, hob sich aber nicht ab, und von aussen sah es
+   * aus, als funktioniere die Technik nicht.
+   *
+   * Jetzt nur die beiden Enden plus ein heller Punkt. Alle drei stehen
+   * deutlich gegen Magenta, der Ring bleibt in jeder Stellung sichtbar.
+   *
+   * MIT AUSWEICHWERTEN. Tailwind gibt nur die Theme-Variablen aus, die im
+   * Build auch vorkommen. Faellt eine davon weg, ist der ganze
+   * Kegelverlauf ungueltig und der Ring verschwindet ersatzlos -- ohne
+   * Fehlermeldung, ohne dass am Markup etwas zu sehen waere. Genau daran
+   * habe ich beim Bauen eine Weile gesucht. */
+  .knopf-ring::before {
+    content: '';
+    position: absolute;
+    inset: -140%;
+    background: conic-gradient(
+      from 0deg,
+      var(--color-brand-start, #5c67db),
+      var(--color-brand-end, #f45e3d),
+      #ffffff,
+      var(--color-brand-start, #5c67db)
+    );
+  }
+
+  /* Der Knopf liegt ueber dem Verlauf und deckt ihn bis auf den Rand ab.
+   *
+   * HIER STAND EINMAL `width: 100%`, und das hat den Ring unsichtbar
+   * gemacht. Der Traeger ist inline-flex, seine Breite richtet sich also
+   * nach dem Knopf darin. Bekommt der Knopf zugleich 100% Breite, ist die
+   * Rechnung im Kreis: der Browser loest sie so auf, dass der Knopf ueber
+   * die zwei Pixel Polsterung hinauswaechst und den Verlauf zudeckt. Von
+   * aussen sah es aus, als wuerde der Ring gar nicht gezeichnet.
+   *
+   * Volle Breite nur dort, wo sie ausdruecklich verlangt ist. */
+  .knopf-ring > :global(*) {
+    position: relative;
+  }
+
+  .knopf-ring:has(:global(.w-full)) > :global(*) {
+    width: 100%;
+  }
+
+  /* Langsam. Ein schnell kreisender Rahmen wirkt wie eine Warnleuchte,
+     und Dringlichkeit ist nicht dasselbe wie Einladung. */
+  @media (prefers-reduced-motion: no-preference) {
+    .knopf-ring::before {
+      animation: knopf-kreisen 6s linear infinite;
+    }
+  }
+
+  @keyframes knopf-kreisen {
+    to {
+      transform: rotate(1turn);
+    }
+  }
+</style>

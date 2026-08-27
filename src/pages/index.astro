@@ -486,7 +486,7 @@ const kachelZeichen: Record<string, string> = {
       </p>
 
       <div class="schluss-knopf">
-        <Button href={cta.primary.href} class="schluss-cta">
+        <Button href={cta.primary.href} ring class="schluss-cta">
           {cta.primary.label}
         </Button>
       </div>
@@ -1267,6 +1267,8 @@ const kachelZeichen: Record<string, string> = {
   /* Groesser als jedes andere Bedienelement der Seite. Das ist der Punkt:
      am Ende soll es nur noch eine Sache zu tun geben, und die soll man
      nicht suchen muessen. */
+  /* Der Ring bringt seinen eigenen Rahmen mit, deshalb sitzt der Radius
+     jetzt am Ring und nicht mehr am Knopf. */
   .schluss-cta {
     position: relative;
     height: 3.75rem;
