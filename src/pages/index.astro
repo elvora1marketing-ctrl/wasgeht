@@ -150,8 +150,13 @@ const wege = [
   <section class="hero">
     <div class="container-content hero-inner">
       <div class="hero-text">
+        {/* Nennt das Publikum, nicht die eigene Kategorie. „Digitalagentur
+            aus Essen" stand hier vorher und sagte, was ich BIN -- damit
+            steht man in einer Reihe mit jeder anderen Agentur im
+            Ruhrgebiet. „Für Handwerk und Betriebe" sagt dem Leser in vier
+            Wörtern, dass diese Seite für ihn gemacht ist. */}
         <p class="hero-kennung kennung">
-          <Scramble text={`Digitalagentur aus ${address.city} · Ruhrgebiet`} />
+          <Scramble text={`Digitalagentur für Handwerk und Betriebe · ${address.city}`} />
         </p>
 
         {/* Die Buchstaben klappen einzeln herein. Das ist der bewegte
@@ -173,10 +178,14 @@ const wege = [
 
         <ReviewBadge groesse="gross" class="hero-beleg" />
 
+        {/* Beginnt beim Verlust, nicht beim Angebot. Vorher stand hier eine
+            Beobachtung über „die meisten Betriebe" -- richtig, aber über
+            andere geredet. Jetzt steht der Satz beim Leser selbst und
+            benennt, was ihn heute schon Geld gekostet hat. */}
         <p class="hero-intro">
-          Die meisten Betriebe verlieren Aufträge nicht an die Konkurrenz, sondern
-          an verpasste Anrufe und eine Website, die niemand findet. Ich bringe
-          beides in Ordnung.
+          Jeder verpasste Anruf ist ein Auftrag, der beim Nächsten landet. Und
+          eine Website, die bei Google nicht auftaucht, bringt Ihnen keinen
+          einzigen. Ich sorge dafür, dass beides aufhört.
         </p>
 
         <div class="hero-handlung">

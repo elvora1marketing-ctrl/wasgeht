@@ -43,6 +43,14 @@ const { text, tempo = 32, class: className = '' }: Props = Astro.props;
     display: inline-block;
   }
 
+  /* Die Vorlese-Fassung liegt unsichtbar neben der sichtbaren. Beim
+     Markieren nimmt der Browser aber beide mit, und in der Zwischenablage
+     landete die Kennung doppelt: „Digitalagentur ...Digitalagentur ...".
+     Vorlesesoftware kümmert das nicht, sie liest den Textbaum. */
+  .scramble .sr-only {
+    user-select: none;
+  }
+
   /* Gleiche Zeichenbreite ist hier keine Stilfrage, sondern Voraussetzung:
      sonst springt die Zeile bei jedem Bild. */
   .scramble-sicht {
