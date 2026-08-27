@@ -1,46 +1,47 @@
 ---
-import Geraet from './Geraet.astro';
-import Chat from './Chat.astro';
-import { planen } from '~/lib/chat';
-import type { Gespraech, Nachricht } from '~/lib/chat';
+import type { Nachricht } from '~/lib/chat';
 
 /**
  * Ein Vormittag im Betrieb: drei Anfragen über drei Wege, alle beantwortet.
  *
- * Zu sehen ist der Posteingang auf dem Rechner. Links die drei Anfragen,
- * rechts der Verlauf, der gerade abläuft. Die Zeile in der Liste wird genau
- * dann aktiv, wenn ihr Verlauf auf den Schirm kommt, und ihre Vorschau
- * springt auf die Antwort um, sobald diese steht.
+ * WAS HIER VORHER STAND, UND WARUM ES WEG IST
  *
- * WARUM DER RECHNER UND NICHT DAS TELEFON: Auf den übrigen Seiten schaut
- * man von der Kundenseite auf ein Telefon. Hier ist es umgekehrt, es ist
- * IHR Posteingang. Der Verlauf selbst ist derselbe wie überall auf der
- * Seite, dieselbe Komponente, dieselben Blasen, derselbe Kopf. Nur die
- * Statusleiste des Telefons fällt weg, denn ein Fenster hat keine.
+ * Ein angedeuteter Rechnerrahmen, darin ein zweispaltiger Posteingang aus
+ * Liste und mitlaufendem Verlauf, darunter drei Erklärkarten, darunter eine
+ * Bilanzzeile. Fünf Ebenen für eine einzige Aussage, und der Rahmen war
+ * oben angedeutet und unten abgeschnitten, sah also unfertig aus statt
+ * stilisiert.
  *
- * BLICKWINKEL: Der Kunde steht links, die Antwort der Assistenz rechts,
- * weil sie über die eigene Nummer hinausgeht.
+ * Dazu kam die Wiederholung: ein Gerät mit einem ablaufenden Verlauf steht
+ * schon im ersten Sichtbereich und noch einmal auf der
+ * Automatisierungsseite. Ein drittes an dieser Stelle brachte nichts Neues,
+ * es kostete nur Aufmerksamkeit.
  *
- * Zeitleiste und Verlauf rechnen NICHT getrennt: beide Seiten holen ihre
- * Sekunden aus `planen` in `~/lib/chat`. Ausgelöst wird alles zugleich vom
- * Beobachter in `Base.astro`, der die äußere Einheit erfasst.
+ * WAS DIE STELLE WIRKLICH SAGEN MUSS: An einem einzigen Vormittag kamen
+ * drei Anfragen über drei verschiedene Wege herein. Alle drei wurden
+ * beantwortet. Sie waren in der Zeit bei Ihren Kunden.
+ *
+ * Dafür braucht es kein Gerät, dafür braucht es die Uhrzeiten. Deshalb
+ * jetzt ein Zeitstrahl: drei Haltepunkte, an jedem die Uhrzeit als Anker,
+ * der Weg, die echte Frage des Kunden in seinen Worten und das Ergebnis.
+ *
+ * Die Frage steht wörtlich da, weil sie das Menschlichste an der ganzen
+ * Seite ist. „Kommt heute noch jemand??" mit zwei Fragezeichen schreibt
+ * kein Marketingtext, so schreibt jemand, dessen Küche unter Wasser steht.
  */
-export interface Ereignis {
-  /** Über welchen Weg die Anfrage hereinkam. */
+interface Ereignis {
+  /** Weg, über den die Anfrage kam. */
   kanal: string;
-  /** Farbe des Kanals, aus der Leistungspalette. */
+  /** Farbe des Haltepunkts, aus der Leistungspalette. */
   farbe: string;
-  /** Pfad des Kanalzeichens im 20er-Raster. */
+  /** Pfad im 20er-Raster. */
   zeichen: string;
   zeit: string;
-  /** Was daraus geworden ist, in einem Satz. */
+  /** Was daraus geworden ist. */
   text: string;
-  /** Der Verlauf, den dieses Ereignis auf dem Schirm zeigt. */
   gespraech: {
-    /** Name des Kunden im Kopf des Verlaufs. */
     name: string;
-    status: string;
-    /** Ersetzt die Anfangsbuchstaben, etwa bei einer Rufnummer. */
+    status?: string;
     kuerzel?: string;
     nachrichten: Nachricht[];
   };
@@ -48,698 +49,227 @@ export interface Ereignis {
 
 interface Props {
   ereignisse: Ereignis[];
-  /** Ergebniszeile unter der Liste, erscheint nach dem letzten Verlauf. */
+  /** Ergebniszeile am Ende des Strahls. */
   bilanz?: string;
   class?: string;
 }
 
 const { ereignisse, bilanz, class: className = '' }: Props = Astro.props;
 
-/** Etwas schneller als der Grundtakt: es laufen drei Verläufe nacheinander. */
-const TEMPO = 0.8;
-
-const gespraeche: Gespraech[] = ereignisse.map((e) => ({
-  ...e.gespraech,
-  uhrzeit: e.zeit,
-  /* Der Stempel über der ersten Nachricht nennt den Weg. Damit ist im
-     Verlauf zu sehen, welcher Eintrag der Liste gerade läuft. */
-  stempel: `${e.kanal} · ${e.zeit}`,
+/* Die erste Nachricht des Kunden ist das Zitat. Sie kommt aus derselben
+   Quelle wie die Verläufe, damit beides nicht auseinanderlaufen kann. */
+const halte = ereignisse.map((e) => ({
+  ...e,
+  frage: (e.gespraech.nachrichten.find((n) => n.von === 'kunde') ?? e.gespraech.nachrichten[0])
+    ?.text ?? '',
 }));
-
-const { folge } = planen(gespraeche, 'betrieb', TEMPO);
-
-/**
- * Die Zeilen der Liste. Die Vorschau zeigt erst die Frage des Kunden und
- * springt auf die Antwort um, sobald diese im Verlauf steht. Genau so
- * verhält sich eine Chatliste auch im Betrieb.
- */
-const schluss = folge[folge.length - 1]?.fertig ?? 0;
-
-const zeilen = ereignisse.map((e, i) => {
-  const nachrichten = e.gespraech.nachrichten;
-  const frage = nachrichten.find((n) => n.von === 'kunde') ?? nachrichten[0];
-  const antwort = [...nachrichten].reverse().find((n) => n.von === 'assistenz');
-
-  return {
-    ...e,
-    kuerzel: folge[i].kuerzel,
-    frage: frage?.text ?? '',
-    antwort: antwort?.text ?? '',
-    von: folge[i].von,
-    bis: folge[i].bis,
-    fenster: folge[i].bis - folge[i].von,
-    fertig: folge[i].fertig,
-    letzte: i === ereignisse.length - 1,
-  };
-});
 ---
 
-<div class={`vormittag ${className}`} data-chat>
-  <div class="vormittag-geraet">
-  <Geraet art="rechner" bildunterschrift="Ihr Posteingang, schematische Darstellung">
-    <div class="fenster">
-      {/*
-        Die Fensterleiste. Ohne sie sah der Bildschirm aus wie ein Telefon
-        in Gross: eine Anwendung ganz ohne Rahmen, die den ganzen Schirm
-        fuellt. Erst die Leiste macht daraus ein Fenster auf einem Rechner.
-      */}
-      <div class="fenster-leiste" aria-hidden="true">
-        <span class="fenster-ampel">
-          <i></i><i></i><i></i>
-        </span>
-        <span class="fenster-marke">Posteingang</span>
-      </div>
-
-      <div class="fenster-koerper">
-      {/* --- Die Liste der Anfragen ------------------------------------- */}
-      <aside class="fenster-liste">
-        <div class="fenster-kopf">
-          <span class="fenster-titel">Anfragen</span>
-          <span class="fenster-zahl">3 heute</span>
-        </div>
-
-        <div class="fenster-suche" aria-hidden="true">
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"
-            stroke-linecap="round">
-            <circle cx="9" cy="9" r="5.5" />
-            <path d="M13 13l4 4" />
-          </svg>
-          Chat suchen
-        </div>
-
-        <ol class="fenster-zeilen">
-          {
-            zeilen.map((z) => (
-              <li
-                class:list={['fenster-zeile', z.letzte && 'fenster-zeile-letzte']}
-                style={`--von:${z.von.toFixed(2)}s;--bis:${z.bis.toFixed(2)}s;--fertig:${z.fertig.toFixed(2)}s`}
-              >
-                <span class="fenster-balken" aria-hidden="true" />
-                <span class="fenster-bild" aria-hidden="true">{z.kuerzel}</span>
-
-                <span class="fenster-inhalt">
-                  <span class="fenster-oben">
-                    <span class="fenster-name">{z.gespraech.name}</span>
-                    <span class="fenster-uhr">{z.zeit}</span>
-                  </span>
-
-                  <span class="fenster-vorschau">
-                    <span class="fenster-frage">{z.frage}</span>
-                    <span class="fenster-antwort">
-                      <svg viewBox="0 0 16 11" fill="none" stroke="currentColor"
-                        stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M1 6l3 3 5.5-6.5M7 9l5.5-6.5" />
-                      </svg>
-                      <span class="fenster-antwort-text">{z.antwort}</span>
-                    </span>
-                  </span>
-
-                  <span class="fenster-kanal">{z.kanal}</span>
-                </span>
-              </li>
-            ))
-          }
-        </ol>
-      </aside>
-
-      {/*
-        Der Verlauf, dieselbe Komponente wie ueberall sonst.
-
-        Er steht in einem eigenen Halter, statt eine Klasse zu bekommen:
-        eine Klasse an einer fremden Komponente traegt die Kennung DIESES
-        Bauteils nicht, und die Regel dazu greift dann nicht. Der Verlauf
-        stand deshalb ungebremst breit und lief unter dem Rahmen heraus.
-      */}
-      <div class="fenster-verlauf">
-        <Chat
-          gespraeche={gespraeche}
-          blickwinkel="betrieb"
-          tempo={TEMPO}
-          geraet="fenster"
-        />
-      </div>
-      </div>
-    </div>
-  </Geraet>
-  </div>
-
-  {/* --- Was daraus geworden ist ------------------------------------- */}
-  <ol class="vormittag-lauf">
-    {
-      zeilen.map((z) => (
-        <li
-          class="vormittag-eintrag"
-          style={`--von:${z.von.toFixed(2)}s;--fenster:${z.fenster.toFixed(2)}s;--fertig:${z.fertig.toFixed(2)}s;--farbe:${z.farbe}`}
-        >
-          <span class="vormittag-linie" aria-hidden="true">
-            <span class="vormittag-fuellung" />
-          </span>
-
-          <p class="vormittag-kopf">
-            <span class="vormittag-zeichen" aria-hidden="true">
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d={z.zeichen} />
-              </svg>
-            </span>
-            <span class="vormittag-kanal">{z.kanal}</span>
-            <span class="vormittag-zeit">{z.zeit}</span>
-          </p>
-          <p class="vormittag-text">{z.text}</p>
-          <p class="vormittag-erledigt">
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2"
-              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M4 10.5l4 4 8-9" />
+<ol class={`lauf ${className}`}>
+  {
+    halte.map((h, i) => (
+      <li class="halt einblenden" style={`--verzug:${i};--farbe:${h.farbe}`}>
+        <span class="halt-anker" aria-hidden="true">
+          <span class="halt-punkt">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d={h.zeichen} />
             </svg>
-            beantwortet
-          </p>
-        </li>
-      ))
-    }
-  </ol>
+          </span>
+        </span>
 
-  {bilanz && (
-    <p class="vormittag-bilanz" style={`--ab:${schluss.toFixed(2)}s`}>
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2"
-        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M4 10.5l4 4 8-9" />
-      </svg>
-      {bilanz}
-    </p>
-  )}
-</div>
+        <p class="halt-zeit ziffern">{h.zeit}</p>
+        <p class="halt-kanal kennung">{h.kanal}</p>
+        <blockquote class="halt-frage">{h.frage}</blockquote>
+        <p class="halt-text">{h.text}</p>
+      </li>
+    ))
+  }
+
+  {
+    bilanz && (
+      <li class="bilanz einblenden" style={`--verzug:${halte.length}`}>
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 10.5l4 4 8-9" />
+        </svg>
+        {bilanz}
+      </li>
+    )
+  }
+</ol>
 
 <style>
-  .vormittag {
-    display: flex;
-    flex-direction: column;
+  /* Der Strahl ist EINE Linie durch alle Haltepunkte, gezeichnet als Rand
+     der Liste. Eine Linie je Eintrag haette an jedem Uebergang eine feine
+     Naht ergeben, und die sieht man. */
+  /* EINE Groesse fuer beides: `--spur` ist der Abstand der Linie vom
+     linken Rand, und Linie wie Haltepunkte rechnen daraus. Vorher standen
+     dort zwei verschiedene clamp()-Ausdruecke, und die Punkte sassen um
+     gut einen halben Zentimeter neben der Linie -- der Strahl sah aus,
+     als sei er verrutscht. */
+  .lauf {
+    --spur: 3rem;
+    position: relative;
+    display: grid;
     gap: clamp(2rem, 4vw, 3rem);
+    margin: 0;
+    padding: 0 0 0 var(--spur);
+    list-style: none;
   }
 
-  .vormittag-geraet {
-    width: 100%;
-    max-width: 56rem;
-    margin-inline: auto;
-  }
-
-  /* --- Das Fenster im Bildschirm ---------------------------------------- */
-  /* Hoeher als vorher: bei 22rem war der Bildschirm ein gepresster
-      Streifen, in dem drei Blasen und die Eingabezeile kaum Luft hatten.
-      Das Seitenverhaeltnis liegt jetzt nahe an einem echten Notebook. */
-  .fenster {
-    display: flex;
-    flex-direction: column;
-    height: clamp(22rem, 48vw, 28rem);
-    background: var(--color-surface);
-  }
-
-  .fenster-leiste {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex-shrink: 0;
-    padding: 0.5rem 0.75rem;
-    border-block-end: 1px solid var(--color-border);
-    background: var(--color-surface-subtle);
-  }
-
-  .fenster-ampel {
-    display: flex;
-    gap: 0.3rem;
-  }
-
-  .fenster-ampel i {
-    width: 0.55rem;
-    height: 0.55rem;
-    border-radius: 999px;
-    background: var(--color-border-strong);
-  }
-
-  .fenster-marke {
-    font-family: var(--font-mono);
-    font-size: 0.625rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--color-ink-faint);
-  }
-
-  .fenster-koerper {
-    display: flex;
-    flex: 1;
-    min-height: 0;
-  }
-
-  .fenster-liste {
-    display: flex;
-    flex-direction: column;
-    width: 15rem;
-    flex-shrink: 0;
-    border-inline-end: 1px solid var(--color-border);
-    background: var(--color-surface-subtle);
-  }
-
-  /* Unter dieser Breite bliebe von der Liste ein Streifen mit abgehackten
-     Woertern uebrig. Dann traegt der Verlauf allein, und was in den anderen
-     beiden passiert ist, steht darunter im Text. */
-  @media (width < 46rem) {
-    .fenster-liste {
-      display: none;
+  @media (width < 30rem) {
+    .lauf {
+      --spur: 2.25rem;
     }
   }
 
-  .fenster-kopf {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 0.5rem;
-    padding: 0.75rem 0.85rem 0.6rem;
-  }
-
-  .fenster-titel {
-    font-family: var(--font-mono);
-    font-size: 0.625rem;
-    font-weight: 500;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--color-ink);
-  }
-
-  .fenster-zahl {
-    font-family: var(--font-mono);
-    font-size: 0.625rem;
-    color: var(--color-ink-faint);
-  }
-
-  .fenster-suche {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    margin: 0 0.6rem 0.5rem;
-    padding: 0.32rem 0.55rem;
-    border: 1px solid var(--color-border);
-    border-radius: 0.4rem;
-    background: var(--color-surface);
-    font-size: 0.6875rem;
-    color: var(--color-ink-faint);
-  }
-
-  .fenster-suche svg {
-    width: 0.7rem;
-    height: 0.7rem;
-    flex-shrink: 0;
-  }
-
-  .fenster-zeilen {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    overflow: hidden;
-  }
-
-  .fenster-zeile {
-    position: relative;
-    display: flex;
-    align-items: flex-start;
-    gap: 0.55rem;
-    padding: 0.6rem 0.7rem 0.6rem 0.85rem;
-    border-block-start: 1px solid var(--color-border);
-  }
-
-  /* Die Marke der aktiven Zeile. Im Ruhezustand ist keine Zeile aktiv. */
-  .fenster-balken {
+  .lauf::before {
+    content: '';
     position: absolute;
-    inset-block: 0;
-    inset-inline-start: 0;
+    inset-block: 0.6rem 1.4rem;
+    inset-inline-start: calc(var(--spur) / 2 - 1px);
     width: 2px;
-    background: var(--color-accent);
-    opacity: 0;
-  }
-
-  .fenster-bild {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.7rem;
-    height: 1.7rem;
-    flex-shrink: 0;
     border-radius: 999px;
-    background: #cfd4da;
-    color: #4a5058;
-    font-size: 0.625rem;
-    font-weight: 600;
+    background: linear-gradient(
+      to bottom,
+      var(--color-border-strong),
+      var(--color-border) 92%,
+      transparent
+    );
   }
 
-  .fenster-inhalt {
-    display: block;
-    min-width: 0;
-    flex: 1;
-  }
-
-  .fenster-oben {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 0.4rem;
-  }
-
-  .fenster-name {
-    overflow: hidden;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--color-ink);
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .fenster-uhr {
-    flex-shrink: 0;
-    font-family: var(--font-mono);
-    font-size: 0.5625rem;
-    color: var(--color-ink-faint);
-  }
-
-  /* Frage und Antwort liegen in derselben Zelle uebereinander und wechseln
-     sich ab. Beide auf eine Zeile beschnitten, sonst wuerde die Zeile beim
-     Wechsel springen. */
-  .fenster-vorschau {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    margin-block-start: 0.1rem;
-  }
-
-  .fenster-frage,
-  .fenster-antwort {
-    grid-area: 1 / 1;
-    overflow: hidden;
-    font-size: 0.6875rem;
-    line-height: 1.35;
-    white-space: nowrap;
-    color: var(--color-ink-muted);
-  }
-
-  /* Ruhezustand ist der fertige Vormittag: in der Vorschau steht die
-     Antwort. Erst wenn ein Skript den Ablauf starten kann, wird auf die
-     Frage zurueckgestellt. */
-  .fenster-frage {
-    display: block;
-    opacity: 0;
-    text-overflow: ellipsis;
-  }
-
-  .fenster-antwort {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    opacity: 1;
-  }
-
-  .fenster-antwort-text {
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .fenster-antwort svg {
-    width: 0.65rem;
-    height: 0.65rem;
-    flex-shrink: 0;
-    color: #2f6df6;
-  }
-
-  .fenster-kanal {
-    display: block;
-    margin-block-start: 0.25rem;
-    font-family: var(--font-mono);
-    font-size: 0.5625rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-ink-faint);
-  }
-
-  .fenster-verlauf {
-    flex: 1;
-    min-width: 0;
-    /* Der Verlauf darin ist auf `height: 100%` gebaut. */
-    display: flex;
-    flex-direction: column;
-  }
-
-  .fenster-verlauf > :global(.chat) {
-    flex: 1;
-    min-height: 0;
-  }
-
-  /* --- Was daraus geworden ist ------------------------------------------ */
-  .vormittag-lauf {
-    display: grid;
-    gap: 1.5rem clamp(1.5rem, 3vw, 2.5rem);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  @media (width >= 48rem) {
-    .vormittag-lauf {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
-
-  .vormittag-eintrag {
+  .halt {
     position: relative;
-    padding-block-start: 1rem;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      'zeit kanal'
+      'frage frage'
+      'text text';
+    align-items: baseline;
+    column-gap: 0.75rem;
+    row-gap: 0.5rem;
   }
 
-  .vormittag-linie {
+  /* Sitzt auf der Linie, nicht daneben: ein Punkt, der die Linie nur
+     streift, laesst den Strahl gebogen aussehen. */
+  .halt-anker {
     position: absolute;
-    inset-block-start: 0;
-    inset-inline: 0;
-    height: 1px;
-    background: var(--color-border);
-  }
-
-  .vormittag-fuellung {
-    display: block;
-    height: 100%;
-    background: var(--farbe, var(--color-accent));
-    transform-origin: left;
-  }
-
-  .vormittag-kopf {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-  }
-
-  /* Das Kanalzeichen in der Kanalfarbe: dieselbe Kachelsprache wie die
-     Karten unter "Wo es klemmt". */
-  .vormittag-zeichen {
+    inset-inline-start: calc(-1 * var(--spur) / 2 - 0.95rem);
+    inset-block-start: -0.15rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 2.1rem;
-    height: 2.1rem;
-    border-radius: 0.65rem;
-    background: var(--farbe, var(--color-accent));
-    color: #fff;
-    box-shadow: 0 5px 12px -6px var(--farbe, var(--color-accent));
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 999px;
+    background: var(--color-surface);
   }
 
-  .vormittag-zeichen svg {
-    width: 1.05rem;
-    height: 1.05rem;
+  .halt-punkt {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--farbe) 12%, var(--color-surface));
+    color: var(--farbe);
   }
 
-  .vormittag-kanal {
-    font-family: var(--font-mono);
-    font-size: 0.6875rem;
+  .halt-punkt svg {
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+
+  /* Die Uhrzeit ist der Anker der ganzen Stelle und deshalb das Groesste
+     in der Kopfzeile. Sie traegt die Aussage: an EINEM Vormittag, zu
+     diesen drei Zeiten. */
+  .halt-zeit {
+    grid-area: zeit;
+    margin: 0;
+    font-size: 1.125rem;
     font-weight: 500;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
     color: var(--color-ink);
+    font-variant-numeric: tabular-nums;
   }
 
-  .vormittag-zeit {
-    font-family: var(--font-mono);
-    font-size: 0.6875rem;
-    color: var(--color-ink-faint);
+  .halt-kanal {
+    grid-area: kanal;
+    margin: 0;
+    color: var(--farbe);
   }
 
-  .vormittag-text {
-    margin-block-start: 0.4rem;
+  /* Woertlich, in Anfuehrungszeichen und in der Serifenschrift: das ist
+     die Stimme des Kunden, nicht die des Betriebs. Der Wechsel der
+     Schriftart macht den Sprecherwechsel sichtbar, ohne ihn anzusagen. */
+  .halt-frage {
+    grid-area: frage;
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: clamp(1.125rem, 2vw, 1.375rem);
+    line-height: 1.3;
+    color: var(--color-ink);
+    text-wrap: pretty;
+  }
+
+  /* Die Zeichen direkt statt als Escape-Folge. `\\201E` mit doppeltem
+     Backslash liest CSS als Backslash plus Text und schreibt genau das
+     hin: \\201EGuten Morgen statt „Guten Morgen. */
+  .halt-frage::before {
+    content: '„';
+  }
+
+  .halt-frage::after {
+    content: '“';
+  }
+
+  .halt-text {
+    grid-area: text;
+    margin: 0;
+    max-width: 54ch;
     font-size: 0.9375rem;
     line-height: 1.6;
     color: var(--color-ink-muted);
   }
 
-  .vormittag-erledigt {
+  /* Steht am Fuss des Strahls und schliesst ihn ab. Deshalb keine eigene
+     Karte: eine Bilanz, die in einem Kasten sitzt, wirkt wie eine Werbung
+     fuer sich selbst statt wie das Ergebnis dessen, was darueber steht. */
+  .bilanz {
     display: flex;
     align-items: center;
-    gap: 0.35rem;
-    margin-block-start: 0.5rem;
-    font-family: var(--font-mono);
-    font-size: 0.6875rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--farbe, var(--color-accent));
-  }
-
-  .vormittag-erledigt svg {
-    width: 0.75rem;
-    height: 0.75rem;
-  }
-
-  /* Die Bilanz: ein Satz, der das Ergebnis zusammenzieht. Erscheint,
-     wenn der letzte Verlauf steht. */
-  .vormittag-bilanz {
-    display: flex;
-    align-items: center;
-    justify-content: center;
     gap: 0.6rem;
-    width: fit-content;
-    margin: 0 auto;
-    padding: 0.8rem 1.5rem;
-    border: 1px solid color-mix(in oklab, var(--color-accent) 30%, transparent);
-    border-radius: 999px;
-    background: var(--color-accent-soft);
+    margin-block-start: -0.5rem;
     font-family: var(--font-mono);
-    font-size: 0.75rem;
-    font-weight: 500;
+    font-size: 0.8125rem;
     letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--color-accent);
+    color: var(--color-success);
   }
 
-  .vormittag-bilanz svg {
-    width: 1rem;
-    height: 1rem;
+  .bilanz svg {
+    width: 1.05rem;
+    height: 1.05rem;
     flex-shrink: 0;
   }
 
-  /* ======================================================================
-     Der Ablauf
-
-     Ruhezustand ist der FERTIGE Vormittag: Linien gefuellt, Vorschauen auf
-     der Antwort, Haken da. Zurueckgestellt wird nur, wenn ein Skript laeuft,
-     das den Ablauf auch wieder starten kann. Ohne JavaScript steht damit
-     alles lesbar da, statt fuer immer leer zu bleiben.
-     ====================================================================== */
-  @media (prefers-reduced-motion: no-preference) {
-    :global(html[data-js]) .vormittag:not([data-laeuft]) .vormittag-fuellung {
-      transform: scaleX(0);
+  /* Ab Tablet stehen Uhrzeit und Weg nebeneinander links, der Inhalt
+     rechts davon. Das gibt der Uhrzeit eine eigene Spalte und macht aus
+     drei Bloecken eine ablesbare Tabelle. */
+  @media (width >= 48rem) {
+    /* Die Uhrzeit steht allein in der schmalen Spalte, alles andere
+       rechts davon. Vorher stand der Weg unter der Uhrzeit, und
+       „Kontaktformular" passte dort nicht hinein: das Wort lief quer
+       ueber das Zitat daneben. */
+    .halt {
+      grid-template-columns: 5.5rem 1fr;
+      grid-template-areas:
+        'zeit kanal'
+        '.    frage'
+        '.    text';
+      column-gap: clamp(1.25rem, 3vw, 2.5rem);
+      row-gap: 0.55rem;
     }
-
-    :global(html[data-js]) .vormittag:not([data-laeuft]) .vormittag-kanal {
-      color: var(--color-ink-faint);
-    }
-
-    :global(html[data-js]) .vormittag:not([data-laeuft]) .vormittag-erledigt,
-    :global(html[data-js]) .vormittag:not([data-laeuft]) .fenster-antwort,
-    :global(html[data-js]) .vormittag:not([data-laeuft]) .fenster-balken {
-      opacity: 0;
-    }
-
-    :global(html[data-js]) .vormittag:not([data-laeuft]) .fenster-frage {
-      opacity: 1;
-    }
-
-    /* Jeder Abschnitt der Linie fuellt sich waehrend genau des Fensters, in
-       dem sein Verlauf laeuft. Deshalb die Dauer aus `--fenster` und nicht
-       eine gemeinsame gleichmaessige Fuellung: die Verlaeufe sind
-       unterschiedlich lang, und eine gleichmaessige Fuellung liefe nach dem
-       ersten Wechsel neben dem Verlauf her. */
-    .vormittag[data-laeuft] .vormittag-fuellung {
-      animation: linie-fuellen var(--fenster) linear var(--von) both;
-    }
-
-    .vormittag[data-laeuft] .vormittag-kanal {
-      animation: kanal-an 0.45s ease-out var(--von) both;
-    }
-
-    .vormittag[data-laeuft] .vormittag-erledigt {
-      animation: haken-an 0.4s cubic-bezier(0.22, 1, 0.36, 1) var(--fertig) both;
-    }
-
-    :global(html[data-js]) .vormittag:not([data-laeuft]) .vormittag-bilanz {
-      opacity: 0;
-    }
-
-    .vormittag[data-laeuft] .vormittag-bilanz {
-      animation: haken-an 0.5s cubic-bezier(0.22, 1, 0.36, 1) var(--ab) both;
-    }
-
-    /* Die aktive Zeile in der Liste. Zwei Animationen an einem Element: die
-       zweite darf NICHT rueckwaerts fuellen, sonst faerbte sie die Zeile
-       schon vor ihrer Zeit ein. Deshalb `forwards` statt `both`. */
-    .vormittag[data-laeuft] .fenster-zeile {
-      animation: zeile-an 0.3s ease-out var(--von) both;
-    }
-
-    .vormittag[data-laeuft] .fenster-zeile:not(.fenster-zeile-letzte) {
-      animation:
-        zeile-an 0.3s ease-out var(--von) both,
-        zeile-aus 0.3s ease-out var(--bis) forwards;
-    }
-
-    .vormittag[data-laeuft] .fenster-balken {
-      animation: balken-an 0.3s ease-out var(--von) both;
-    }
-
-    .vormittag[data-laeuft] .fenster-zeile:not(.fenster-zeile-letzte) .fenster-balken {
-      animation:
-        balken-an 0.3s ease-out var(--von) both,
-        balken-aus 0.3s ease-out var(--bis) forwards;
-    }
-
-    .vormittag[data-laeuft] .fenster-frage {
-      animation: vorschau-weg 0.3s ease-out var(--fertig) both;
-    }
-
-    .vormittag[data-laeuft] .fenster-antwort {
-      animation: vorschau-her 0.3s ease-out var(--fertig) both;
-    }
-  }
-
-  @keyframes linie-fuellen {
-    from { transform: scaleX(0); }
-    to { transform: scaleX(1); }
-  }
-
-  @keyframes kanal-an {
-    from { color: var(--color-ink-faint); }
-    to { color: var(--color-ink); }
-  }
-
-  @keyframes haken-an {
-    from { opacity: 0; transform: translateY(0.3rem); }
-    to { opacity: 1; transform: none; }
-  }
-
-  @keyframes zeile-an {
-    from { background: transparent; }
-    to { background: var(--color-surface); }
-  }
-
-  @keyframes zeile-aus {
-    from { background: var(--color-surface); }
-    to { background: transparent; }
-  }
-
-  @keyframes balken-an {
-    from { opacity: 0; transform: scaleY(0.3); }
-    to { opacity: 1; transform: none; }
-  }
-
-  @keyframes balken-aus {
-    from { opacity: 1; }
-    to { opacity: 0; }
-  }
-
-  @keyframes vorschau-weg {
-    from { opacity: 1; }
-    to { opacity: 0; }
-  }
-
-  @keyframes vorschau-her {
-    from { opacity: 0; }
-    to { opacity: 1; }
   }
 </style>
