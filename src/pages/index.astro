@@ -468,12 +468,21 @@ const kachelZeichen: Record<string, string> = {
       Der Verlauf hinter dem Knopf ist Zierde und traegt keinen Text. Auf
       Verlaeufen steht auf dieser Seite nie welcher, sie erfuellen keine
       Kontrastanforderung. */}
-  <Band ton="gedaempft" kennung="Loslegen" heading="Klingt das nach Ihrem Betrieb?">
+  <Band
+    ton="gedaempft"
+    kennung="Loslegen"
+    heading="Klingt das nach Ihrem Betrieb?"
+    mitte
+  >
     <div class="schluss">
+      {/* Kurz gehalten. An der Stelle, an der jemand klickt oder weggeht,
+          liest niemand mehr drei Sätze -- jeder weitere Satz ist eine
+          weitere Gelegenheit, es sich anders zu überlegen. Der Satz über
+          das ehrliche Nein bleibt trotzdem: er nimmt die Angst vor dem
+          Verkaufsgespräch, und genau die hält Leute vom Klicken ab. */}
       <p class="schluss-satz">
-        In einem kurzen Gespräch schauen wir, wo bei Ihnen gerade Anfragen
-        liegen bleiben. Ohne Vorbereitung, ohne Verpflichtung. Und wenn ich
-        Ihnen nicht helfen kann, sage ich Ihnen das.
+        In fünfzehn Minuten schauen wir, wo bei Ihnen gerade Anfragen liegen
+        bleiben. Und wenn ich Ihnen nicht helfen kann, sage ich Ihnen das.
       </p>
 
       <div class="schluss-knopf">
@@ -1208,19 +1217,25 @@ const kachelZeichen: Record<string, string> = {
   }
 
   /* ===================== Abschluss ===================== */
+  /* Der Rhythmus ist hier die halbe Miete: Satz und Knopf gehoeren eng
+     zusammen, die Zusagen kleben am Knopf, und erst danach kommt Luft.
+     Gleichmaessige Abstaende lassen vier Dinge nebeneinanderstehen -- so
+     entstehen zwei Gruppen, und die obere fuehrt in die untere. */
   .schluss {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: clamp(1.5rem, 3vw, 2.25rem);
+    gap: 0;
   }
 
   .schluss-satz {
-    max-width: 46ch;
-    margin: 0;
+    max-width: 40ch;
+    margin: 0 0 clamp(1.75rem, 3vw, 2.5rem);
     color: var(--color-ink-muted);
     font-size: clamp(1.0625rem, 1.6vw, 1.1875rem);
+    line-height: 1.6;
+    text-wrap: balance;
   }
 
   /* Traeger fuer den Schein hinter dem Knopf. Der Schein liegt in einem
@@ -1232,18 +1247,20 @@ const kachelZeichen: Record<string, string> = {
     display: inline-flex;
   }
 
+  /* Weiter aufgezogen und weicher als zuerst: eng gefasst sah der Schein
+     wie ein Fleck unter dem Knopf aus statt wie Licht. */
   .schluss-knopf::before {
     content: '';
     position: absolute;
-    inset: -2.75rem -3.5rem;
+    inset: -5rem -7rem;
     border-radius: 999px;
     background: radial-gradient(
       50% 50% at 50% 50%,
-      color-mix(in oklab, var(--color-brand-mid) 30%, transparent) 0%,
-      color-mix(in oklab, var(--color-brand-start) 14%, transparent) 55%,
-      transparent 72%
+      color-mix(in oklab, var(--color-brand-mid) 24%, transparent) 0%,
+      color-mix(in oklab, var(--color-brand-start) 12%, transparent) 48%,
+      transparent 70%
     );
-    filter: blur(32px);
+    filter: blur(48px);
     pointer-events: none;
   }
 
@@ -1277,6 +1294,7 @@ const kachelZeichen: Record<string, string> = {
      gestapelt sahen sie nach Bedingungen aus, nebeneinander nach dem,
      was sie sind: Gruende, es einfach zu tun. */
   .schluss-zusagen {
+    margin-block-start: 1.125rem;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -1297,21 +1315,27 @@ const kachelZeichen: Record<string, string> = {
     color: var(--color-border-strong);
   }
 
+  /* Deutlich abgesetzt: das hier ist der Ausweg fuer den, der lieber
+     schreibt, und darf dem Termin nicht die Aufmerksamkeit abziehen. */
   .schluss-direkt {
-    margin: 0;
+    margin: clamp(2.25rem, 4vw, 3rem) 0 0;
     font-size: 0.9375rem;
-    color: var(--color-ink-muted);
+    color: var(--color-ink-faint);
   }
 
+  /* Ohne Unterstreichung. Drei unterstrichene Woerter nebeneinander lasen
+     sich wie Fussnoten und zogen den Blick vom Knopf weg. */
   .schluss-direkt a {
-    color: var(--color-ink);
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
-    text-decoration-color: var(--color-border-strong);
+    color: var(--color-ink-muted);
+    font-weight: 500;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
   }
 
   .schluss-direkt a:hover {
-    text-decoration-color: var(--color-accent);
+    color: var(--color-accent);
+    border-bottom-color: var(--color-accent);
   }
 
   .schluss-direkt span {

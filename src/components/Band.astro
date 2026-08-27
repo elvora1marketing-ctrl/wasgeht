@@ -41,6 +41,16 @@ interface Props {
   breite?: 'inhalt' | 'weit' | 'voll';
   /** Vertikaler Raum. */
   raum?: 'md' | 'lg';
+  /**
+   * Kennung, Linie und Überschrift mittig statt links.
+   *
+   * Gedacht für Abschlüsse: dort ist der Abschnitt kein Text, den man
+   * liest, sondern ein Moment, an dem man sich entscheidet. Ohne diese
+   * Eigenschaft stand der Kopf links und der Inhalt darunter mittig --
+   * zwei Ausrichtungen in einem Abschnitt, und das sieht immer nach
+   * Unfall aus, egal wie gut beide Hälften für sich sind.
+   */
+  mitte?: boolean;
   id?: string;
   class?: string;
 }
@@ -79,7 +89,7 @@ const hatKopf = Boolean(kennung || heading || intro);
   <div class:list={['band-inner', `band-${breite}`]}>
     {
       hatKopf && (
-        <header class="band-kopf">
+        <header class:list={['band-kopf', mitte && 'band-kopf-mitte']}>
           {kennung && (
             <p class="band-kennung kennung">
               <Scramble text={kennung} />
@@ -180,6 +190,18 @@ const hatKopf = Boolean(kennung || heading || intro);
     flex-direction: column;
     gap: clamp(0.875rem, 1.8vw, 1.5rem);
     max-width: 46rem;
+  }
+
+  /* Die Linie zieht mittig nach beiden Seiten, statt links zu beginnen:
+     eine Linie, die nur an einem Ende ausläuft, kippt die ganze Mitte. */
+  .band-kopf-mitte {
+    align-items: center;
+    text-align: center;
+    margin-inline: auto;
+  }
+
+  .band-kopf-mitte hr {
+    width: min(100%, 7rem);
   }
 
   .band-kennung {
