@@ -700,13 +700,26 @@ const mehrere = folge.length > 1;
     }
 
     /* Vor dem Start ist nichts zu sehen. Ohne das blitzte der fertige
-       Verlauf einmal auf, bevor er sich zurueckstellt. */
-    :global(html[data-js]) .chat:not([data-laeuft]) .chat-zeile {
+       Verlauf einmal auf, bevor er sich zurueckstellt.
+
+       `data-fertig` ist der DRITTE Zustand und der Grund, warum hier zwei
+       Bedingungen stehen statt einer:
+
+         (nichts)      noch nicht dran, unsichtbar
+         data-laeuft   laeuft gerade ab
+         data-fertig   steht fertig da, ohne je gelaufen zu sein
+
+       Gebraucht wird er im Karussell. Dort soll nur das vordere Telefon
+       ablaufen, damit man den Ablauf sieht, wenn man weiterklickt. Die
+       hinteren duerfen deswegen aber nicht leer stehen: zwei blasse leere
+       Schirme neben dem vorderen sehen aus wie ein Fehler. Sie bekommen
+       deshalb `data-fertig` und zeigen ihren Verlauf als Standbild. */
+    :global(html[data-js]) .chat:not([data-laeuft]):not([data-fertig]) .chat-zeile {
       opacity: 0;
       grid-template-rows: 0fr;
     }
 
-    :global(html[data-js]) .chat:not([data-laeuft]) .chat-teil {
+    :global(html[data-js]) .chat:not([data-laeuft]):not([data-fertig]) .chat-teil {
       opacity: 0;
       visibility: hidden;
     }

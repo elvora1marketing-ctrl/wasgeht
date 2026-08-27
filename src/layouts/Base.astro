@@ -185,15 +185,78 @@ const {
           return !el.parentElement || !el.parentElement.closest('[data-chat]');
         });
 
-        function starten(el) {
-          el.setAttribute('data-laeuft', '');
+        function setzen(el, wert) {
+          el.setAttribute(wert, '');
           [].forEach.call(el.querySelectorAll('[data-chat]'), function (k) {
-            k.setAttribute('data-laeuft', '');
+            k.setAttribute(wert, '');
           });
         }
 
+        function loeschen(el, wert) {
+          el.removeAttribute(wert);
+          [].forEach.call(el.querySelectorAll('[data-chat]'), function (k) {
+            k.removeAttribute(wert);
+          });
+        }
+
+        function starten(el) { setzen(el, 'data-laeuft'); }
+
+        /* ------------------------------------------------------------------
+           Karussells steuern ihre Verlaeufe selbst.
+
+           Vorher liefen beim Erscheinen ALLE DREI Telefone gleichzeitig los.
+           Wer dann weiterklickte, fand den naechsten Verlauf bereits
+           abgelaufen vor und sah nie, wie die Assistenz antwortet -- also
+           genau das, was die Vorfuehrung zeigen soll.
+
+           Jetzt laeuft nur das vordere. Die hinteren stehen als Standbild
+           (`data-fertig`), damit sie nicht leer wirken. Wer weiterklickt,
+           startet den Verlauf, der nach vorn kommt, von vorn -- auch beim
+           zweiten Mal, deshalb das Zuruecksetzen mitsamt erzwungener
+           Neuberechnung. Ohne die fasst der Browser Entfernen und Setzen
+           zu nichts zusammen und die Animation laeuft einfach weiter.
+           ------------------------------------------------------------------ */
+        var karussells = [].slice.call(document.querySelectorAll('.karussell'));
+
+        function vorderesIndex(k) {
+          var wahl = k.querySelectorAll('.karussell-wahl');
+          for (var i = 0; i < wahl.length; i++) if (wahl[i].checked) return i;
+          return 0;
+        }
+
+        function karussellStellen(k) {
+          var aktiv = vorderesIndex(k);
+          var telefone = k.querySelectorAll('.karussell-telefon');
+          [].forEach.call(telefone, function (t, i) {
+            [].forEach.call(t.querySelectorAll('[data-chat]'), function (c) {
+              if (i === aktiv) {
+                c.removeAttribute('data-fertig');
+                loeschen(c, 'data-laeuft');
+                void c.offsetWidth;
+                starten(c);
+              } else {
+                loeschen(c, 'data-laeuft');
+                setzen(c, 'data-fertig');
+              }
+            });
+          });
+        }
+
+        karussells.forEach(function (k) {
+          k.addEventListener('change', function () {
+            if (k.hasAttribute('data-sichtbar')) karussellStellen(k);
+          });
+        });
+
+        /* Verlaeufe in einem Karussell nicht zusaetzlich einzeln beobachten. */
+        var frei = aeussere.filter(function (el) { return !el.closest('.karussell'); });
+
         if (!('IntersectionObserver' in window)) {
-          aeussere.forEach(starten);
+          frei.forEach(starten);
+          karussells.forEach(function (k) {
+            k.setAttribute('data-sichtbar', '');
+            karussellStellen(k);
+          });
           return;
         }
 
@@ -201,14 +264,20 @@ const {
           function (eintraege) {
             eintraege.forEach(function (e) {
               if (!e.isIntersecting) return;
-              starten(e.target);
               wache.unobserve(e.target);
+              if (e.target.classList.contains('karussell')) {
+                e.target.setAttribute('data-sichtbar', '');
+                karussellStellen(e.target);
+              } else {
+                starten(e.target);
+              }
             });
           },
           { threshold: 0.35 },
         );
 
-        aeussere.forEach(function (v) { wache.observe(v); });
+        frei.forEach(function (v) { wache.observe(v); });
+        karussells.forEach(function (k) { wache.observe(k); });
       })();
     </script>
   </body>

@@ -18,7 +18,18 @@
 interface Props {
   eintraege: Array<{ titel: string; text: string }>;
   anordnung?: 'spalten' | 'reihen' | 'raster';
-  /** Ziffern anzeigen. Bei Aufzählungen ohne Reihenfolge abschalten. */
+  /**
+   * Ziffern anzeigen.
+   *
+   * Ohne Angabe richtet sich das nach `geordnet`, und das ist der Punkt:
+   * vorher stand hier `true` als fester Vorgabewert, und dadurch trug JEDE
+   * Liste die Ziffern 01, 02, 03 -- auch die, in denen es gar keine
+   * Reihenfolge gibt. Eine Nummer, die nichts nummeriert, ist Dekoration
+   * und behauptet obendrein einen Ablauf, den es nicht gibt.
+   *
+   * Auf den Leistungsseiten steht unter „So läuft es ab" ein echter
+   * Ablauf; dort sind die Ziffern eine Information und bleiben.
+   */
   ziffern?: boolean;
   /** Bei `true` wird ein `<ol>` ausgegeben, sonst ein `<ul>`. */
   geordnet?: boolean;
@@ -28,8 +39,8 @@ interface Props {
 const {
   eintraege,
   anordnung = 'spalten',
-  ziffern = true,
   geordnet = false,
+  ziffern = geordnet,
   class: className = '',
 }: Props = Astro.props;
 

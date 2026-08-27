@@ -117,7 +117,21 @@ export const forms = {
  * eine Bewertungsbehauptung ohne Grundlage auf der Seite.
  */
 export const reviews = {
-  enabled: true,
+  /*
+   * ABGESCHALTET, bis echte Kundenstimmen vorliegen.
+   *
+   * Die Alternative waere gewesen, `platzhalter` auf false zu setzen --
+   * dann verschwindet zwar die Marke „Beispieldaten", die erfundene
+   * Bewertung stuende aber als Tatsachenbehauptung auf der Seite und im
+   * JSON-LD. Das ist eine irrefuehrende geschaeftliche Handlung nach
+   * § 5 UWG und abmahnfaehig.
+   *
+   * Also lieber gar kein Bewertungsbeleg als ein erfundener. Sobald echte
+   * Rueckmeldungen in `items` stehen: hier auf true, `platzhalter` auf
+   * false, `rating` und `count` anpassen. Dann erscheint der Beleg an
+   * allen Stellen wieder von selbst.
+   */
+  enabled: false,
 
   /**
    * ACHTUNG: Alles hier sind Platzhalter, damit die Gestaltung beurteilt
@@ -204,7 +218,19 @@ export const reviews = {
  * darum zu sagen, WIE der Preis zustande kommt.
  */
 export const versprechen = {
-  antwortzeit: 'Antwort innerhalb von 24 Stunden, werktags meist schneller',
+  /*
+   * Vorher stand hier „Antwort innerhalb von 24 Stunden". Das war der
+   * Satz einer Agentur ohne Assistenz -- und damit ausgerechnet an der
+   * Stelle, an der die eigene Leistung beworben wird, das Gegenteil von
+   * dem, was diese Seite verkauft. Wer eine Assistenz einrichtet, die
+   * rund um die Uhr antwortet, darf sich nicht selbst einen Werktag Zeit
+   * geben.
+   *
+   * Bewusst zweigeteilt: die Assistenz antwortet sofort, Luan meldet sich
+   * danach persoenlich. Ein blosses „sofortige Antwort" waere die
+   * Behauptung, ER sei rund um die Uhr am Telefon, und das waere gelogen.
+   */
+  antwortzeit: 'Sofortige Antwort über die Assistenz, persönlich melde ich mich am selben Tag',
   preis:
     'Das hängt vom Umfang ab, deshalb steht hier keine Zahl, die für Ihren Betrieb ohnehin nicht stimmen würde. Nach dem Erstgespräch bekommen Sie ein schriftliches Angebot mit einem festen Preis. Erst wenn Sie zusagen, fange ich an. Es gibt keine Stundenzettel und keine Nachforderungen für das, was vorher besprochen war.',
 } as const;
