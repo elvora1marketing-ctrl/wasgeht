@@ -1,0 +1,261 @@
+---
+/**
+ * Der Haupt-Aufruf, der sich selbst zerreißt.
+ *
+ * Portiert aus einer React-Vorlage („glitching-button"). Hier gibt es kein
+ * React und kein shadcn/ui, und beides für einen Knopf einzubauen hieße,
+ * eine Laufzeitbibliothek auf jede Seite zu legen, die heute ohne eine
+ * einzige JavaScript-Datei ausgeliefert wird. Deshalb: dieselbe Mechanik
+ * in Astro, die Rechenarbeit als ein eigenes Element in `Base.astro`.
+ *
+ * WAS DER KNOPF MACHT
+ *
+ * Er steht nie ganz still. In Ruhe zerfällt er alle 1,8 Sekunden für einen
+ * Moment in waagerechte Streifen, die seitlich wegrutschen, und ein bis
+ * zwei Buchstaben kippen dabei in ähnlich aussehende um. Fährt der Zeiger
+ * darauf, wird der Ausschlag härter und kürzer, und der Knopf neigt sich
+ * dem Zeiger entgegen.
+ *
+ * WARUM DAS AUF EINEM AUFRUF FUNKTIONIERT
+ *
+ * Bewegung im Randblick zieht den Blick, das ist nicht Geschmack sondern
+ * Reflex. Eine Fläche, die sich in unregelmäßigen Abständen kurz verformt,
+ * bekommt deshalb Aufmerksamkeit, ohne zu blinken oder zu hüpfen. Und weil
+ * der Ausschlag beim Überfahren zunimmt, antwortet der Knopf auf Nähe: er
+ * wirkt greifbar, bevor man ihn berührt hat.
+ *
+ * DIE GRENZEN, DIE ICH GESETZT HABE
+ *
+ * Der zugängliche Name kommt aus `label` und wird NIE verwürfelt. Die
+ * sichtbaren Textkopien sind alle `aria-hidden`, sonst läse eine
+ * Sprachausgabe „Ersfgesqräch" vor. Leerzeichen bleiben stehen, damit aus
+ * zwei Wörtern nicht ein Klumpen wird. Und ohne JavaScript oder bei
+ * `prefers-reduced-motion` steht hier ein ganz normaler Knopf.
+ */
+interface Props {
+  href: string;
+  /** Der Text. Steht auch als zugänglicher Name, unverwürfelt. */
+  label: string;
+  /**
+   * `marke` -- Markenverlauf, für helle Flächen.
+   * `hell`  -- Weiß, für die dunklen Tafeln. Die Akzentfarbe geht dort
+   *            unter, auf der Magenta-Tafel fast ganz.
+   */
+  ton?: 'marke' | 'hell';
+  size?: 'md' | 'lg';
+  /** Über die volle Breite, für schmale Schirme. */
+  breit?: boolean;
+  class?: string;
+}
+
+const {
+  href,
+  label,
+  ton = 'marke',
+  size = 'lg',
+  breit = false,
+  class: className = '',
+}: Props = Astro.props;
+
+/*
+ * ZEHN LAGEN, NICHT MEHR.
+ *
+ * Die Vorlage legt zehn Kopien übereinander und benutzt je nach Härte des
+ * Ausschlags sieben (Ruhe) oder zehn (Zeiger darauf). Sie stehen im Markup
+ * und nicht im Skript: so ist der Knopf auch ohne JavaScript vollständig,
+ * und das Skript muss beim Start nichts bauen, sondern nur bewegen.
+ */
+const LAGEN = 10;
+---
+
+<glitch-cta
+  class:list={['gcta-wirt', breit && 'gcta-wirt-breit', className]}
+  data-ton={ton}
+>
+  <span class="gcta-magnet">
+    <a
+      class:list={['gcta', `gcta-${ton}`, `gcta-${size}`]}
+      href={href}
+      aria-label={label}
+    >
+      {/* Trägt die Größe des Knopfes und wackelt. Die Lagen darüber liegen
+          absolut und können deshalb nichts verschieben. */}
+      <span class="gcta-schuetteln" data-glitch-base aria-hidden="true">
+        <span data-glitch-text>{label}</span>
+      </span>
+
+      {
+        Array.from({ length: LAGEN }).map(() => (
+          <span class="gcta-lage" data-glitch-layer aria-hidden="true">
+            <span data-glitch-text>{label}</span>
+          </span>
+        ))
+      }
+    </a>
+  </span>
+</glitch-cta>
+
+<style>
+  /*
+   * Der versetzte Schlagschatten läuft über eine registrierte
+   * Eigenschaft. Das Skript kann sie animieren wie jede andere, und die
+   * FARBEN bleiben trotzdem hier im Stylesheet -- sonst müsste das Skript
+   * für jeden Ton einen eigenen Schattensatz mitbringen und die Palette
+   * stünde an zwei Stellen.
+   *
+   * Kann ein Browser die Eigenschaft nicht bewegen, bleibt sie bei 0 und
+   * es fehlt allein das Nachziehen des Schattens. Alles andere läuft.
+   */
+  @property --gcta-versatz {
+    syntax: '<length>';
+    inherits: false;
+    initial-value: 0px;
+  }
+
+  .gcta-wirt {
+    display: inline-block;
+    /* Die Lagen rutschen seitlich aus dem Knopf heraus. Ohne das würde
+       der Knopf beim Zerfallen den Textfluss daneben anstoßen. */
+    isolation: isolate;
+  }
+
+  .gcta-magnet {
+    display: inline-block;
+    will-change: transform;
+  }
+
+  .gcta {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-button);
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+    /* OHNE `overflow: hidden`, UND DAS IST DER GANZE EFFEKT.
+       Die Streifen sollen seitlich AUS dem Knopf herausrutschen. Beschnitte
+       man sie am Rand, sähe man nur den Text reißen und die Fläche
+       darunter ruhig stehen bleiben -- der Knopf wirkte dann kaputt statt
+       zerrissen. Verschieben tut das nichts: die Lagen liegen absolut. */
+    /* Eigene Zeichenebene: die zehn Lagen bewegen sich sonst auf dem
+       Hauptfaden mit und lassen das Scrollen ruckeln. */
+    transform: translateZ(0);
+  }
+
+  .gcta-md {
+    height: 2.75rem;
+    padding-inline: 1.25rem;
+    font-size: 0.9375rem;
+  }
+
+  .gcta-lg {
+    height: 3.25rem;
+    padding-inline: 1.75rem;
+    font-size: 1rem;
+  }
+
+  .gcta-wirt-breit,
+  .gcta-wirt-breit .gcta-magnet,
+  .gcta-wirt-breit .gcta {
+    width: 100%;
+  }
+
+  /* Auf schmalen Schirmen IMMER über die volle Breite. Stand vorher an
+     jeder Verwendungsstelle einzeln als `max-sm:w-full` -- zehnmal
+     dieselbe Entscheidung, und einmal war sie vergessen. Ein Aufruf, der
+     auf dem Telefon nur so breit ist wie sein Text, ist mit dem Daumen
+     schlechter zu treffen und sieht neben allem anderen verloren aus. */
+  @media (width < 40rem) {
+    .gcta-wirt,
+    .gcta-wirt .gcta-magnet,
+    .gcta-wirt .gcta {
+      width: 100%;
+    }
+  }
+
+  /* --- Markenton ---------------------------------------------------------
+   * Der Verlauf wandert langsam von Magenta Richtung Indigo und zurück.
+   * In der Vorlage ist das ein Grünton, der zwischen zwei Sättigungen
+   * pendelt; hier nimmt er den Markenverlauf auf, den die Seite ohnehin
+   * überall benutzt.
+   *
+   * Sehr langsam (elf Sekunden) und über eine kleine Strecke: es soll
+   * auffallen, dass die Fläche lebt, aber niemand soll die Farbe wechseln
+   * SEHEN. */
+  .gcta-marke {
+    color: #fff;
+    background:
+      linear-gradient(to bottom, rgb(255 255 255 / 0.14), rgb(255 255 255 / 0) 42%),
+      linear-gradient(160deg, #c2479f, #93307b);
+    box-shadow:
+      inset 0 1px 0 -0.5px rgb(255 255 255 / 0.42),
+      inset 0 -1px 0 -0.5px rgb(48 6 36 / 0.32),
+      inset 0 0 0 1px rgb(56 8 44 / 0.1),
+      var(--gcta-versatz) 1px 2px rgb(74 14 58 / 0.24),
+      var(--gcta-versatz) 4px 12px -4px rgb(74 14 58 / 0.34);
+  }
+
+  .gcta-hell {
+    color: var(--color-ink);
+    background:
+      linear-gradient(to bottom, rgb(255 255 255 / 0.9), rgb(255 255 255 / 0) 45%),
+      linear-gradient(160deg, #ffffff, #ecebf2);
+    box-shadow:
+      inset 0 1px 0 -0.5px rgb(255 255 255 / 0.9),
+      inset 0 -1px 0 -0.5px rgb(22 25 58 / 0.14),
+      inset 0 0 0 1px rgb(22 25 58 / 0.08),
+      var(--gcta-versatz) 1px 2px rgb(0 0 0 / 0.22),
+      var(--gcta-versatz) 4px 12px -4px rgb(0 0 0 / 0.3);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .gcta-marke {
+      animation: gcta-farbe 11s ease-in-out infinite;
+    }
+  }
+
+  /* KLEINER ALS ZUERST GEBAUT. Die Vorlage pendelt weit, und mit den
+     Markenfarben hiess das: der Knopf war die halbe Zeit violett und nur
+     kurz magenta. Wer die Seite aufschlaegt, sieht dann eine Farbe, die
+     nirgends sonst vorkommt. Jetzt bleibt der Ausschlag knapp -- man
+     merkt, dass die Flaeche lebt, ohne die Farbe wechseln zu sehen. */
+  @keyframes gcta-farbe {
+    50% {
+      background:
+        linear-gradient(to bottom, rgb(255 255 255 / 0.14), rgb(255 255 255 / 0) 42%),
+        linear-gradient(160deg, #b74aa4, #8b3486);
+    }
+  }
+
+  /* --- Die Kopien --------------------------------------------------------
+   * Jede Lage ist eine vollständige Kopie der Knopffläche. Das Skript
+   * beschneidet sie auf einen waagerechten Streifen und schiebt ihn zur
+   * Seite -- dadurch reißt nicht nur der Text, sondern der ganze Knopf.
+   *
+   * Der Hintergrund wird GEERBT, nicht wiederholt: sonst stünde der
+   * Markenverlauf an elf Stellen und ein Wechsel der Farbe wäre elf
+   * Änderungen. */
+  .gcta-lage {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: inherit;
+    color: inherit;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .gcta-schuetteln {
+    position: relative;
+    /* Damit der Text über den Lagen bleibt, wenn keine davon gerade einen
+       Streifen an dieser Stelle hat. */
+    z-index: 1;
+  }
+
+  /* Ohne Skript und bei reduzierter Bewegung bleiben die Lagen
+     unsichtbar. Beides ist hier kein Sonderfall, sondern der
+     Ausgangszustand: sie starten auf `opacity: 0`. */
+</style>

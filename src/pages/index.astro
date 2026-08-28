@@ -1,7 +1,7 @@
 ---
 import Base from '~/layouts/Base.astro';
 import Band from '~/components/Band.astro';
-import Button from '~/components/Button.astro';
+import GlitchCta from '~/components/GlitchCta.astro';
 import Portrait from '~/components/Portrait.astro';
 import Scramble from '~/components/Scramble.astro';
 import Sterne from '~/components/Sterne.astro';
@@ -207,9 +207,12 @@ const kachelZeichen: Record<string, string> = {
                 der eine Knopf ueber die volle Breite gezogen und der
                 andere daneben nur so breit wie sein Text. Beide Breiten
                 kommen jetzt aus derselben Abfrage weiter unten. */}
-            <Button href={cta.primary.href} size="lg" magnet class="hero-cta">
-              {cta.primary.label}
-            </Button>
+            <GlitchCta
+              href={cta.primary.href}
+              label={cta.primary.label}
+              size="lg"
+              class="hero-cta"
+            />
 
             {/* DER ZWEITE WEG IST JETZT EIN KNOPF, KEIN TEXTLINK MEHR.
                 Als unterstrichene graue Zeile sah er aus wie eine
@@ -397,9 +400,7 @@ const kachelZeichen: Record<string, string> = {
         So sähe ein Vormittag in Ihrem Betrieb aus. In 15 Minuten schauen wir,
         welcher der drei Wege bei Ihnen gerade die meisten Anfragen liegen lässt.
       </p>
-      <Button href={cta.primary.href} size="lg" magnet class="max-sm:w-full">
-        {cta.primary.label}
-      </Button>
+      <GlitchCta href={cta.primary.href} label={cta.primary.label} size="lg" />
     </div>
   </Band>
 
@@ -548,10 +549,18 @@ const kachelZeichen: Record<string, string> = {
         was sich davon automatisieren lässt — und was nicht.
       </p>
 
+      {/* OHNE DEN LAUFENDEN RING. Der Ring war bisher das Zeichen, dass
+          DIESER Aufruf der wichtigste der Seite ist. Das uebernimmt jetzt
+          der Knopf selbst: er ist der einzige, der sich zerreisst, und
+          zwei Aufmerksamkeitsmittel auf einem Element heben sich
+          gegenseitig auf. */}
       <div class="schluss-knopf">
-        <Button href={cta.primary.href} ring magnet class="schluss-cta">
-          {cta.primary.label}
-        </Button>
+        <GlitchCta
+          href={cta.primary.href}
+          label={cta.primary.label}
+          size="lg"
+          class="schluss-cta"
+        />
       </div>
 
       {/* HIER STANDEN „15 MINUTEN · UNVERBINDLICH · OHNE VERKAUFSGESPRÄCH".
@@ -660,21 +669,11 @@ const kachelZeichen: Record<string, string> = {
     gap: 0.75rem;
   }
 
-  /* Der Haupt-Aufruf im Hero traegt einen weichen Schein in der
-     Markenfarbe. Kein Rahmen, keine Bewegung -- der laufende Ring bleibt
-     dem Abschluss vorbehalten. Der Schein macht ihn hier zum hellsten
-     Punkt der Flaeche, ohne dass zwei Dinge gleichzeitig blinken. */
-  .hero-cta {
-    box-shadow:
-      0 1px 2px rgb(25 29 33 / 0.1),
-      0 10px 26px -12px rgb(178 58 148 / 0.55);
-  }
-
-  .hero-cta:hover {
-    box-shadow:
-      0 1px 2px rgb(25 29 33 / 0.12),
-      0 16px 34px -12px rgb(178 58 148 / 0.68);
-  }
+  /* HIER STAND EIN SCHEIN IN DER MARKENFARBE UNTER DEM KNOPF.
+     Der Aufruf bringt seinen Schatten jetzt selbst mit, und er zieht den
+     Blick ueber Bewegung statt ueber ein Leuchten. Zwei
+     Aufmerksamkeitsmittel auf einem Element heben sich gegenseitig auf:
+     man sieht dann beides und keines richtig. */
 
   /* Der zweite Weg: eigener Knopf, aber ohne Flaeche. Er soll einladen,
      nicht mitbieten. Auf gleicher Hoehe wie der erste (`h-13` dort =
@@ -726,7 +725,8 @@ const kachelZeichen: Record<string, string> = {
       flex-direction: column;
       align-items: stretch;
     }
-    .hero-cta,
+    /* Der Aufruf zieht sich unter 40rem von selbst auf volle Breite, das
+       steht in `GlitchCta.astro`. Hier fehlt er deshalb. */
     .hero-whatsapp {
       width: 100%;
     }
@@ -1476,67 +1476,36 @@ const kachelZeichen: Record<string, string> = {
     display: inline-flex;
   }
 
-  /* Weiter aufgezogen und weicher als zuerst: eng gefasst sah der Schein
-     wie ein Fleck unter dem Knopf aus statt wie Licht. */
-  .schluss-knopf::before {
-    content: '';
-    position: absolute;
-    inset: -5rem -7rem;
-    border-radius: 999px;
-    background: radial-gradient(
-      50% 50% at 50% 50%,
-      color-mix(in oklab, var(--color-brand-mid) 24%, transparent) 0%,
-      color-mix(in oklab, var(--color-brand-start) 12%, transparent) 48%,
-      transparent 70%
-    );
-    filter: blur(48px);
-    pointer-events: none;
-  }
+  /* HIER LAG EIN WEICHER SCHEIN HINTER DEM KNOPF.
+     Er stammt aus der Zeit, als der Aufruf still war und etwas brauchte,
+     das ihn heraushebt. Jetzt hebt er sich selbst heraus, und der Schein
+     legte nur noch einen hellen Fleck auf eine ohnehin fast weisse
+     Flaeche -- von aussen sah es aus, als saesse der Knopf auf einer
+     zweiten, unsauber begrenzten Karte. */
 
   /* Groesser als jedes andere Bedienelement der Seite. Das ist der Punkt:
      am Ende soll es nur noch eine Sache zu tun geben, und die soll man
-     nicht suchen muessen. */
-  /* Der Ring bringt seinen eigenen Rahmen mit, deshalb sitzt der Radius
-     jetzt am Ring und nicht mehr am Knopf. */
+     nicht suchen muessen.
 
-  /* MIT `:global`, UND DAS IST KEIN SCHOENHEITSFEHLER GEWESEN.
-   *
-   * Astro haengt seine Bereichskennung an das WURZELELEMENT einer
-   * eingebundenen Komponente. Bei `<Button ring>` ist die Wurzel aber der
-   * Ring, und `.schluss-cta` sitzt eine Ebene tiefer am Knopf darin. Ohne
-   * `:global` schrieb Astro also `.schluss-cta[data-astro-cid-…]` -- ein
-   * Selektor, auf den kein einziges Element der Seite passt.
-   *
-   * Wirkung: Hoehe, Polsterung und Schatten des groessten Aufrufs der
-   * Seite waren wirkungslos. Er sah aus wie jeder andere Knopf, nur mit
-   * Ring drumherum, und stand dadurch verloren in der Flaeche. Genau das
-   * war an dieser Stelle als „falsch platziert" zu sehen. */
-  .schluss-knopf :global(.schluss-cta) {
-    position: relative;
+     MIT `:global`. Astro haengt seine Bereichskennung an das
+     WURZELELEMENT einer eingebundenen Komponente -- das ist hier
+     `<glitch-cta>`, der Knopf darin bekommt sie nicht. Ohne `:global`
+     schriebe Astro `.gcta[data-astro-cid-…]`, einen Selektor, auf den
+     kein Element der Seite passt. Genau daran war der Aufruf vorher
+     wirkungslos gross: er sah aus wie jeder andere Knopf und stand
+     verloren in der Flaeche. */
+  .schluss-knopf :global(.gcta) {
     height: 3.75rem;
     padding-inline: 2.5rem;
     font-size: 1.0625rem;
-    box-shadow: 0 2px 4px rgb(25 29 33 / 0.1), 0 14px 30px -12px rgb(178 58 148 / 0.55);
   }
 
-  .schluss-knopf :global(.schluss-cta:hover) {
-    box-shadow: 0 2px 4px rgb(25 29 33 / 0.12), 0 18px 36px -12px rgb(178 58 148 / 0.65);
-  }
-
-  /* Auf schmalen Schirmen ueber die volle Breite. Der Ring muss dabei
-     MITWACHSEN: bleibt er inhaltsbreit und der Knopf darin nimmt 100%,
-     ist die Rechnung im Kreis und der Knopf deckt den Verlauf zu. */
   @media (width < 30rem) {
     .schluss-knopf {
       display: flex;
       width: 100%;
     }
-    .schluss-knopf > :global(.knopf-ring) {
-      display: flex;
-      width: 100%;
-    }
-    .schluss-knopf :global(.schluss-cta) {
-      width: 100%;
+    .schluss-knopf :global(.gcta) {
       padding-inline: 1.25rem;
     }
   }

@@ -4,7 +4,7 @@ import PanelHero from '~/components/PanelHero.astro';
 import Band from '~/components/Band.astro';
 import Liste from '~/components/Liste.astro';
 import Portrait from '~/components/Portrait.astro';
-import Button from '~/components/Button.astro';
+import GlitchCta from '~/components/GlitchCta.astro';
 import WhatsappCta from '~/components/WhatsappCta.astro';
 import { cta, address, owner } from '~/config/site';
 
@@ -58,9 +58,7 @@ const grundsaetze = [
     breadcrumbs={[{ label: 'Über mich' }]}
   >
     <div class="kopf-handlung">
-      <Button href={cta.primary.href} size="lg" magnet class="max-sm:w-full">
-        {cta.primary.label}
-      </Button>
+      <GlitchCta href={cta.primary.href} label={cta.primary.label} size="lg" />
       <p class="kopf-notiz">{cta.primary.note}</p>
     </div>
   </PanelHero>
@@ -143,9 +141,7 @@ const grundsaetze = [
       </p>
 
       <div class="schluss-handlung">
-        <Button href={cta.primary.href} size="lg" magnet class="max-sm:w-full">
-          {cta.primary.label}
-        </Button>
+        <GlitchCta href={cta.primary.href} label={cta.primary.label} size="lg" />
         <p class="schluss-notiz">{cta.primary.note}</p>
         <WhatsappCta variant="inline" class="text-ink-muted" />
       </div>

@@ -1,5 +1,5 @@
 ---
-import Button from './Button.astro';
+import GlitchCta from './GlitchCta.astro';
 import Texture from './Texture.astro';
 import Scramble from './Scramble.astro';
 import ReviewBadge from './ReviewBadge.astro';
@@ -42,9 +42,7 @@ const {
     </div>
 
     <div class="schlussband-handlung">
-      <Button href={cta.primary.href} size="lg" variant="aufFarbe" magnet class="max-sm:w-full">
-        {cta.primary.label}
-      </Button>
+      <GlitchCta href={cta.primary.href} label={cta.primary.label} ton="hell" size="lg" />
       <p class="schlussband-notiz">{cta.primary.note}</p>
 
       {/* Der Beleg gehoert NEBEN den Aufruf, nicht nur an den Seitenanfang.

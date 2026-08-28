@@ -140,6 +140,436 @@ const {
         });
       })();
 
+      /* ====================================================================
+         DER HAUPT-AUFRUF, DER SICH SELBST ZERREISST
+
+         Uebernommen aus einer React-Vorlage („glitching-button") und hier
+         ohne React nachgebaut. Das Markup steht in `GlitchCta.astro`, die
+         Rechenarbeit hier -- der Knopf kommt auf manchen Seiten viermal
+         vor, und ein Skript in der Komponente laege dann viermal im
+         Dokument.
+
+         DAS VERFAHREN, in einem Satz: der Knopf liegt elfmal
+         uebereinander; zehn Kopien werden auf je einen waagerechten
+         Streifen beschnitten und seitlich weggeschoben, und zwar nicht
+         weich, sondern in Stufen -- `steps()` statt einer Kurve. Weiche
+         Bewegung liest das Auge als Animation, harte Stufen als Stoerung.
+
+         DIE HUELLKURVE ist das Herz davon. Sie sagt fuer jeden Moment,
+         wie stark ausgeschlagen wird: erst nichts, dann ein steiler
+         Anstieg, ein Gipfel, ein laengeres Abklingen und zuletzt ein
+         kurzer Ausschlag ins Gegenteil. Ohne sie waere es gleichmaessiges
+         Zappeln, und gleichmaessiges Zappeln wird nach zwei Sekunden
+         ignoriert.
+
+         ZWEI HAERTEN: in Ruhe selten und weich, unter dem Zeiger kurz und
+         hart. Der Knopf antwortet damit auf Naehe.
+
+         GRENZEN: bei `prefers-reduced-motion` laeuft nichts, ausserhalb
+         des Bildschirms und bei verdeckter Seite ebenfalls nicht, und der
+         zugaengliche Name haengt am `aria-label` und wird nie angefasst.
+         ==================================================================== */
+      if (!customElements.get('glitch-cta'))
+      customElements.define(
+        'glitch-cta',
+        class extends HTMLElement {
+          connectedCallback() {
+            var wirt = this;
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+            var grund = wirt.querySelector('[data-glitch-base]');
+            var knopf = wirt.querySelector('.gcta');
+            var magnet = wirt.querySelector('.gcta-magnet');
+            var lagen = [].slice.call(wirt.querySelectorAll('[data-glitch-layer]'));
+            if (!grund || !knopf || !magnet || !lagen.length) return;
+
+            /* --- Buchstaben, die einander aehnlich sehen ----------------
+               Der Reiz des Verfahrens: ein getauschter Buchstabe faellt
+               nicht als Fehler auf, sondern als Flackern. „Erstgespraech"
+               mit einem b statt des h liest man erst beim zweiten
+               Hinsehen -- genau deshalb sieht man ueberhaupt hin. */
+            var AEHNLICH = {
+              a: 'eo', b: 'hd', c: 'eo', d: 'bh', e: 'ca', f: 'tr', g: 'qy',
+              h: 'bn', i: 'lj', j: 'il', k: 'hx', l: 'il', m: 'nw', n: 'mh',
+              o: 'ce', p: 'qb', q: 'pg', r: 'nf', s: 'z5', t: 'fl', u: 'vn',
+              v: 'uy', w: 'vm', x: 'kz', y: 'vg', z: 'sx',
+            };
+            var WIRR = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+
+            function tausch(z) {
+              var nah = AEHNLICH[z.toLowerCase()];
+              if (nah) return nah[(Math.random() * nah.length) | 0];
+              return WIRR[(Math.random() * WIRR.length) | 0];
+            }
+
+            /* RUHE und ZEIGER. Die Werte stammen aus der Vorlage; geaendert
+               habe ich nur `dauer` in Ruhe: 1,8 Sekunden hiessen, dass der
+               Knopf gut die Haelfte der Zeit in Bewegung ist. Auf einem
+               Aufruf, der Vertrauen braucht, ist das zu viel -- er soll
+               den Blick holen, nicht um ihn betteln. */
+            var RUHE = {
+              dauer: 2600, streifen: 7, takt: 15,
+              hoeheMin: 0.02, hoeheMax: 0.18, versatzMax: 20,
+              wackeln: 0.13, vonT: 0.62, bisT: 0.88, gipfelBei: 0.3,
+              ausreisser: 3, eckeMax: 4, driftPx: 0.5,
+              wirrAnteil: 0.06, wirrTakt: 50,
+            };
+            var ZEIGER = {
+              dauer: 340, streifen: 10, takt: 18,
+              hoeheMin: 0.02, hoeheMax: 0.2, versatzMax: 38,
+              wackeln: 0.26, vonT: 0.22, bisT: 0.9, gipfelBei: 0.3,
+              ausreisser: 3.5, eckeMax: 6, driftPx: 0.5,
+              wirrAnteil: 0.14, wirrTakt: 45,
+            };
+
+            var UEBER_SPANNE = 0.14;
+            var UEBER_GIPFEL = 0.22;
+            var SCHATTEN_NACHLAUF = 7;
+            var AUSFALL_JE = 8;
+            var AUSFALL_STREUUNG = 5;
+
+            /* Die Huellkurve. Vor `vonT` und nach dem Ueberschwinger:
+               null, also absolute Ruhe. Dazwischen linear hinauf zum
+               Gipfel und laenger wieder hinunter -- ein Einschlag klingt
+               ab, er hoert nicht auf. Der Schwanz hinter `bisT` geht ins
+               Negative: der Knopf federt einmal zurueck, statt einfach
+               stehenzubleiben. */
+            function huelle(o, t) {
+              if (t < o.vonT) return 0;
+              var spanne = o.bisT - o.vonT;
+              if (t > o.bisT) {
+                var rest = (t - o.bisT) / (spanne * UEBER_SPANNE);
+                return rest < 1 ? -UEBER_GIPFEL * (1 - rest) : 0;
+              }
+              var gipfel = o.vonT + spanne * o.gipfelBei;
+              return t < gipfel
+                ? (t - o.vonT) / (gipfel - o.vonT)
+                : (o.bisT - t) / (o.bisT - gipfel);
+            }
+
+            function stoss(o, t) {
+              return (Math.random() - 0.5) * 2 * huelle(o, t);
+            }
+
+            function schritte(o) {
+              return Math.max(1, ((o.takt * o.dauer) / 1000 | 0) + 1);
+            }
+
+            /* Ein waagerechter Streifen. Die Hoehe wird mitgegeben, weil
+               der Versatz davon abhaengt: ein duenner Streifen darf weit
+               fliegen, ein dicker nur wenig. Sonst rutscht der halbe Knopf
+               am Stueck weg und es sieht aus, als sei er verschoben. */
+            function streifen(o) {
+              var anteil = Math.random();
+              var h = o.hoeheMin + anteil * (o.hoeheMax - o.hoeheMin);
+              var y = Math.random() * (1 - h);
+              var oben = (y * 100).toFixed(2);
+              var unten = ((y + h) * 100).toFixed(2);
+              return {
+                pfad: 'polygon(0% ' + oben + '%, 100% ' + oben + '%, 100% ' +
+                  unten + '%, 0% ' + unten + '%)',
+                anteil: anteil,
+              };
+            }
+
+            /* Jede Lage hat ihre eigene Schwelle: die erste reisst schon
+               bei schwachem Ausschlag, die letzte erst kurz vor dem
+               Gipfel. Dadurch faellt der Knopf gestaffelt auseinander und
+               nicht auf einen Schlag. */
+            function lagenBilder(o, i, ausreisser) {
+              var n = schritte(o);
+              var schwelle = ((i + 1) / (o.streifen + 1)) * 0.9;
+              var schub = i === ausreisser
+                ? o.versatzMax * o.ausreisser
+                : o.versatzMax;
+              var aus = [];
+              for (var k = 0; k < n; k++) {
+                var t = k / n;
+                var e = huelle(o, t);
+                if (Math.abs(e) < schwelle) {
+                  /* Ein seltenes Einzelflackern auch in der Ruhephase.
+                     Ohne das ist die Pause zwischen zwei Ausschlaegen
+                     vollkommen tot und der Knopf wirkt wie zwei Zustaende
+                     statt wie ein Ding, das nicht stillhalten kann. */
+                  if (i !== 0 || Math.random() >= 0.035) {
+                    aus.push({ opacity: '0', transform: 'none', clipPath: 'unset' });
+                    continue;
+                  }
+                  var f = streifen(o);
+                  aus.push({
+                    opacity: '1',
+                    transform: 'translate3d(' +
+                      ((Math.random() - 0.5) * o.versatzMax * 0.3).toFixed(2) + '%,0,0)',
+                    clipPath: f.pfad,
+                  });
+                  continue;
+                }
+                var s = streifen(o);
+                var mass = 0.35 + s.anteil * 0.65;
+                aus.push({
+                  opacity: '1',
+                  transform: 'translate3d(' +
+                    (stoss(o, t) * schub * mass).toFixed(2) + '%,0,0)',
+                  clipPath: s.pfad,
+                });
+              }
+              return aus;
+            }
+
+            /* Der ganze Knopf faellt fuer EIN Einzelbild aus. Nicht bei
+               jedem Durchlauf, sondern etwa bei jedem zehnten: was
+               regelmaessig passiert, ist keine Stoerung mehr. */
+            function ausfallBilder(o) {
+              var n = schritte(o);
+              var gipfel = Math.round(n * (o.vonT + (o.bisT - o.vonT) * o.gipfelBei));
+              var aus = [];
+              for (var k = 0; k < n; k++) aus.push({ opacity: k === gipfel ? '0' : '1' });
+              return aus;
+            }
+
+            /* Ecken und Schatten. Der Radius zittert, und der Schatten
+               laeuft dem Knopf entgegengesetzt nach -- als haenge er einen
+               Moment hinterher. Der Versatz geht ueber eine registrierte
+               Eigenschaft, damit die Schattenfarben im Stylesheet bleiben
+               und hier nicht je Ton doppelt stuenden. */
+            function rahmenBilder(o, radius) {
+              var n = schritte(o);
+              var aus = [];
+              for (var k = 0; k < n; k++) {
+                var t = k / n;
+                if (huelle(o, t) === 0) {
+                  aus.push({ borderRadius: radius + 'px', '--gcta-versatz': '0px' });
+                  continue;
+                }
+                var r = Math.max(0, radius + stoss(o, t) * o.eckeMax);
+                aus.push({
+                  borderRadius: r.toFixed(2) + 'px',
+                  '--gcta-versatz': (-stoss(o, t) * SCHATTEN_NACHLAUF).toFixed(1) + 'px',
+                });
+              }
+              return aus;
+            }
+
+            function wackelBilder(o) {
+              var n = schritte(o);
+              var aus = [];
+              for (var k = 0; k < n; k++) {
+                var t = k / n;
+                aus.push({
+                  transform: 'translate3d(' +
+                    (stoss(o, t) * o.wackeln * 100).toFixed(2) + '%,' +
+                    (stoss(o, t) * o.wackeln * 100).toFixed(2) + '%,0)',
+                });
+              }
+              return aus;
+            }
+
+            // --- Zustand ------------------------------------------------
+            var o = RUHE;
+            var laeuft = false;
+            var anims = [];
+            var wirrUhr = null;
+            var wirrZaehler = 0;
+            var rundenStart = 0;
+            var uhr = null;
+            var seitAusfall = 0;
+            var drift = null;
+            var wort = (grund.textContent || '').trim();
+            var radius = parseFloat(getComputedStyle(knopf).borderTopLeftRadius);
+            if (isNaN(radius)) radius = 10;
+
+            var textfelder = [grund].concat(lagen).map(function (el) {
+              return el.querySelector('[data-glitch-text]') || el;
+            });
+
+            function schreiben(s) {
+              for (var i = 0; i < textfelder.length; i++) textfelder[i].textContent = s;
+            }
+
+            function abbrechen() {
+              for (var i = 0; i < anims.length; i++) {
+                try { anims[i].cancel(); } catch (e) {}
+              }
+              anims = [];
+              for (var k = 0; k < lagen.length; k++) {
+                lagen[k].style.opacity = '0';
+                lagen[k].style.transform = 'none';
+                lagen[k].style.clipPath = 'none';
+              }
+              grund.style.transform = 'none';
+              knopf.style.removeProperty('border-radius');
+              knopf.style.removeProperty('--gcta-versatz');
+              wirt.style.removeProperty('opacity');
+            }
+
+            function runde() {
+              var stufen = 'steps(' + schritte(o) + ', jump-start)';
+              var zeit = { duration: o.dauer, iterations: 1, easing: stufen, fill: 'none' };
+              var ausreisser = (Math.random() * o.streifen) | 0;
+
+              if (++seitAusfall >= AUSFALL_JE + ((Math.random() * AUSFALL_STREUUNG) | 0)) {
+                seitAusfall = 0;
+                anims.push(wirt.animate(ausfallBilder(o), zeit));
+              }
+
+              anims.push(grund.animate(wackelBilder(o), zeit));
+              for (var i = 0; i < o.streifen && i < lagen.length; i++) {
+                anims.push(lagen[i].animate(lagenBilder(o, i, ausreisser), zeit));
+              }
+              anims.push(knopf.animate(rahmenBilder(o, radius), {
+                duration: o.dauer, iterations: 1, easing: 'ease-in-out', fill: 'none',
+              }));
+
+              /* DIE NAECHSTE RUNDE HAENGT AN EINER UHR, NICHT AM
+                 `finished`-VERSPRECHEN DER ANIMATION.
+
+                 Die Vorlage kettet die Runden ueber `animation.finished`.
+                 Das ist eleganter und hat mich beim Pruefen eine Weile
+                 gekostet: die Animation erreichte sichtbar ihr Ende
+                 (`playState: "finished"`), aber der angehaengte Rueckruf
+                 kam nie -- der Knopf zerriss sich genau einmal und stand
+                 danach still. Eine Uhr haengt an nichts davon, laesst sich
+                 mit einem Handgriff abbestellen und macht das Anhalten
+                 damit sogar sauberer. */
+              rundenStart = performance.now();
+              if (uhr !== null) window.clearTimeout(uhr);
+              uhr = window.setTimeout(function () {
+                uhr = null;
+                if (laeuft) runde();
+              }, o.dauer);
+            }
+
+            function wirrStart() {
+              wirrStop();
+              rundenStart = performance.now();
+              var schlag = function () {
+                var phase = ((performance.now() - rundenStart) % o.dauer) / o.dauer;
+                if (huelle(o, phase) === 0 || ++wirrZaehler % 2 !== 0) {
+                  schreiben(wort);
+                  return;
+                }
+                var aus = wort;
+                for (var i = 0; i < aus.length; i++) {
+                  /* LEERZEICHEN BLEIBEN STEHEN. In der Vorlage ist das
+                     Wort einteilig; „Erstgespräch vereinbaren" wuerde
+                     ohne diese Ausnahme gelegentlich zu einem Klumpen
+                     zusammenlaufen, und ein Aufruf, den man nicht mehr
+                     als zwei Woerter erkennt, ist kein Aufruf mehr. */
+                  if (aus[i] === ' ') continue;
+                  if (Math.random() < o.wirrAnteil) {
+                    aus = aus.slice(0, i) + tausch(aus[i]) + aus.slice(i + 1);
+                  }
+                }
+                schreiben(aus);
+              };
+              schlag();
+              wirrUhr = window.setInterval(schlag, o.wirrTakt);
+            }
+
+            function wirrStop() {
+              if (wirrUhr !== null) window.clearInterval(wirrUhr);
+              wirrUhr = null;
+              schreiben(wort);
+            }
+
+            /* Ein sehr langsames Wandern um einen halben Pixel. Man sieht
+               es nicht, aber ein Element, das exakt stillsteht, wirkt
+               daneben tot. `composite: add` legt es AUF das Wackeln, statt
+               es zu ersetzen. */
+            function driftStart() {
+              if (drift) return;
+              var p = o.driftPx;
+              drift = grund.animate(
+                [
+                  { transform: 'translate3d(0,0,0)' },
+                  { transform: 'translate3d(' + p + 'px,' + -p * 0.6 + 'px,0)' },
+                  { transform: 'translate3d(' + -p * 0.8 + 'px,' + p + 'px,0)' },
+                  { transform: 'translate3d(' + p * 0.5 + 'px,' + p * 0.7 + 'px,0)' },
+                  { transform: 'translate3d(0,0,0)' },
+                ],
+                { duration: 9400, iterations: Infinity, easing: 'ease-in-out', composite: 'add' },
+              );
+            }
+
+            function starten() {
+              if (laeuft) return;
+              laeuft = true;
+              runde();
+              wirrStart();
+              driftStart();
+            }
+
+            function anhalten() {
+              laeuft = false;
+              if (uhr !== null) { window.clearTimeout(uhr); uhr = null; }
+              abbrechen();
+              wirrStop();
+              if (drift) { drift.cancel(); drift = null; }
+            }
+
+            function haerte(neu) {
+              o = neu;
+              if (laeuft) { anhalten(); starten(); }
+            }
+
+            // --- Nur laufen lassen, wenn es jemand sehen kann -----------
+            var sichtbar = false;
+            var verdeckt = false;
+
+            function abgleichen() {
+              if (sichtbar && !verdeckt) starten();
+              else anhalten();
+            }
+
+            if ('IntersectionObserver' in window) {
+              new IntersectionObserver(function (eintraege) {
+                sichtbar = eintraege.some(function (e) { return e.isIntersecting; });
+                abgleichen();
+              }, { rootMargin: '200px' }).observe(wirt);
+            } else {
+              sichtbar = true;
+              abgleichen();
+            }
+
+            document.addEventListener('visibilitychange', function () {
+              verdeckt = document.hidden;
+              abgleichen();
+            });
+
+            // --- Zeiger: haerter, und der Knopf kommt entgegen ----------
+            if (window.matchMedia('(pointer: fine)').matches) {
+              var ZUG = 0.18;
+              var warten = 0;
+
+              wirt.addEventListener('pointerenter', function () { haerte(ZEIGER); });
+              wirt.addEventListener('pointerleave', function () { haerte(RUHE); });
+
+              wirt.addEventListener('pointermove', function (e) {
+                if (warten) return;
+                warten = requestAnimationFrame(function () {
+                  warten = 0;
+                  var r = wirt.getBoundingClientRect();
+                  var dx = e.clientX - (r.left + r.width / 2);
+                  var dy = e.clientY - (r.top + r.height / 2);
+                  var reichweite = Math.hypot(r.width, r.height) / 2;
+                  var nah = Math.max(0, 1 - Math.hypot(dx, dy) / reichweite);
+                  var k = ZUG * nah * nah;
+                  magnet.style.transition = 'none';
+                  magnet.style.transform = 'translate3d(' +
+                    (dx * k).toFixed(2) + 'px,' + (dy * k).toFixed(2) + 'px,0)';
+                });
+              });
+
+              wirt.addEventListener('pointerleave', function () {
+                if (warten) { cancelAnimationFrame(warten); warten = 0; }
+                magnet.style.transition = 'transform 620ms cubic-bezier(.16,1,.3,1)';
+                magnet.style.transform = 'translate3d(0,0,0)';
+              });
+            }
+          }
+        },
+      );
+
       // Nur anmelden, wenn es die Kennung noch nicht gibt. Auf der Seite
       // selbst steht das Skript ohnehin nur einmal, in der Vorschau liegen
       // aber alle Seiten in EINEM Dokument, und ein zweiter Anlauf wuerde
