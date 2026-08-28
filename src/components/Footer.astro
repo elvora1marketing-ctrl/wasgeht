@@ -9,16 +9,20 @@ import {
   services,
   serviceArea,
   cta,
-  versprechen,
 } from '~/config/site';
 
 /**
  * Fußbereich.
  *
  * Dunkel wie das Schlussband darüber, damit die Seite in EINER Fläche
- * ausklingt statt in einem grauen Anhang. Der Fuß ist die letzte Chance
- * auf eine Handlung, deshalb stehen Erstgespräch und WhatsApp noch einmal
- * hier, zusammen mit der Antwortzeit.
+ * ausklingt statt in einem grauen Anhang.
+ *
+ * Der Fuß bietet noch EINEN Weg an -- WhatsApp, den mit der geringsten
+ * Hemmschwelle -- und hört danach auf zu werben. Vorher stand hier ein
+ * Satz in Überschriftengröße und darunter noch das Antwortzeit-Versprechen
+ * aus dem Abschluss: dieselbe Zusage zum zweiten Mal, zwanzig Zentimeter
+ * tiefer. Wiederholung an dieser Stelle überzeugt niemanden mehr, sie
+ * lässt die Seite nur nicht enden.
  */
 const year = new Date().getFullYear();
 
@@ -37,22 +41,30 @@ const seiten = [
 
 <footer class="fuss">
   <div class="container-content">
-    {/* --- Der letzte Aufruf ---------------------------------------------- */}
+    {/* --- Der letzte Aufruf ----------------------------------------------
+        FRÜHER STAND HIER EIN GROSSER SERIFENSATZ mit kursivem „Hallo",
+        knapp drei Zentimeter hoch. Der Fuß ist die letzte Fläche der
+        Seite; ein Auftritt in dieser Größe direkt unter dem Abschluss ließ
+        die Seite zweimal enden und gab dem Ganzen einen schiefen Ton.
+
+        Jetzt eine ruhige Zeile in der Grundschrift. Der Fuß darf hier
+        etwas anbieten, aber er soll nichts mehr verkaufen -- das ist
+        einen Abschnitt weiter oben schon passiert. */}
     <div class="fuss-kopf">
-      <p class="fuss-schlag">
-        Kurz <em>Hallo</em> sagen genügt. Sie bekommen eine ehrliche
-        Einschätzung, keine Verkaufsshow.
-      </p>
+      <p class="fuss-schlag">Kurz Hallo sagen genügt.</p>
 
       <div class="fuss-handlung">
+        {/* IN DER FARBE VON WHATSAPP.
+            Vorher: weiße Schrift auf 6 % Weiß mit blassem Rand -- ein
+            Knopf, den man nur fand, wenn man ihn suchte, und der nach
+            nichts aussah. Auf dem dunklen Grund ist das Grün der einzige
+            gesättigte Punkt und wird erkannt, bevor man liest. */}
         <a href={contactLinks.whatsapp} target="_blank" rel="noopener noreferrer" class="fuss-knopf">
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"
-            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M3 17l1.3-3.4A7 7 0 1 1 6.6 16z" />
+          <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M10 2a8 8 0 0 0-6.9 12l-1 3.7 3.8-1A8 8 0 1 0 10 2zm0 1.6a6.4 6.4 0 1 1-3.3 11.9l-.3-.2-2.2.6.6-2.1-.2-.3A6.4 6.4 0 0 1 10 3.6zM7.4 6.3c-.1 0-.3 0-.5.2-.2.2-.6.6-.6 1.4s.6 1.6.7 1.8c.1.1 1.2 2 3 2.7 1.5.6 1.8.5 2.1.5.4 0 1.1-.4 1.3-.9.2-.5.2-.9.1-1l-.4-.2-1.2-.6c-.2 0-.3-.1-.4.1l-.6.7c-.1.2-.2.2-.4.1-.2-.1-.9-.3-1.6-1a6 6 0 0 1-1.1-1.4c-.1-.2 0-.3.1-.4l.3-.4.2-.3v-.4l-.6-1.4c-.1-.4-.3-.3-.4-.3z" />
           </svg>
           Auf WhatsApp schreiben
         </a>
-        <p class="fuss-notiz">{versprechen.antwortzeit}</p>
       </div>
     </div>
 
@@ -116,13 +128,26 @@ const seiten = [
           <a href={contactLinks.tel} class="fuss-link">{contact.phoneDisplay}</a>
           <a href={contactLinks.mail} class="fuss-link">{contact.email}</a>
           <span class="fuss-dezent">{openingHours.display}</span>
+          {/* Die Öffnungszeiten sind die Zeiten, zu denen LUAN erreichbar
+              ist. Die Assistenz ist es immer -- und das ist auf dieser
+              Seite kein Nebensatz, sondern das Produkt. Direkt unter der
+              Zeile mit den Bürozeiten steht es genau da, wo jemand gerade
+              denkt „jetzt ist zu". */}
+          <span class="fuss-rundumdieuhr">
+            <span class="fuss-punkt-live" aria-hidden="true"></span>
+            Nachrichten beantwortet die Assistenz rund um die Uhr
+          </span>
         </address>
       </div>
     </div>
 
     {/* --- Schlusszeile ----------------------------------------------------- */}
     <div class="fuss-schluss">
-      <p>&copy; {year} {site.name} · Aus {address.city}, im Einsatz im Ruhrgebiet und darüber hinaus</p>
+      {/* Nur Jahr und Name. Der Zusatz „Aus Essen, im Einsatz im
+          Ruhrgebiet und darüber hinaus" stand hier als letzte Zeile der
+          Seite -- ein Werbesatz an der Stelle, an der ein Rechtshinweis
+          steht. Das Einsatzgebiet steht ohnehin oben in der Spalte. */}
+      <p>&copy; {year} {site.name}</p>
       <ul class="fuss-recht">
         {
           legalLinks.map((link) => (
@@ -158,21 +183,15 @@ const seiten = [
     }
   }
 
+  /* In der GRUNDSCHRIFT, nicht in der Serif der Überschriften, und in
+     einem Maß, das eine Einladung ist und kein Auftritt. */
   .fuss-schlag {
     margin: 0;
-    max-width: 18ch;
-    font-family: var(--font-heading);
-    font-weight: 400;
-    font-size: clamp(1.875rem, 3.6vw, 2.75rem);
-    line-height: 1.12;
-    letter-spacing: -0.01em;
+    font-size: 1.25rem;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: -0.005em;
     color: #fff;
-    text-wrap: balance;
-  }
-
-  .fuss-schlag em {
-    font-style: italic;
-    color: color-mix(in oklab, var(--color-accent) 70%, #fff);
   }
 
   .fuss-handlung {
@@ -186,31 +205,33 @@ const seiten = [
     align-items: center;
     justify-content: center;
     gap: 0.6rem;
-    padding: 0.85rem 1.5rem;
-    border: 1px solid rgb(255 255 255 / 0.25);
+    padding: 0.9rem 1.6rem;
+    border: 0;
     border-radius: 999px;
-    background: rgb(255 255 255 / 0.06);
-    color: #fff;
+    background: #25d366;
+    /* Dunkler Text auf dem hellen Grün. Weiß auf #25d366 kommt nicht auf
+       den Kontrast, den eine Schaltfläche braucht. */
+    color: #06251a;
     font-size: 0.9375rem;
-    font-weight: 500;
+    font-weight: 600;
     text-decoration: none;
-    transition: background 0.2s, border-color 0.2s;
+    box-shadow: 0 8px 22px -12px rgb(37 211 102 / 0.9);
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
   }
 
   .fuss-knopf:hover {
-    background: rgb(255 255 255 / 0.14);
-    border-color: rgb(255 255 255 / 0.45);
+    background: #3ade79;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 28px -12px rgb(37 211 102 / 1);
+  }
+
+  .fuss-knopf:active {
+    transform: translateY(0);
   }
 
   .fuss-knopf svg {
-    width: 1.125rem;
-    height: 1.125rem;
-  }
-
-  .fuss-notiz {
-    margin: 0;
-    font-size: 0.8125rem;
-    color: rgb(255 255 255 / 0.55);
+    width: 1.25rem;
+    height: 1.25rem;
   }
 
   .fuss-linie {
@@ -289,6 +310,46 @@ const seiten = [
   .fuss-dezent {
     color: rgb(255 255 255 / 0.45);
     font-size: 0.875rem;
+  }
+
+  .fuss-rundumdieuhr {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-top: 0.15rem;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: color-mix(in oklab, #25d366 62%, #fff);
+  }
+
+  .fuss-punkt-live {
+    position: relative;
+    top: -0.15em;
+    width: 0.45rem;
+    height: 0.45rem;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: #25d366;
+  }
+
+  /* Derselbe Puls wie am Statusabzeichen im Aufschlag. Bewusst dasselbe
+     Zeichen an beiden Enden der Seite: was oben behauptet wird, steht
+     unten noch einmal am Kontakt. */
+  @media (prefers-reduced-motion: no-preference) {
+    .fuss-punkt-live::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      background: #25d366;
+      animation: fuss-pulsen 2.4s ease-out infinite;
+    }
+  }
+
+  @keyframes fuss-pulsen {
+    0% { transform: scale(1); opacity: 0.6; }
+    70% { transform: scale(2.6); opacity: 0; }
+    100% { transform: scale(2.6); opacity: 0; }
   }
 
   /* --- Schlusszeile --------------------------------------------------------- */

@@ -198,7 +198,6 @@
    "fein", und die Regel griffe dann nicht. Eine Breite unter 48rem ist in
    der Praxis ein Telefon. */
 @media (width < 48rem) {
-  .hero-neben,
   .mensch-weiter,
   .leistung-link,
   .weiter,

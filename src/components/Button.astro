@@ -13,6 +13,22 @@
  */
 interface Props {
   href?: string;
+  /**
+   * Der Knopf neigt sich leicht zum Zeiger.
+   *
+   * Uebernommen aus einer Vorlage, deren uebriger Teil hier nichts zu
+   * suchen hatte: dort zerreisst sich der Knopf und seine Buchstaben
+   * verrutschen zu Kauderwelsch. Auf einem Aufruf, der Vertrauen braucht,
+   * sagt das „hier ist etwas kaputt", und im Moment der Entscheidung muss
+   * die Beschriftung lesbar bleiben.
+   *
+   * Das Magnetische daran ist aber gut: ein Element, das auf die Naehe des
+   * Zeigers reagiert, wirkt greifbar, noch bevor man es beruehrt. Es
+   * veraendert weder Text noch Form und stoert deshalb nichts.
+   *
+   * Nur mit feinem Zeigegeraet und nur ohne `prefers-reduced-motion`.
+   */
+  magnet?: boolean;
   type?: 'button' | 'submit';
   variant?: 'primary' | 'secondary' | 'quiet' | 'aufFarbe';
   size?: 'md' | 'lg';
@@ -41,22 +57,42 @@ const {
   size = 'md',
   fullWidth = false,
   ring = false,
+  magnet = false,
   class: className = '',
   ...rest
 } = Astro.props;
 
+/*
+ * KOERPERLICHE RUECKMELDUNG STATT EFFEKT.
+ *
+ * Der Knopf hebt sich beim Ueberfahren einen Hauch an und geht beim
+ * Druecken wieder herunter. Das ist keine Zierde: ein Bedienelement, das
+ * sich beim Beruehren bewegt, wird als druckbar erkannt, bevor man
+ * darueber nachgedacht hat. Deshalb `active:` schneller als `hover:` --
+ * beim Druecken erwartet man eine sofortige Antwort, beim Ueberfahren
+ * eine weiche.
+ *
+ * `transition-colors` reichte dafuer nicht, Bewegung und Schatten muessen
+ * mitgehen, sonst springt der Knopf statt zu federn.
+ */
 const base =
   'inline-flex items-center justify-center gap-2 rounded-button font-medium ' +
-  'transition-colors duration-150 whitespace-nowrap ' +
+  'whitespace-nowrap transition duration-200 ease-out ' +
+  'hover:-translate-y-px active:translate-y-0 active:duration-75 ' +
   'disabled:opacity-50 disabled:pointer-events-none';
 
 const variants: Record<string, string> = {
   primary:
-    'bg-accent text-accent-contrast hover:bg-accent-hover shadow-[0_1px_2px_rgb(25_29_33/0.10)]',
+    'bg-accent text-accent-contrast hover:bg-accent-hover ' +
+    'shadow-[0_1px_2px_rgb(25_29_33/0.10)] ' +
+    'hover:shadow-[0_4px_12px_-2px_rgb(178_58_148/0.45)] ' +
+    'active:shadow-[0_1px_2px_rgb(25_29_33/0.14)]',
   secondary:
     'border border-border-strong bg-surface text-ink hover:bg-surface-subtle hover:border-ink-faint',
   quiet: 'text-ink-muted underline underline-offset-4 decoration-border-strong hover:text-ink hover:decoration-ink-faint',
-  aufFarbe: 'bg-white text-ink hover:bg-white/90 shadow-[0_1px_2px_rgb(0_0_0/0.16)]',
+  aufFarbe:
+    'bg-white text-ink hover:bg-white/90 shadow-[0_1px_2px_rgb(0_0_0/0.16)] ' +
+    'hover:shadow-[0_4px_12px_-2px_rgb(0_0_0/0.28)]',
 };
 
 const sizes: Record<string, string> = {
@@ -75,17 +111,18 @@ const classes = [
   .join(' ');
 
 const Tag = href ? 'a' : 'button';
+const zusatz = magnet ? { 'data-magnet': '' } : {};
 ---
 
 {
   ring ? (
     <span class="knopf-ring">
-      <Tag class={classes} {...(href ? { href } : { type })} {...rest}>
+      <Tag class={classes} {...(href ? { href } : { type })} {...zusatz} {...rest}>
         <slot />
       </Tag>
     </span>
   ) : (
-    <Tag class={classes} {...(href ? { href } : { type })} {...rest}>
+    <Tag class={classes} {...(href ? { href } : { type })} {...zusatz} {...rest}>
       <slot />
     </Tag>
   )

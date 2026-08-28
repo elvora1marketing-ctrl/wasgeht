@@ -25,27 +25,39 @@ const description =
   'Website, Google-Sichtbarkeit und automatisierte Abläufe für Betriebe und Selbstständige in Essen und im Ruhrgebiet. Fester Ansprechpartner statt Agentur-Apparat.';
 
 /**
- * Wo Aufträge im Alltag verloren gehen. Konkret, nicht abstrakt.
+ * Wo Aufträge im Alltag verloren gehen.
  *
- * Jede Karte trägt eine eigene Farbe aus der Leistungspalette und ein
- * Zeichen. Vorher waren es drei graue Textspalten, die man überlesen hat.
+ * ZWEIGETEILT: Lage und Folge stehen getrennt.
+ *
+ * Vorher stand beides in EINEM Absatz je Karte, und die drei Karten
+ * standen nebeneinander. Man musste jede Karte einzeln lesen, um zu
+ * merken, dass alle drei dasselbe erzählen. Genau das ist aber der Punkt
+ * des Abschnitts.
+ *
+ * Jetzt liegen die drei untereinander, und in jeder Zeile steht links die
+ * Lage, rechts die Folge, immer an derselben Stelle. Das Muster sieht man
+ * dann, ohne es zu lesen: dreimal war die Anfrage da, dreimal kam sie
+ * nicht an. Erst danach liest man nach, warum.
  */
 const verluste = [
   {
     titel: 'Das Telefon klingelt',
-    text: 'Sie sind beim Kunden, im Termin, in der Werkstatt. Der Anrufer probiert den nächsten Betrieb. Sie erfahren nie davon.',
+    lage: 'Sie sind beim Kunden, im Termin, unter der Spüle. Abheben geht gerade nicht.',
+    folge: 'Der Anrufer probiert den nächsten Betrieb. Sie erfahren nie davon.',
     farbe: '#a93d28',
     zeichen: 'M6.5 3h-3v3a10.5 10.5 0 0 0 10.5 10.5h3v-3l-3.5-1.5-2 2A8.5 8.5 0 0 1 7 7l2-2z',
   },
   {
-    titel: 'Zwölf Nachrichten am Abend',
-    text: 'Dazu vier Rückrufwünsche. Sie arbeiten sie nach Feierabend ab, oder eben nicht.',
+    titel: 'Abends zwölf Nachrichten',
+    lage: 'Dazu vier Rückrufwünsche, alle seit dem Vormittag offen.',
+    folge: 'Sie arbeiten sie nach Feierabend ab. Oder eben nicht.',
     farbe: '#2b2f7a',
     zeichen: 'M3 16l1.2-3A6.5 6.5 0 1 1 6.6 15.4zM7 8h6M7 11h4',
   },
   {
-    titel: 'Niemand findet Sie',
-    text: 'Gesucht wird bei Google, angerufen wird einer der ersten drei Treffer. Stehen Sie dort nicht, existieren Sie nicht.',
+    titel: 'Bei Google nicht zu finden',
+    lage: 'Gesucht wird online, angerufen wird einer der ersten drei Treffer.',
+    folge: 'Stehen Sie dort nicht, kommt die Anfrage gar nicht erst bei Ihnen an.',
     farbe: '#a63082',
     zeichen: 'M9 4a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM13 13l4 4',
   },
@@ -174,74 +186,91 @@ const kachelZeichen: Record<string, string> = {
         {/* Beginnt beim Verlust, nicht beim Angebot. Vorher stand hier eine
             Beobachtung über „die meisten Betriebe" -- richtig, aber über
             andere geredet. Jetzt steht der Satz beim Leser selbst und
-            benennt, was ihn heute schon Geld gekostet hat. */}
+            benennt, was ihm heute schon durchgeht. */}
         <p class="hero-intro">
           Jeder verpasste Anruf ist ein Auftrag, der beim Nächsten landet. Und
           eine Website, die bei Google nicht auftaucht, bringt Ihnen keinen
           einzigen. Ich sorge dafür, dass beides aufhört.
         </p>
 
-        <div class="hero-handlung">
-          <Button href={cta.primary.href} size="lg" class="max-sm:w-full">
-            {cta.primary.label}
-          </Button>
+        {/* HANDLUNG UND ZUSATZ SIND EINE EINHEIT.
+            Vorher stand der Zusatz als eigene Zeile unter dem Knopf, mit
+            demselben Abstand wie alles andere im Hero -- also als vierter
+            loser Absatz untereinander. So sah er aus wie noch ein Satz,
+            den man liest oder eben nicht. Jetzt sitzt er eng am Knopf und
+            gehoert sichtbar zu ihm: er beantwortet die Frage, die man im
+            Moment vor dem Klick hat. */}
+        <div class="hero-block">
+          <div class="hero-handlung">
+            {/* OHNE `max-sm:w-full`. Tailwinds `sm` liegt bei 40rem, die
+                Umbruchstelle dieser Zeile lag bei 30rem -- dazwischen war
+                der eine Knopf ueber die volle Breite gezogen und der
+                andere daneben nur so breit wie sein Text. Beide Breiten
+                kommen jetzt aus derselben Abfrage weiter unten. */}
+            <Button href={cta.primary.href} size="lg" magnet class="hero-cta">
+              {cta.primary.label}
+            </Button>
 
-          <a
-            class="hero-neben"
-            href={contactLinks.whatsapp}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Oder direkt auf WhatsApp schreiben
-            <svg
-              viewBox="0 0 20 20"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
+            {/* DER ZWEITE WEG IST JETZT EIN KNOPF, KEIN TEXTLINK MEHR.
+                Als unterstrichene graue Zeile sah er aus wie eine
+                Fussnote, und fuer viele Betriebsinhaber ist WhatsApp der
+                Weg mit der geringsten Hemmschwelle ueberhaupt -- der darf
+                nicht der unscheinbarste auf der Seite sein.
+
+                Farbe traegt nur das Zeichen. Ein zweiter flaechig
+                gefaerbter Knopf wuerde mit dem ersten um denselben Blick
+                streiten; das gruene Zeichen auf ruhigem Grund wird sofort
+                als WhatsApp erkannt und bleibt trotzdem untergeordnet. */}
+            <a
+              class="hero-whatsapp"
+              href={contactLinks.whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              <path d="M4 10h11M11 6l4 4-4 4" />
-            </svg>
-          </a>
+              <span class="hero-whatsapp-zeichen" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M10 2a8 8 0 0 0-6.9 12l-1 3.7 3.8-1A8 8 0 1 0 10 2zm0 1.6a6.4 6.4 0 1 1-3.3 11.9l-.3-.2-2.2.6.6-2.1-.2-.3A6.4 6.4 0 0 1 10 3.6zM7.4 6.3c-.1 0-.3 0-.5.2-.2.2-.6.6-.6 1.4s.6 1.6.7 1.8c.1.1 1.2 2 3 2.7 1.5.6 1.8.5 2.1.5.4 0 1.1-.4 1.3-.9.2-.5.2-.9.1-1l-.4-.2-1.2-.6c-.2 0-.3-.1-.4.1l-.6.7c-.1.2-.2.2-.4.1-.2-.1-.9-.3-1.6-1a6 6 0 0 1-1.1-1.4c-.1-.2 0-.3.1-.4l.3-.4.2-.3v-.4l-.6-1.4c-.1-.4-.3-.3-.4-.3z" />
+                </svg>
+              </span>
+              Auf WhatsApp schreiben
+            </a>
+          </div>
+
+          <p class="hero-notiz">{cta.primary.note}</p>
         </div>
 
-        <p class="hero-notiz">{cta.primary.note}</p>
-
-        {/* Steht NACH dem Aufruf, nicht davor.
-         *
-         * Wer schon geklickt hat, braucht sie nicht; wer noch zoegert,
-         * bekommt hier den einen Grund, den keine Agentur kopieren kann.
-         * In die Ueberschrift gehoert sie nicht -- dort zaehlt, was der
-         * Leser davon hat, nicht wer ich bin.
-         *
-         * Nebenbei traegt sie die linke Spalte: die war deutlich kuerzer
-         * als die Vorfuehrung rechts, und unten links klaffte Leere. */}
-        <p class="hero-herkunft">
-          <span class="hero-herkunft-marke" aria-hidden="true"></span>
-          Gelernter {owner.trade}. Ich weiß, wie Ihr Tag aussieht.
-        </p>
       </div>
 
       <div class="hero-geraet">
         {/* Das Karussell nach der Vorlage: drei Telefone, das aktive vorn,
             die anderen seitlich zurueckgedreht, Pfeile schalten durch.
-            In jedem laeuft ein anderer Verlauf der Assistenz. */}
+            In jedem laeuft ein anderer Verlauf der Assistenz.
+
+            OHNE BILDUNTERSCHRIFT. Dort stand „Schematische Darstellung" --
+            eine Vokabel aus einem technischen Datenblatt, direkt unter der
+            Stelle, an der die Seite ihre Sache vorfuehrt. */}
         <Telefonkarussell
           kennung="hero-karussell"
           gespraeche={empfangGespraeche}
-          bildunterschrift="Schematische Darstellung"
         />
 
-        {/* Verweist auf die Uhrzeiten in den Verläufen, statt Erreichbarkeit
-            zu behaupten. „Wir sind rund um die Uhr für Sie da" schreibt
-            jeder auf seine Seite. Eine Antwort, die sichtbar um 6:12 Uhr
-            herausgeht, muss man nicht glauben. */}
-        <p class="hero-geraet-text">
-          Auf WhatsApp antwortet zuerst meine KI-Assistenz — dieselbe, die
-          ich für Betriebe einrichte. Achten Sie auf die Uhrzeiten.
+        {/* HIER STAND EIN ERKLAERSATZ ÜBER ZWEI ZEILEN, der den Leser auf
+            die Uhrzeiten hinwies. Wer erst erklaeren muss, worauf man
+            achten soll, hat die Vorfuehrung nicht gebaut, sondern
+            beschrieben.
+
+            Jetzt ein Statusabzeichen, wie man es aus Messengern kennt:
+            gruener Punkt, kurze Zeile. Es sagt dasselbe in vier Woertern
+            und sieht dabei aus wie das, was es behauptet. Die Uhrzeiten in
+            den Verlaeufen belegen es von selbst. */}
+        <p class="hero-status">
+          <span class="hero-puls" aria-hidden="true"></span>
+          Assistenz aktiv · antwortet zu jeder Uhrzeit
         </p>
+
+        {/* Bleibt trotzdem stehen: die Verlaeufe sind nachgestellt, und das
+            muss dranstehen. Nur so klein, wie ein Hinweis sein darf. */}
+        <p class="hero-fein">Beispielverläufe aus einem Betriebsalltag</p>
       </div>
     </div>
   </section>
@@ -253,22 +282,53 @@ const kachelZeichen: Record<string, string> = {
     heading="Der Auftrag geht an den, der zuerst erreichbar war"
     intro="Nicht an den Besseren. Für einen Betrieb, in dem der Inhaber mitarbeitet, ist das eine unfaire Ausgangslage. Genau die lässt sich abstellen."
   >
-    <ul class="verluste">
+    {/* Kopfzeile ueber den drei Zeilen. Sie benennt einmal, was links und
+        was rechts steht -- danach muss man in keiner Zeile mehr suchen.
+        Nur am Rechner: auf dem Handy stehen die beiden Teile ohnehin
+        untereinander und tragen ihre eigene Beschriftung. */}
+    <div class="klemmt-kopf" aria-hidden="true">
+      <span>Das passiert</span>
+      <span>Das kommt dabei heraus</span>
+    </div>
+
+    <ol class="klemmt">
       {
         verluste.map((v, i) => (
-          <li class="verlust einblenden" style={`--verzug:${i};--farbe:${v.farbe}`}>
-            <span class="verlust-zeichen" aria-hidden="true">
+          <li class="klemme einblenden" style={`--verzug:${i};--farbe:${v.farbe}`}>
+            <span class="klemme-zeichen" aria-hidden="true">
               <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"
                 stroke-linecap="round" stroke-linejoin="round">
                 <path d={v.zeichen} />
               </svg>
             </span>
-            <p class="verlust-titel">{v.titel}</p>
-            <p class="verlust-text">{v.text}</p>
+
+            <div class="klemme-lage">
+              <p class="klemme-titel">{v.titel}</p>
+              <p class="klemme-text">{v.lage}</p>
+            </div>
+
+            {/* Der Pfeil ist das ganze Argument des Abschnitts in einem
+                Zeichen: aus dem einen folgt das andere. Auf dem Handy
+                zeigt er nach unten, weil dort die Leserichtung dorthin
+                geht -- gedreht wird er per CSS, nicht per zweitem SVG. */}
+            <span class="klemme-pfeil" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 12h14M14 7l5 5-5 5" />
+              </svg>
+            </span>
+
+            <p class="klemme-folge">{v.folge}</p>
           </li>
         ))
       }
-    </ul>
+    </ol>
+
+    {/* Der Satz, auf den die drei Zeilen hinauslaufen. Ohne ihn bleibt es
+        eine Aufzaehlung von Aergernissen; mit ihm ist es eine Diagnose. */}
+    <p class="klemmt-fazit">
+      Dreimal war die Anfrage da. Dreimal kam sie nicht bei Ihnen an.
+    </p>
   </Band>
 
   {/* ===================== Die vier Leistungen ===================== */}
@@ -276,7 +336,7 @@ const kachelZeichen: Record<string, string> = {
     ton="hell"
     kennung="Leistungen"
     heading="Vier Bausteine, einzeln oder zusammen"
-    intro="Sie müssen nicht alles auf einmal angehen. Meistens beginnen wir dort, wo gerade am meisten Geld liegen bleibt."
+    intro="Sie müssen nicht alles auf einmal angehen. Meistens beginnen wir dort, wo im Alltag gerade am meisten liegen bleibt."
   >
     <ul class="leistungen">
       {
@@ -335,24 +395,30 @@ const kachelZeichen: Record<string, string> = {
     <div class="zwischenruf">
       <p class="zwischenruf-satz">
         So sähe ein Vormittag in Ihrem Betrieb aus. In 15 Minuten schauen wir,
-        welcher der drei Wege bei Ihnen gerade am meisten kostet.
+        welcher der drei Wege bei Ihnen gerade die meisten Anfragen liegen lässt.
       </p>
-      <Button href={cta.primary.href} class="max-sm:w-full">
+      <Button href={cta.primary.href} size="lg" magnet class="max-sm:w-full">
         {cta.primary.label}
       </Button>
     </div>
   </Band>
 
   {/* ===================== Der Mensch dahinter =====================
-      Rundes Portrait mit laufendem Ring, ein Zitat als Kernaussage,
-      darunter drei belegbare Fakten. Vorher: ein Textblock und ein
-      Rechteckbild, die niemand angeschaut hat. */}
-  <Band
-    ton="gedaempft"
-    textur="punkte"
-    kennung="Der Mensch dahinter"
-    heading="Erst Baustelle, dann Bildschirm"
-  >
+      NEU GEBAUT. Vorher stand hier eine Überschrift („Erst Baustelle,
+      dann Bildschirm"), darunter ein Absatz, dann das Zitat, dann noch
+      ein Absatz, dann eine nummerierte Liste 01/02/03 und zuletzt ein
+      Link. Sechs Dinge untereinander, von denen jedes um dieselbe
+      Aufmerksamkeit bat -- und die eine Aussage, die diesen Abschnitt
+      trägt, saß in der Mitte davon eingeklemmt.
+
+      Jetzt gibt es genau EINEN großen Satz, und der ist zugleich die
+      Überschrift des Abschnitts. Er steht in der Serif der Marke, weil
+      genau diese Form hier funktioniert. Darunter zwei kurze Absätze,
+      die ihn belegen, und ein Weg zur langen Fassung.
+
+      Die Ziffernliste ist ersatzlos weg. Nummeriert wird, was eine
+      Reihenfolge hat; drei Eigenschaften haben keine. */}
+  <Band ton="gedaempft" textur="punkte" kennung="Der Mensch dahinter">
     <div class="mensch">
       <div class="mensch-buehne hereinziehen">
         <div class="mensch-ring" aria-hidden="true"></div>
@@ -368,37 +434,25 @@ const kachelZeichen: Record<string, string> = {
       </div>
 
       <div class="mensch-text">
-        <p>
-          Gelernt habe ich {owner.trade}, nicht Marketing. Ich stand selbst
-          auf der Baustelle, während vorn das Telefon klingelte und der
-          Auftrag an den Betrieb ging, der zufällig abheben konnte.
-        </p>
-
-        <blockquote class="mensch-zitat">
+        {/* Zugleich Überschrift und Kernaussage. Als eigenes Zitat UNTER
+            einer Überschrift standen hier zwei große Sätze übereinander,
+            die sich gegenseitig die Wirkung nahmen. */}
+        <h2 class="mensch-satz">
           Wer das Angebot macht, macht auch die Arbeit{' '}
           <em>und geht ans Telefon.</em>
-        </blockquote>
+        </h2>
 
         <p>
-          Elvora baut genau dagegen: eine Website, die gefunden wird, und
-          eine Assistenz, die rangeht, wenn Sie es nicht können. Sie
-          sprechen dabei mit mir, nicht mit einem Ticketsystem.
+          Bei Elvora gibt es keine Projektnummer und keine Weiterleitung.
+          Ich baue Ihre Website, ich richte die Assistenz ein, und wenn in
+          einem halben Jahr etwas anders soll, schreiben Sie wieder mir.
         </p>
 
-        <ol class="mensch-fakten">
-          <li class="einblenden">
-            <span class="ziffern" aria-hidden="true">01</span>
-            Gelernter {owner.trade}
-          </li>
-          <li class="einblenden" style="--verzug:1">
-            <span class="ziffern" aria-hidden="true">02</span>
-            Ein Ansprechpartner, keine Weiterleitung
-          </li>
-          <li class="einblenden" style="--verzug:2">
-            <span class="ziffern" aria-hidden="true">03</span>
-            Aus {address.city}, im Einsatz weit darüber hinaus
-          </li>
-        </ol>
+        <p>
+          Ich weiß, wie ein Arbeitstag aussieht, an dem das Telefon immer
+          im falschen Moment klingelt. Deshalb baue ich nichts, was Sie
+          abends noch bedienen müssen.
+        </p>
 
         <a class="mensch-weiter" href="/ueber-mich/">
           Mehr über mich
@@ -490,21 +544,26 @@ const kachelZeichen: Record<string, string> = {
           das ehrliche Nein bleibt trotzdem: er nimmt die Angst vor dem
           Verkaufsgespräch, und genau die hält Leute vom Klicken ab. */}
       <p class="schluss-satz">
-        In fünfzehn Minuten schauen wir, wo bei Ihnen gerade Anfragen liegen
-        bleiben. Und wenn ich Ihnen nicht helfen kann, sage ich Ihnen das.
+        Erzählen Sie mir, wie Ihr Betrieb gerade arbeitet. Ich sage Ihnen,
+        was sich davon automatisieren lässt — und was nicht.
       </p>
 
       <div class="schluss-knopf">
-        <Button href={cta.primary.href} ring class="schluss-cta">
+        <Button href={cta.primary.href} ring magnet class="schluss-cta">
           {cta.primary.label}
         </Button>
       </div>
 
-      <ul class="schluss-zusagen">
-        <li>15 Minuten</li>
-        <li>unverbindlich</li>
-        <li>ohne Verkaufsgespräch</li>
-      </ul>
+      {/* HIER STANDEN „15 MINUTEN · UNVERBINDLICH · OHNE VERKAUFSGESPRÄCH".
+          Drei Wörter in Versalien, die auf jeder zweiten Seite im Netz
+          genauso unter dem Knopf stehen. Sie beruhigen niemanden mehr,
+          weil sie niemand mehr liest.
+
+          An derselben Stelle steht jetzt derselbe Zusatz wie im Aufschlag:
+          was NACH dem Gespräch anders ist. Bewusst dieselbe Zeile an
+          beiden Enden der Seite -- wer oben nicht geklickt hat, findet
+          unten kein neues Versprechen vor, sondern dasselbe. */}
+      <p class="schluss-notiz">{cta.primary.note}</p>
 
       <p class="schluss-direkt">
         Lieber sofort schreiben oder anrufen?
@@ -582,92 +641,169 @@ const kachelZeichen: Record<string, string> = {
     color: var(--color-ink-muted);
   }
 
+  /* Der Handlungsblock hat einen eigenen, GROESSEREN Abstand nach oben als
+     die Zeilen darueber und einen sehr kleinen nach innen. Damit steht er
+     als eigene Einheit da, statt als vierter Absatz in einer Reihe von
+     Absaetzen. Gleiche Abstaende ueberall heissen: nichts gehoert
+     zusammen. */
+  .hero-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    margin-top: clamp(0.5rem, 1.5vw, 1rem);
+  }
+
   .hero-handlung {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.875rem 1.75rem;
-    margin-top: clamp(0.25rem, 1vw, 0.5rem);
+    gap: 0.75rem;
   }
 
-  /* Der zweite Weg bleibt ein Textlink: flaechig waere er ein zweiter
-     Haupt-CTA und wuerde dem ersten die Wirkung nehmen. */
-  .hero-neben {
+  /* Der Haupt-Aufruf im Hero traegt einen weichen Schein in der
+     Markenfarbe. Kein Rahmen, keine Bewegung -- der laufende Ring bleibt
+     dem Abschluss vorbehalten. Der Schein macht ihn hier zum hellsten
+     Punkt der Flaeche, ohne dass zwei Dinge gleichzeitig blinken. */
+  .hero-cta {
+    box-shadow:
+      0 1px 2px rgb(25 29 33 / 0.1),
+      0 10px 26px -12px rgb(178 58 148 / 0.55);
+  }
+
+  .hero-cta:hover {
+    box-shadow:
+      0 1px 2px rgb(25 29 33 / 0.12),
+      0 16px 34px -12px rgb(178 58 148 / 0.68);
+  }
+
+  /* Der zweite Weg: eigener Knopf, aber ohne Flaeche. Er soll einladen,
+     nicht mitbieten. Auf gleicher Hoehe wie der erste (`h-13` dort =
+     3.25rem), sonst sieht die Zeile aus wie ein Setzfehler. */
+  .hero-whatsapp {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    color: var(--color-ink-muted);
-    font-size: 0.9375rem;
-    text-decoration: underline;
-    text-decoration-color: var(--color-border-strong);
-    text-underline-offset: 5px;
-    transition: color 0.15s, text-decoration-color 0.15s;
-  }
-
-  .hero-neben:hover {
+    justify-content: center;
+    gap: 0.625rem;
+    height: 3.25rem;
+    padding-inline: 1.5rem;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-button);
+    background: var(--color-surface);
     color: var(--color-ink);
-    text-decoration-color: var(--color-ink-faint);
+    font-size: 1rem;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: border-color 0.2s, background 0.2s, transform 0.2s, box-shadow 0.2s;
   }
 
-  .hero-neben svg {
-    width: 1.125rem;
-    height: 1.125rem;
-    flex-shrink: 0;
-    transition: transform 0.2s;
+  .hero-whatsapp:hover {
+    transform: translateY(-1px);
+    border-color: #25d366;
+    background: color-mix(in oklab, #25d366 7%, var(--color-surface));
+    box-shadow: 0 6px 16px -8px rgb(37 211 102 / 0.5);
   }
 
-  .hero-neben:hover svg {
-    transform: translateX(3px);
+  .hero-whatsapp:active {
+    transform: translateY(0);
   }
 
+  .hero-whatsapp-zeichen {
+    display: inline-flex;
+    color: #25d366;
+  }
+
+  .hero-whatsapp-zeichen svg {
+    width: 1.375rem;
+    height: 1.375rem;
+  }
+
+  /* Untereinander, sobald die beiden Knoepfe nebeneinander nicht mehr in
+     eine Zeile passen. Beide dann ueber die volle Breite -- ein voller
+     und ein textbreiter Knopf untereinander sieht nach Versehen aus. */
+  @media (width < 40rem) {
+    .hero-handlung {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .hero-cta,
+    .hero-whatsapp {
+      width: 100%;
+    }
+  }
+
+  /* Klein, aber nicht blass: der Zusatz ist die letzte Zeile vor dem Klick
+     und darf nicht unter der Wahrnehmungsschwelle liegen. */
   .hero-notiz {
     margin: 0;
+    padding-inline-start: 0.75rem;
+    border-inline-start: 2px solid var(--color-border-strong);
     font-size: 0.875rem;
-    color: var(--color-ink-faint);
+    line-height: 1.5;
+    color: var(--color-ink-muted);
   }
 
   /* --- Die Vorfuehrung im ersten Sichtbereich --------------------------- */
-  /* Klein, aber mit einem Punkt in der Akzentfarbe: eine reine Textzeile
-     waere hier untergegangen, ein Kasten haette mit dem Aufruf darueber
-     konkurriert. */
-  .hero-herkunft {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin: 1.25rem 0 0;
-    font-size: 0.9375rem;
-    color: var(--color-ink-muted);
-  }
-
-  .hero-herkunft-marke {
-    width: 0.4rem;
-    height: 0.4rem;
-    flex-shrink: 0;
-    border-radius: 999px;
-    background: var(--color-accent);
-  }
-
-  /* Enger Abstand mit Absicht: die Bildunterschrift „Schematische
-     Darstellung" kommt aus dem Karussell, der Satz darunter aus dieser
-     Seite. Mit gleichem Abstand zu allem standen unter dem Geraet drei
-     lose Zeilen. Eng gesetzt lesen sich beide als EINE Bildunterschrift,
-     und die Punkte darueber haben wieder Luft. */
   .hero-geraet {
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.625rem;
   }
 
-
-  .hero-geraet-text {
+  /* Statusabzeichen statt Erklaersatz. Die Form ist bewusst die eines
+     Online-Hinweises aus einem Messenger -- sie wird gelesen, bevor sie
+     entziffert wird. */
+  .hero-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
     margin: 0;
-    max-width: 38ch;
-    font-size: 0.9375rem;
-    line-height: 1.6;
+    padding: 0.4rem 0.85rem 0.4rem 0.7rem;
+    border: 1px solid color-mix(in oklab, #25d366 30%, var(--color-border));
+    border-radius: 999px;
+    background: color-mix(in oklab, #25d366 8%, var(--color-surface));
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-ink);
+    white-space: nowrap;
+  }
+
+  .hero-puls {
+    position: relative;
+    width: 0.5rem;
+    height: 0.5rem;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: #1eb257;
+  }
+
+  /* Der Ring geht nach aussen und verblasst -- derselbe Ausdruck wie ein
+     Aufnahme- oder Online-Punkt. Nur einmal auf der Seite, und nur so
+     gross, dass er die Zeile nicht auseinanderdrueckt. */
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-puls::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      background: #1eb257;
+      animation: hero-pulsen 2.4s ease-out infinite;
+    }
+  }
+
+  @keyframes hero-pulsen {
+    0% { transform: scale(1); opacity: 0.55; }
+    70% { transform: scale(2.6); opacity: 0; }
+    100% { transform: scale(2.6); opacity: 0; }
+  }
+
+  .hero-fein {
+    margin: 0;
+    font-size: 0.75rem;
     text-align: center;
-    color: var(--color-ink-muted);
+    color: var(--color-ink-faint);
   }
 
   /* FRUEHER STAND HIER `align-items: flex-end` UND `text-align: end`.
@@ -683,8 +819,7 @@ const kachelZeichen: Record<string, string> = {
     .hero-kennung,
     .hero-beleg,
     .hero-intro,
-    .hero-handlung,
-    .hero-notiz,
+    .hero-block,
     .hero-geraet {
       animation: aufsteigen 0.8s cubic-bezier(0.22, 1, 0.36, 1) backwards;
     }
@@ -693,8 +828,9 @@ const kachelZeichen: Record<string, string> = {
        sein und nicht nachtroepfeln. */
     .hero-beleg { animation-delay: 0.26s; }
     .hero-intro { animation-delay: 0.34s; }
-    .hero-handlung { animation-delay: 0.42s; }
-    .hero-notiz { animation-delay: 0.48s; }
+    /* Knopf und Zusatz steigen GEMEINSAM auf. Getrennt animiert kamen sie
+       nacheinander an und wirkten wieder wie zwei Dinge. */
+    .hero-block { animation-delay: 0.42s; }
     .hero-geraet { animation-delay: 0.3s; }
   }
 
@@ -703,73 +839,163 @@ const kachelZeichen: Record<string, string> = {
     to { opacity: 1; transform: none; }
   }
 
-  /* ===================== Wo es klemmt ===================== */
-  .verluste {
+  /* ===================== Wo es klemmt =====================
+     DREI ZEILEN STATT DREI KARTEN.
+
+     Nebeneinander waren es drei gleich aussehende Kaesten, und in jedem
+     stand ein Absatz. Man las den ersten und ueberflog den Rest.
+
+     Untereinander mit fester Spaltenteilung wird die Wiederholung selbst
+     zum Argument: Lage steht immer links, Folge immer rechts, dazwischen
+     immer derselbe Pfeil. Nach der ersten Zeile weiss man, wie die
+     naechste zu lesen ist, und braucht dafuer keine Sekunde mehr. */
+  .klemmt-kopf {
+    display: none;
+  }
+
+  .klemmt {
     display: grid;
-    gap: 1.25rem;
+    gap: 1rem;
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  @media (width >= 56rem) {
-    .verluste {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 1.5rem;
-    }
-  }
-
-  /* Jede Karte in ihrer Farbe: getoente Flaeche, Zeichen im Farbfeld,
-     grosse Wasserzeichen-Ziffer. Der Abschnitt soll auffallen, nicht
-     gelesen werden MUESSEN: Titel und Farbe tragen die Botschaft. */
-  .verlust {
-    position: relative;
-    overflow: hidden;
-    padding: 1.75rem 1.5rem 1.5rem;
-    border: 1px solid color-mix(in oklab, var(--farbe) 22%, transparent);
+  /* Die Zeile. Auf dem Handy gestapelt, am Rechner vierspaltig.
+     `align-items: center` ueber alle vier Spalten: der Pfeil sitzt damit
+     auf der Mitte der Zeile und nicht an ihrem Kopf. */
+  .klemme {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 1rem 1.25rem;
+    padding: 1.5rem;
+    border: 1px solid color-mix(in oklab, var(--farbe) 20%, transparent);
     border-radius: 1.25rem;
-    background: color-mix(in oklab, var(--farbe) 7%, var(--color-surface));
-    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s;
+    background: color-mix(in oklab, var(--farbe) 6%, var(--color-surface));
+    transition: border-color 0.25s, box-shadow 0.25s;
   }
 
-  .verlust:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 18px 36px -22px color-mix(in oklab, var(--farbe) 55%, transparent);
+  .klemme:hover {
+    border-color: color-mix(in oklab, var(--farbe) 40%, transparent);
+    box-shadow: 0 16px 34px -24px color-mix(in oklab, var(--farbe) 60%, transparent);
   }
 
-  .verlust-zeichen {
+  .klemme-zeichen {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 3rem;
-    height: 3rem;
-    border-radius: 0.9rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.85rem;
     background: var(--farbe);
     color: #fff;
     box-shadow: 0 6px 16px -8px var(--farbe);
   }
 
-  .verlust-zeichen svg {
-    width: 1.4rem;
-    height: 1.4rem;
+  .klemme-zeichen svg {
+    width: 1.3rem;
+    height: 1.3rem;
   }
 
-  .verlust-titel {
-    margin: 1.1rem 0 0;
+  .klemme-titel {
+    margin: 0;
     font-family: var(--font-heading);
     font-weight: 400;
-    font-size: 1.5rem;
+    font-size: clamp(1.375rem, 2.4vw, 1.625rem);
     line-height: 1.15;
     color: var(--color-ink);
   }
 
-  .verlust-text {
-    position: relative;
-    z-index: 1;
-    margin: 0.6rem 0 0;
+  .klemme-text {
+    margin: 0.4rem 0 0;
     font-size: 0.9375rem;
     line-height: 1.6;
     color: var(--color-ink-muted);
+  }
+
+  /* Der Pfeil steht in der Farbe der Zeile, aber gedaempft: er fuehrt den
+     Blick, er soll ihn nicht halten. */
+  .klemme-pfeil {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: color-mix(in oklab, var(--farbe) 55%, transparent);
+  }
+
+  .klemme-pfeil svg {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  /* Die Folge steht in der Textfarbe der Seite, nicht gedaempft: sie ist
+     der Satz, der wehtut, und der soll schwerer wiegen als die Lage
+     davor. Die farbige Linie bindet sie an die Zeile. */
+  .klemme-folge {
+    margin: 0;
+    padding-inline-start: 1rem;
+    border-inline-start: 3px solid color-mix(in oklab, var(--farbe) 45%, transparent);
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--color-ink);
+  }
+
+  /* Auf dem Handy: Zeichen links, alles andere rechts darunter, der Pfeil
+     zeigt nach unten. */
+  @media (width < 52rem) {
+    .klemme-lage,
+    .klemme-pfeil,
+    .klemme-folge {
+      grid-column: 2;
+    }
+
+    .klemme-pfeil {
+      justify-content: flex-start;
+      rotate: 90deg;
+      width: 1.75rem;
+      margin-block: -0.25rem;
+    }
+  }
+
+  @media (width >= 52rem) {
+    .klemmt-kopf {
+      display: grid;
+      grid-template-columns: 2.75rem minmax(0, 1fr) 1.75rem minmax(0, 0.95fr);
+      gap: 1.25rem;
+      /* Deckungsgleich mit der Polsterung der Zeilen darunter, damit die
+         Beschriftung wirklich ueber ihrer Spalte steht. */
+      padding-inline: 1.5rem;
+      margin-block-end: 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-ink-faint);
+    }
+
+    .klemmt-kopf span:first-child {
+      grid-column: 2;
+    }
+
+    .klemmt-kopf span:last-child {
+      grid-column: 4;
+    }
+
+    .klemme {
+      grid-template-columns: 2.75rem minmax(0, 1fr) 1.75rem minmax(0, 0.95fr);
+      align-items: center;
+      gap: 1.25rem;
+      padding-block: 1.375rem;
+    }
+  }
+
+  .klemmt-fazit {
+    margin: clamp(1.75rem, 3vw, 2.5rem) 0 0;
+    font-family: var(--font-heading);
+    font-weight: 400;
+    font-size: clamp(1.25rem, 2.2vw, 1.5rem);
+    line-height: 1.3;
+    color: var(--color-ink);
+    text-wrap: balance;
   }
 
   /* Die grosse Ziffer laeuft unten aus der Karte heraus. Zier, kein
@@ -1091,63 +1317,39 @@ const kachelZeichen: Record<string, string> = {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 1.25rem;
-    max-width: 54ch;
+    gap: 1.125rem;
+    max-width: 46ch;
   }
 
   .mensch-text p {
     margin: 0;
+    font-size: 1.0625rem;
     line-height: 1.65;
     color: var(--color-ink-muted);
   }
 
-  /* Das Zitat ist die Kernaussage der Sektion und darf so gross sein wie
-     eine Zwischenueberschrift. Instrument Serif hat keinen Fettschnitt,
-     die Wirkung kommt aus Mass und dem kursiven Schluss. */
-  .mensch-zitat {
-    margin: 0.25rem 0;
-    padding-inline-start: 1.25rem;
-    border-inline-start: 3px solid var(--color-accent);
+  /* DER SATZ, UM DEN ES GEHT.
+   *
+   * Er ist die Überschrift des Abschnitts und trägt ihn allein. Deshalb
+   * so groß wie die Überschriften der anderen Abschnitte -- vorher war er
+   * als Zitat eine Stufe kleiner und stand UNTER einer Überschrift, die
+   * weniger zu sagen hatte als er.
+   *
+   * Der senkrechte Strich davor ist weg. Er machte aus der Aussage ein
+   * Zitat von jemand anderem; sie ist aber seine eigene. */
+  .mensch-satz {
+    margin: 0 0 0.5rem;
     font-family: var(--font-heading);
     font-weight: 400;
-    font-size: clamp(1.5rem, 2.6vw, 2rem);
-    line-height: 1.25;
-    letter-spacing: -0.01em;
+    font-size: clamp(1.875rem, 3.4vw, 2.75rem);
+    line-height: 1.12;
+    letter-spacing: -0.015em;
     color: var(--color-ink);
     text-wrap: balance;
   }
 
-  .mensch-zitat em {
+  .mensch-satz em {
     font-style: italic;
-    color: var(--color-accent);
-  }
-
-  /* Die Fakten als redaktionelle Zeilen mit Mono-Ziffer und Haarlinie,
-     dieselbe Sprache wie die Listen der Unterseiten. Die Pillenform davor
-     sah nach Filterknoepfen aus, nicht nach Aussagen. */
-  .mensch-fakten {
-    align-self: stretch;
-    margin: 0.5rem 0 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .mensch-fakten li {
-    display: flex;
-    align-items: baseline;
-    gap: 0.9rem;
-    padding-block: 0.7rem;
-    border-block-start: 1px solid var(--color-border);
-    font-size: 0.9375rem;
-    color: var(--color-ink);
-  }
-
-  .mensch-fakten li:last-child {
-    border-block-end: 1px solid var(--color-border);
-  }
-
-  .mensch-fakten .ziffern {
-    font-size: 0.75rem;
     color: var(--color-accent);
   }
 
@@ -1296,7 +1498,20 @@ const kachelZeichen: Record<string, string> = {
      nicht suchen muessen. */
   /* Der Ring bringt seinen eigenen Rahmen mit, deshalb sitzt der Radius
      jetzt am Ring und nicht mehr am Knopf. */
-  .schluss-cta {
+
+  /* MIT `:global`, UND DAS IST KEIN SCHOENHEITSFEHLER GEWESEN.
+   *
+   * Astro haengt seine Bereichskennung an das WURZELELEMENT einer
+   * eingebundenen Komponente. Bei `<Button ring>` ist die Wurzel aber der
+   * Ring, und `.schluss-cta` sitzt eine Ebene tiefer am Knopf darin. Ohne
+   * `:global` schrieb Astro also `.schluss-cta[data-astro-cid-…]` -- ein
+   * Selektor, auf den kein einziges Element der Seite passt.
+   *
+   * Wirkung: Hoehe, Polsterung und Schatten des groessten Aufrufs der
+   * Seite waren wirkungslos. Er sah aus wie jeder andere Knopf, nur mit
+   * Ring drumherum, und stand dadurch verloren in der Flaeche. Genau das
+   * war an dieser Stelle als „falsch platziert" zu sehen. */
+  .schluss-knopf :global(.schluss-cta) {
     position: relative;
     height: 3.75rem;
     padding-inline: 2.5rem;
@@ -1304,44 +1519,38 @@ const kachelZeichen: Record<string, string> = {
     box-shadow: 0 2px 4px rgb(25 29 33 / 0.1), 0 14px 30px -12px rgb(178 58 148 / 0.55);
   }
 
-  .schluss-cta:hover {
+  .schluss-knopf :global(.schluss-cta:hover) {
     box-shadow: 0 2px 4px rgb(25 29 33 / 0.12), 0 18px 36px -12px rgb(178 58 148 / 0.65);
   }
 
+  /* Auf schmalen Schirmen ueber die volle Breite. Der Ring muss dabei
+     MITWACHSEN: bleibt er inhaltsbreit und der Knopf darin nimmt 100%,
+     ist die Rechnung im Kreis und der Knopf deckt den Verlauf zu. */
   @media (width < 30rem) {
     .schluss-knopf {
       display: flex;
       width: 100%;
     }
-    .schluss-cta {
+    .schluss-knopf > :global(.knopf-ring) {
+      display: flex;
+      width: 100%;
+    }
+    .schluss-knopf :global(.schluss-cta) {
       width: 100%;
       padding-inline: 1.25rem;
     }
   }
 
-  /* Die drei Zusagen als eine Zeile mit Trennpunkten. Untereinander
-     gestapelt sahen sie nach Bedingungen aus, nebeneinander nach dem,
-     was sie sind: Gruende, es einfach zu tun. */
-  .schluss-zusagen {
-    margin-block-start: 1.125rem;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.35rem 0.9rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--color-ink-faint);
-  }
-
-  .schluss-zusagen li + li::before {
-    content: '\00B7';
-    margin-inline-end: 0.9rem;
-    color: var(--color-border-strong);
+  /* Der Zusatz klebt am Knopf. Ein knapper Abstand nach oben, ein
+     grosser nach unten: so gehoert er sichtbar zum Knopf und nicht zu
+     der Zeile darunter. */
+  .schluss-notiz {
+    margin: 1rem 0 0;
+    max-width: 40ch;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: var(--color-ink-muted);
+    text-wrap: balance;
   }
 
   /* Deutlich abgesetzt: das hier ist der Ausweg fuer den, der lieber

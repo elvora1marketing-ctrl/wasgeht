@@ -62,9 +62,9 @@ export const empfangGespraeche: Gespraech[] = [
     stempel: 'Anfrage stellen',
     bild: mark.src,
     nachrichten: [
-      { von: 'kunde', zeit: '06:12', text: 'Hallo, was kostet bei euch ungefähr eine Website? Malerbetrieb, 6 Leute.' },
-      { von: 'assistenz', zeit: '06:12', text: 'Hallo. Ehrliche Antwort: das hängt vom Umfang ab. Luan nennt Preise erst nach einem kurzen Gespräch, dann aber fest und schriftlich, ohne Nachforderungen.' },
-      { von: 'kunde', zeit: '06:15', text: 'ok, fair. Habt ihr Beispiele von anderen Betrieben?' },
+      { von: 'kunde', zeit: '06:12', text: 'Hallo, sorgt ihr auch dafür, dass man uns bei Google findet? Malerbetrieb, 6 Leute.' },
+      { von: 'assistenz', zeit: '06:12', text: 'Hallo. Ja, genau dafür gibt es einen eigenen Baustein. Luan sieht sich an, wo Sie heute stehen, und sagt Ihnen, was zuerst wirkt.' },
+      { von: 'kunde', zeit: '06:15', text: 'ok. Habt ihr Beispiele von anderen Betrieben?' },
       { von: 'assistenz', zeit: '06:15', text: 'Ja, die zeigt er Ihnen im Gespräch. Passt es Ihnen heute Mittag um 12:30 Uhr?' },
       { von: 'kunde', zeit: '06:16', text: 'passt 👍' },
       { von: 'assistenz', zeit: '06:16', text: 'Steht: heute um 12:30 Uhr ruft Luan Sie an. Die Bestätigung kommt gleich hier herein.' },

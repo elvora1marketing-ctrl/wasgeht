@@ -212,10 +212,11 @@ export const reviews = {
  * auf der Seite selbst. Ein Versprechen, das nur die Suchmaschine liest,
  * nimmt keinem Besucher die Hemmung.
  *
- * `preis` ist die Antwort auf die Frage, die auf einer Seite ohne Preise
- * jeder zuerst stellt. Ohne eine Antwort darauf klickt ein Teil der Leute
- * weg, statt zu fragen. Es geht NICHT darum, Preise zu nennen, sondern
- * darum zu sagen, WIE der Preis zustande kommt.
+ * `aufwand` ist die Antwort auf die Frage, die jeder Betriebsinhaber
+ * zuerst stellt: was kommt an Arbeit auf MICH zu. Nicht was es kostet --
+ * auf dieser Seite geht es nirgends um Geld, sondern um Funktionen und
+ * darum, was sie bringen. Wer wissen will, was etwas kostet, fragt im
+ * Gespräch, und dort gehört die Antwort auch hin.
  */
 export const versprechen = {
   /*
@@ -231,25 +232,44 @@ export const versprechen = {
    * Behauptung, ER sei rund um die Uhr am Telefon, und das waere gelogen.
    */
   antwortzeit: 'Sofortige Antwort über die Assistenz, persönlich melde ich mich am selben Tag',
-  preis:
-    'Das hängt vom Umfang ab, deshalb steht hier keine Zahl, die für Ihren Betrieb ohnehin nicht stimmen würde. Nach dem Erstgespräch bekommen Sie ein schriftliches Angebot mit einem festen Preis. Erst wenn Sie zusagen, fange ich an. Es gibt keine Stundenzettel und keine Nachforderungen für das, was vorher besprochen war.',
+  aufwand:
+    'Wenig. Sie erzählen mir einmal, wie Ihr Betrieb arbeitet, und liefern Ihre Bilder und Angaben. Den Rest baue ich und zeige es Ihnen fertig. Sie sagen dann, was noch anders soll. Laufend müssen Sie nichts tun: die Assistenz arbeitet, ohne dass jemand sie bedient.',
 } as const;
 
 export const cta = {
   primary: {
-    label: 'Kostenloses Erstgespräch',
+    /*
+     * OHNE „kostenlos". Das Wort ist die einzige Stelle, an der auf der
+     * ganzen Seite noch Geld vorkam -- und es verspricht ausgerechnet im
+     * entscheidenden Moment nichts ueber die Sache, sondern ueber den
+     * Preis. „Vereinbaren" sagt stattdessen, was passiert, wenn man
+     * klickt. Das ist der Grund, warum jemand klickt.
+     */
+    label: 'Erstgespräch vereinbaren',
     /**
      * Kurzfassung für den klebenden Kopfbereich auf Mobil.
      *
      * Bewusst dasselbe Wort wie in der Langfassung. Vorher stand hier
      * „Termin sichern", also ein zweiter Name für dieselbe Handlung. Wer
-     * am Schreibtisch „Kostenloses Erstgespräch" liest und auf dem Handy
+     * am Schreibtisch „Erstgespräch vereinbaren" liest und auf dem Handy
      * „Termin sichern", hat zwei Angebote im Kopf statt einem.
      */
     labelShort: 'Erstgespräch',
     href: '/termin/',
-    /** Kurzer Zusatz direkt unter dem Button, nimmt die Hemmschwelle. */
-    note: `${booking.durationLabel}, unverbindlich, ohne Verkaufsgespräch`,
+    /**
+     * Kurzer Zusatz direkt unter dem Button.
+     *
+     * HIER STAND „15 Minuten, unverbindlich, ohne Verkaufsgespräch".
+     *
+     * Der Satz ist nicht falsch, er ist nur nicht mehr Ihrer. Er steht
+     * inzwischen unter jedem zweiten Terminknopf im Netz, besonders auf
+     * KI-Seiten, und wer ihn zum dritten Mal liest, liest ihn nicht mehr.
+     * Ein Versprechen, das jeder gibt, ist keins.
+     *
+     * Der Zusatz sagt jetzt, was NACH dem Gespräch anders ist. Das kann
+     * nur sagen, wer das Gespräch auch führt.
+     */
+    note: 'Danach wissen Sie, was in Ihrem Betrieb künftig von allein läuft.',
   },
   secondary: {
     label: 'Lieber anrufen',
@@ -298,7 +318,7 @@ export const services = [
     label: 'Branding & Print',
     benefit: 'Ein Auftritt, der nach Fachbetrieb aussieht, nicht nach Nebenerwerb',
     teaser:
-      'Vom Logo über den Briefkopf bis zum Angebot: ein einheitliches Bild, das Ihre Preise rechtfertigt.',
+      'Vom Logo über den Briefkopf bis zum Angebot: ein einheitliches Bild, an dem man den Fachbetrieb erkennt.',
     href: '/leistungen/branding/',
   },
   {

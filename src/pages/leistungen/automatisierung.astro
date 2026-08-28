@@ -42,8 +42,8 @@ const faq: FaqItem[] = [
      Teil der Leute weg, statt zu fragen. Der Text kommt aus einer einzigen
      Stelle in `site.ts`, damit er auf allen vier Seiten gleich lautet. */
   {
-    question: 'Was kostet das?',
-    answer: versprechen.preis,
+    question: 'Was muss ich selbst dafür tun?',
+    answer: versprechen.aufwand,
   },
   {
     question: 'Merken meine Kunden, dass da eine KI antwortet?',
@@ -209,7 +209,7 @@ const painPoints = [
       </div>
 
       <div class="individuell-handlung">
-        <Button href={cta.primary.href} size="lg" class="max-sm:w-full">
+        <Button href={cta.primary.href} size="lg" magnet class="max-sm:w-full">
           {cta.primary.label}
         </Button>
         <p class="individuell-notiz">{cta.primary.note}</p>

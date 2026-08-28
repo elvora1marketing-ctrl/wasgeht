@@ -3,7 +3,7 @@ import Button from './Button.astro';
 import Texture from './Texture.astro';
 import Scramble from './Scramble.astro';
 import ReviewBadge from './ReviewBadge.astro';
-import { cta, contactLinks, versprechen } from '~/config/site';
+import { cta, contactLinks } from '~/config/site';
 
 /**
  * Wiederkehrender Abschluss jeder Seite.
@@ -42,7 +42,7 @@ const {
     </div>
 
     <div class="schlussband-handlung">
-      <Button href={cta.primary.href} size="lg" variant="aufFarbe" class="max-sm:w-full">
+      <Button href={cta.primary.href} size="lg" variant="aufFarbe" magnet class="max-sm:w-full">
         {cta.primary.label}
       </Button>
       <p class="schlussband-notiz">{cta.primary.note}</p>
@@ -52,19 +52,31 @@ const {
           „kann der das ueberhaupt" wieder da. */}
       <ReviewBadge tone="inverse" class="schlussband-beleg" />
 
-      {/* Nimmt die Sorge, in ein schwarzes Loch zu schreiben. Stand bisher
-          nur in der Beschreibung fuer Google und auf der Dankeseite, also
-          erst NACH dem Absenden. Da hilft sie niemandem mehr. */}
-      <p class="schlussband-notiz">{versprechen.antwortzeit}</p>
+      {/* DER ZWEITE WEG IST EIN KNOPF, wie im Aufschlag und im Fuss.
+          Vorher lag er als unterstrichenes Satzstueck in einem Absatz,
+          zwischen zwei weiteren Absaetzen in derselben Groesse -- man
+          musste die Zeile lesen, um zu merken, dass da ueberhaupt etwas
+          anzuklicken war.
+
+          HIER STANDEN AUSSERDEM ZWEI ZUSAGEN UNTEREINANDER: die Antwort-
+          zeit und darunter noch einmal, dass die Assistenz sofort
+          antwortet. Zweimal dasselbe unter demselben Knopf. Geblieben ist
+          der Satz, der zugleich eine Vorfuehrung ankuendigt. */}
+      <a
+        class="schlussband-whatsapp"
+        href={contactLinks.whatsapp}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path d="M10 2a8 8 0 0 0-6.9 12l-1 3.7 3.8-1A8 8 0 1 0 10 2zm0 1.6a6.4 6.4 0 1 1-3.3 11.9l-.3-.2-2.2.6.6-2.1-.2-.3A6.4 6.4 0 0 1 10 3.6zM7.4 6.3c-.1 0-.3 0-.5.2-.2.2-.6.6-.6 1.4s.6 1.6.7 1.8c.1.1 1.2 2 3 2.7 1.5.6 1.8.5 2.1.5.4 0 1.1-.4 1.3-.9.2-.5.2-.9.1-1l-.4-.2-1.2-.6c-.2 0-.3-.1-.4.1l-.6.7c-.1.2-.2.2-.4.1-.2-.1-.9-.3-1.6-1a6 6 0 0 1-1.1-1.4c-.1-.2 0-.3.1-.4l.3-.4.2-.3v-.4l-.6-1.4c-.1-.4-.3-.3-.4-.3z" />
+        </svg>
+        Auf WhatsApp schreiben
+      </a>
 
       <p class="schlussband-notiz">
-        Lieber schreiben?{' '}
-        <a
-          href={contactLinks.whatsapp}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="schlussband-link">Auf WhatsApp antwortet sofort meine KI-Assistenz</a
-        >. Sie sehen sie also gleich in Aktion.
+        Dort antwortet zuerst die Assistenz. Sie sehen sie also gleich in
+        Aktion.
       </p>
     </div>
   </div>
@@ -147,16 +159,46 @@ const {
     opacity: 0.82;
   }
 
-  .schlussband-link {
-    color: #fff;
-    text-decoration: underline;
-    text-underline-offset: 4px;
-    text-decoration-color: rgb(255 255 255 / 0.4);
-    transition: text-decoration-color 0.15s;
+  /* Umriss in WhatsApp-Gruen statt Flaeche: der weisse Haupt-Aufruf
+     darueber bleibt damit der hellste Punkt der Tafel, das Gruen wird
+     trotzdem sofort erkannt. */
+  .schlussband-whatsapp {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    margin-top: 0.5rem;
+    padding: 0.8rem 1.5rem;
+    border: 1px solid color-mix(in oklab, #25d366 55%, transparent);
+    border-radius: 999px;
+    background: color-mix(in oklab, #25d366 12%, transparent);
+    color: color-mix(in oklab, #25d366 55%, #fff);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s, transform 0.2s;
   }
 
-  .schlussband-link:hover {
-    text-decoration-color: #fff;
+  .schlussband-whatsapp:hover {
+    transform: translateY(-1px);
+    border-color: #25d366;
+    background: color-mix(in oklab, #25d366 22%, transparent);
+  }
+
+  .schlussband-whatsapp:active {
+    transform: translateY(0);
+  }
+
+  .schlussband-whatsapp svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #25d366;
+  }
+
+  @media (width < 30rem) {
+    .schlussband-whatsapp {
+      width: 100%;
+    }
   }
 
   @media (prefers-reduced-motion: no-preference) {
