@@ -4,7 +4,7 @@ import Band from '~/components/Band.astro';
 import ShimmerCta from '~/components/ShimmerCta.astro';
 import Portrait from '~/components/Portrait.astro';
 import Scramble from '~/components/Scramble.astro';
-import Sterne from '~/components/Sterne.astro';
+import Stimmen from '~/components/Stimmen.astro';
 import ReviewBadge from '~/components/ReviewBadge.astro';
 import Telefonkarussell from '~/components/Telefonkarussell.astro';
 import Textrolle from '~/components/Textrolle.astro';
@@ -481,18 +481,20 @@ const kachelZeichen: Record<string, string> = {
     </div>
   </Band>
 
-  {/* ===================== Bewertungen ===================== */}
+  {/* ===================== Stimmen =====================
+      Erscheint nur mit echten Rueckmeldungen. `reviews.enabled` steht in
+      `site.ts` auf false, solange keine vorliegen -- eine erfundene
+      Kundenstimme ist eine irrefuehrende geschaeftliche Handlung nach
+      § 5 UWG, und zwar unabhaengig davon, wie plausibel sie klingt.
+      Das Raster steht, es fehlen nur die Saetze. */}
   {
     reviews.enabled && reviews.items.length > 0 && (
       <Band
-        ton="gedaempft"
-        kennung="Bewertungen"
+        ton="hell"
+        kennung="Stimmen"
         heading="Was Betriebe hinterher sagen"
+        intro="Keine Auswahl der besten drei: das sind die Rückmeldungen, die kamen."
       >
-        {/* Der Abschnitt trug bisher keinen Hinweis: die Marke sass nur am
-            Bewertungsbeleg. Solange die Stimmen erfunden sind, muss sie
-            auch hier stehen -- und zwar unabhaengig davon, ob die Texte
-            zufaellig noch mit „Platzhalter:" anfangen. */}
         {reviews.platzhalter && (
           <p class="stimmen-warnung">
             <span class="platzhalter-marke">Beispieldaten</span>
@@ -503,18 +505,7 @@ const kachelZeichen: Record<string, string> = {
           </p>
         )}
 
-        <ul class="stimmen">
-          {reviews.items.map((stimme, i) => (
-            <li class="stimme einblenden" style={`--verzug:${i}`}>
-              <Sterne wert={stimme.rating} groesse={1} />
-              <p class="stimme-text">{stimme.text}</p>
-              <p class="stimme-quelle">
-                <span class="stimme-name">{stimme.author}</span>
-                {stimme.business && <span class="stimme-betrieb">{stimme.business}</span>}
-              </p>
-            </li>
-          ))}
-        </ul>
+        <Stimmen />
       </Band>
     )
   }
@@ -1405,7 +1396,15 @@ const kachelZeichen: Record<string, string> = {
     transform: translateX(3px);
   }
 
-  /* ===================== Bewertungen ===================== */
+  /* ===================== Stimmen =====================
+     Das Raster selbst steht in `Stimmen.astro`. Hier bleibt nur die
+     Warnzeile, die ueber den erfundenen Platzhaltern sitzt.
+
+     HIER STANDEN 60 ZEILEN fuer drei nebeneinanderstehende Spalten mit
+     Trennlinien. Die Stimmen liegen jetzt in einem Bento-Raster: eine
+     grosse Karte, kleinere daneben. Drei gleich grosse Spalten liest man
+     als Tabelle und ueberfliegt sie; ein ungleiches Raster liest man als
+     „hier ist die Hauptaussage, hier sind die Belege dazu". */
   .stimmen-warnung {
     display: flex;
     flex-wrap: wrap;
@@ -1414,59 +1413,6 @@ const kachelZeichen: Record<string, string> = {
     margin-block-end: clamp(1.5rem, 3vw, 2.25rem);
     font-size: 0.875rem;
     color: var(--color-ink-muted);
-  }
-
-  .stimmen {
-    display: grid;
-    gap: clamp(2rem, 4vw, 3rem);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  @media (width >= 48rem) {
-    .stimmen {
-      grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-      gap: clamp(2rem, 3.5vw, 3.5rem);
-    }
-
-    .stimme {
-      padding-inline-start: clamp(1.25rem, 2vw, 2rem);
-      border-inline-start: 1px solid var(--color-border);
-    }
-
-    .stimme:first-child {
-      padding-inline-start: 0;
-      border-inline-start: 0;
-    }
-  }
-
-  .stimme-text {
-    margin: 1rem 0 0;
-    font-size: 1rem;
-    line-height: 1.6;
-    color: var(--color-ink-muted);
-  }
-
-  .stimme-quelle {
-    display: flex;
-    flex-direction: column;
-    gap: 0.125rem;
-    margin: 1.25rem 0 0;
-  }
-
-  .stimme-name {
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--color-ink);
-  }
-
-  .stimme-betrieb {
-    font-family: var(--font-mono);
-    font-size: 0.6875rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--color-ink-faint);
   }
 
   /* ===================== Abschluss ===================== */
