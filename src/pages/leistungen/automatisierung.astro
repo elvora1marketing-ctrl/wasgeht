@@ -124,7 +124,7 @@ const painPoints = [
       <Telefonkarussell
         kennung="module-karussell"
         gespraeche={modulGespraechFolge}
-        bildunterschrift="Schematische Darstellung"
+        bildunterschrift="Nachgestellt"
         breite="14.5rem"
         class="problem-stapel"
       />
@@ -164,7 +164,7 @@ const painPoints = [
                   kein erfundener Beleg. */}
               <div class:list={['modul-bild', flip && 'modul-bild-links']}>
                 {rahmenArt(module.slug) === 'handy' ? (
-                  <Iphone bildunterschrift={shot ? 'Aus dem laufenden Betrieb' : 'Schematische Darstellung'} breite="16rem">
+                  <Iphone bildunterschrift={shot ? 'Aus dem laufenden Betrieb' : 'Nachgestellt'} breite="16rem">
                     {shot ? (
                       <Image src={shot} alt={module.screenshotAlt} widths={[400, 800]} loading="lazy" class="w-full" />
                     ) : (
@@ -172,7 +172,7 @@ const painPoints = [
                     )}
                   </Iphone>
                 ) : (
-                  <Geraet art="rechner" bildunterschrift={shot ? 'Aus dem laufenden Betrieb' : 'Schematische Darstellung'}>
+                  <Geraet art="rechner" bildunterschrift={shot ? 'Aus dem laufenden Betrieb' : 'Nachgestellt'}>
                     {shot ? (
                       <Image src={shot} alt={module.screenshotAlt} widths={[400, 800]} loading="lazy" class="w-full" />
                     ) : (

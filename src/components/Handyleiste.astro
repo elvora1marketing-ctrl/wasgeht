@@ -1,0 +1,130 @@
+---
+import ShimmerCta from './ShimmerCta.astro';
+import { cta, contactLinks } from '~/config/site';
+
+/**
+ * Die Handlungsleiste am unteren Rand. Nur auf dem Telefon.
+ *
+ * WARUM UNTEN UND NICHT OBEN
+ *
+ * Ein Telefon wird mit einer Hand gehalten, und der Daumen erreicht bequem
+ * das untere Drittel des Schirms. Die obere rechte Ecke -- wo der Aufruf
+ * bisher saß -- ist die am schwersten erreichbare Stelle des ganzen
+ * Geräts. Man kommt dort hin, indem man das Telefon in der Hand
+ * umgreift, und genau das tut niemand, der nur mal eben schaut.
+ *
+ * Der Aufruf steht deshalb da, wo der Daumen ohnehin liegt, und zwar
+ * durchgehend: auf einer Seite, die auf dem Telefon acht Bildschirme lang
+ * ist, muss man nicht erst irgendwohin scrollen, um etwas tun zu können.
+ *
+ * WAS DAMIT AUS DER KOPFLEISTE VERSCHWINDET
+ *
+ * Der Aufruf oben. Er passte bei 320 Punkten Breite nicht mehr neben Logo
+ * und Menü -- die Kopfleiste lief dort waagerecht über, und die ganze
+ * Seite ließ sich seitlich schieben. Oben stehen jetzt nur noch Marke und
+ * Menü, und das ist auf einem Telefon auch genug.
+ *
+ * ZWEI WEGE, KEIN DRITTER. Termin und WhatsApp. Der Anruf fehlt bewusst:
+ * wer anrufen will, findet die Nummer im Fuß, und drei gleich große
+ * Angebote nebeneinander sind so gut wie keins.
+ */
+---
+
+<div class="handyleiste">
+  <ShimmerCta
+    href={cta.primary.href}
+    size="md"
+    schmal
+    class="handyleiste-haupt"
+  >
+    {cta.primary.labelShort}
+  </ShimmerCta>
+
+  {/* Nur das Zeichen. Der Name steht als zugänglicher Name am Element --
+      auf 320 Punkten Breite ist neben dem Termin kein Platz für ein
+      zweites Wort, und das Zeichen von WhatsApp erkennt ohnehin jeder. */}
+  <ShimmerCta
+    href={contactLinks.whatsapp}
+    ton="whatsapp"
+    size="md"
+    schmal
+    class="handyleiste-wa"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Auf WhatsApp schreiben"
+  >
+    <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <path
+        d="M10 2a8 8 0 0 0-6.9 12l-1 3.7 3.8-1A8 8 0 1 0 10 2zm0 1.6a6.4 6.4 0 1 1-3.3 11.9l-.3-.2-2.2.6.6-2.1-.2-.3A6.4 6.4 0 0 1 10 3.6zM7.4 6.3c-.1 0-.3 0-.5.2-.2.2-.6.6-.6 1.4s.6 1.6.7 1.8c.1.1 1.2 2 3 2.7 1.5.6 1.8.5 2.1.5.4 0 1.1-.4 1.3-.9.2-.5.2-.9.1-1l-.4-.2-1.2-.6c-.2 0-.3-.1-.4.1l-.6.7c-.1.2-.2.2-.4.1-.2-.1-.9-.3-1.6-1a6 6 0 0 1-1.1-1.4c-.1-.2 0-.3.1-.4l.3-.4.2-.3v-.4l-.6-1.4c-.1-.4-.3-.3-.4-.3z"
+      />
+    </svg>
+  </ShimmerCta>
+</div>
+
+<style>
+  .handyleiste {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.75rem;
+    /* Der Streifen unter der Wischleiste des Telefons. Ohne diese Angabe
+       liegen die Knöpfe auf iPhones teilweise unter der Systemleiste und
+       lassen sich nicht sauber treffen. */
+    padding-bottom: calc(0.55rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* DER GRUND LIEGT IN EINEM EIGENEN ELEMENT, NICHT AN DER LEISTE SELBST.
+   *
+   * Erster Bau: Weichzeichner und Farbe standen direkt auf `.handyleiste`.
+   * Ergebnis: die Leiste war da -- messbar, an der richtigen Stelle, in
+   * der richtigen Größe -- aber vollkommen leer. Kein Knopf, kein Text.
+   *
+   * `backdrop-filter` öffnet auf dem Elternteil eine eigene Zeichenebene,
+   * und die Aufrufe darin arbeiten mit negativen Stapelnummern (der
+   * Schimmer liegt hinter dem Knopfgrund). Diese Kombination hat Chromium
+   * verschluckt. Dasselbe Muster steht schon im Telefonkarussell: ein
+   * 3D-Kontext über den Geräten ließ dort die weißen Blasen verschwinden.
+   *
+   * Jetzt trägt ein Pseudo-Element Farbe, Linie und Weichzeichner, und es
+   * liegt HINTER den Knöpfen. Kein Vorfahre eines Aufrufs hat noch einen
+   * Filter, und alles wird gezeichnet.
+   *
+   * Der Rückfallwert ist deckend: ein durchsichtiger Streifen ohne
+   * Weichzeichner wäre unleserlich. */
+  .handyleiste::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-top: 1px solid var(--color-border);
+    background: var(--color-surface);
+  }
+
+  @supports (backdrop-filter: blur(1px)) {
+    .handyleiste::before {
+      background: color-mix(in srgb, var(--color-surface) 82%, transparent);
+      backdrop-filter: blur(12px) saturate(1.4);
+    }
+  }
+
+  .handyleiste-haupt {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .handyleiste-wa {
+    flex: 0 0 auto;
+    padding-inline: 1.05rem;
+  }
+
+  /* Ab Tablet übernimmt wieder die Kopfleiste. */
+  @media (width >= 48rem) {
+    .handyleiste {
+      display: none;
+    }
+  }
+</style>

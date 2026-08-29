@@ -762,6 +762,63 @@ const kachelZeichen: Record<string, string> = {
     color: var(--color-ink-faint);
   }
 
+  /* ================= AUFSCHLAG AUF DEM TELEFON =========================
+   * Gemessen auf 390 Punkten Breite: der Aufschlag brauchte dort 1300
+   * Punkte Hoehe, ein Bildschirm hat 844. Die Vorfuehrung -- das Beste,
+   * was diese Seite zu zeigen hat -- begann erst 460 Punkte UNTER der
+   * Falz. Wer nicht weiterscrollt, sieht sie nie.
+   *
+   * Die Abstaende sind deshalb enger, das Geraet ist kleiner, und das
+   * Ganze rueckt so weit hoch, dass der obere Rand des Telefons noch im
+   * ersten Bildschirm auftaucht. Ein angeschnittenes Bild ist die
+   * staerkste Einladung zum Weiterscrollen, die es gibt: man will sehen,
+   * was da unten abgeschnitten ist. */
+  @media (width < 48rem) {
+    .hero-inner {
+      gap: 1.75rem;
+      padding-block: 1.5rem 2.25rem;
+    }
+
+    .hero-text {
+      gap: 0.875rem;
+    }
+
+    /* Die Kennung passt auf dem Telefon nicht in eine Zeile -- „Digital-
+       agentur für Handwerk und Betriebe · Essen" ist dafuer zu lang, und
+       gesperrte Grossbuchstaben brauchen zusaetzlich Platz.
+       Sie darf umbrechen, aber nicht in eine volle Zeile plus zwei
+       uebriggebliebene Woerter: `balance` verteilt sie auf zwei etwa
+       gleich lange Zeilen. Enger gesperrt und eine Spur kleiner passt
+       ohnehin mehr in jede davon. */
+    .hero-kennung {
+      font-size: 0.6875rem;
+      letter-spacing: 0.08em;
+      text-wrap: balance;
+    }
+
+    .hero-block {
+      margin-top: 0.25rem;
+      gap: 0.625rem;
+    }
+
+    /* Das Geraet kleiner: bei 74vw war es 288 Punkte breit und damit --
+       das Seitenverhaeltnis ist 1:2 -- fast 580 Punkte hoch, mehr als
+       zwei Drittel des Bildschirms fuer ein einziges Bild. */
+    .hero-geraet {
+      gap: 0.5rem;
+    }
+
+    /* Das Statusabzeichen darf umbrechen. Mit `nowrap` und einer Zeile,
+       die bei 360 Punkten schon knapp war, haette es auf schmaleren
+       Geraeten seitlich hinausgeragt. */
+    .hero-status {
+      white-space: normal;
+      text-align: center;
+      line-height: 1.35;
+      padding-block: 0.45rem;
+    }
+  }
+
   /* FRUEHER STAND HIER `align-items: flex-end` UND `text-align: end`.
    *
    * Rechtsbuendiger Fliesstext hat links einen ausgefransten Rand; das

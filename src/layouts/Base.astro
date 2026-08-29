@@ -4,6 +4,7 @@ import SeoHead from '~/components/SeoHead.astro';
 import Schema from '~/components/Schema.astro';
 import Header from '~/components/Header.astro';
 import Footer from '~/components/Footer.astro';
+import Handyleiste from '~/components/Handyleiste.astro';
 import type { FaqItem } from '~/types';
 
 interface Props {
@@ -15,6 +16,14 @@ interface Props {
   breadcrumbs?: Array<{ label: string; href?: string }>;
   service?: { name: string; description: string };
   faq?: FaqItem[];
+  /**
+   * Die Handlungsleiste am unteren Rand weglassen.
+   *
+   * Gesetzt auf Termin- und Kontaktseite: wer dort ist, hat den Aufruf
+   * schon befolgt. Ein Streifen, der ihn noch einmal auffordert, nimmt
+   * dem Formular darunter nur Platz weg.
+   */
+  ohneHandyleiste?: boolean;
   /**
    * Farbe der Kopftafel dieser Seite. Die Kopfleiste übernimmt sie, damit die
    * Seite nicht mit einem weißen Streifen über der Tafel beginnt. Seiten ohne
@@ -32,6 +41,7 @@ const {
   service,
   faq,
   kopfFarbe,
+  ohneHandyleiste = false,
 }: Props = Astro.props;
 ---
 
@@ -80,6 +90,8 @@ const {
     </main>
 
     <Footer />
+
+    {!ohneHandyleiste && <Handyleiste />}
 
     {/*
       Das eigene Element für die einlaufenden Kennungen. Steht bewusst HIER

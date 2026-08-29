@@ -51,6 +51,15 @@ interface Props {
   size?: 'sm' | 'md' | 'lg';
   /** Über die volle Breite. */
   breit?: boolean;
+  /**
+   * Nimmt den Knopf von der Regel aus, die ihn auf schmalen Schirmen über
+   * die volle Breite zieht.
+   *
+   * Gebraucht in der Handlungsleiste am unteren Rand: dort stehen zwei
+   * Knöpfe nebeneinander, und volle Breite hieße für beide, dass keiner
+   * mehr danebenpasst.
+   */
+  schmal?: boolean;
   class?: string;
   [key: string]: unknown;
 }
@@ -61,6 +70,7 @@ const {
   ton = 'marke',
   size = 'lg',
   breit = false,
+  schmal = false,
   class: className = '',
   ...rest
 } = Astro.props;
@@ -69,7 +79,14 @@ const Tag = href ? 'a' : 'button';
 ---
 
 <Tag
-  class:list={['scta', `scta-${ton}`, `scta-${size}`, breit && 'scta-breit', className]}
+  class:list={[
+    'scta',
+    `scta-${ton}`,
+    `scta-${size}`,
+    breit && 'scta-breit',
+    schmal && 'scta-schmal',
+    className,
+  ]}
   {...(href ? { href } : { type })}
   {...rest}
 >
@@ -179,7 +196,7 @@ const Tag = href ? 'a' : 'button';
      jeder Verwendungsstelle einzeln als `max-sm:w-full` -- ein Dutzend
      Mal dieselbe Entscheidung, und einmal war sie vergessen. */
   @media (width < 40rem) {
-    .scta {
+    .scta:not(.scta-schmal) {
       width: 100%;
     }
   }

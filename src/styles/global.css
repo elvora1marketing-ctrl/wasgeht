@@ -399,3 +399,16 @@
     font-weight: 600;
   }
 }
+
+/* --- Platz fuer die Handlungsleiste am unteren Rand -----------------------
+   Die Leiste liegt fest ueber der Seite. Ohne diesen Abstand verdeckt sie
+   die letzten Zeilen des Fusses -- also ausgerechnet Impressum und
+   Datenschutz, die erreichbar sein muessen.
+
+   `env(safe-area-inset-bottom)` kommt dazu, damit auf Geraeten mit
+   Wischleiste unten nicht doch wieder etwas darunter verschwindet. */
+@media (width < 48rem) {
+  body {
+    padding-block-end: calc(4.25rem + env(safe-area-inset-bottom, 0px));
+  }
+}

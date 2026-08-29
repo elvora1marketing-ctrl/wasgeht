@@ -144,6 +144,24 @@ const vor = [1, 2, 0];
     width: 100%;
   }
 
+  @media (width < 48rem) {
+    .karussell {
+      gap: 0.75rem;
+    }
+
+    /* Zwei Zentimeter Luft ueber und unter dem Geraet sind am Rechner
+       Schattenraum, auf dem Telefon ein Zehntel des Bildschirms. */
+    .karussell-buehne {
+      padding-block: 1rem;
+    }
+  }
+
+  @media (width >= 48rem) {
+    .karussell-telefon {
+      max-width: 74vw;
+    }
+  }
+
   /* Die Buehne beschneidet die seitlich herausstehenden Telefone, mit
      Luft nach oben und unten fuer Schatten. */
   /* KEINE perspective-Eigenschaft an der Buehne: sie oeffnet einen
@@ -207,7 +225,13 @@ const vor = [1, 2, 0];
   .karussell-telefon {
     grid-area: 1 / 1;
     width: var(--breite);
-    max-width: 74vw;
+    /* AUF DEM TELEFON DEUTLICH KLEINER. Bei 74vw war das Geraet auf einem
+       390 Punkte breiten Schirm 288 Punkte breit -- und weil das
+       Seitenverhaeltnis 1:2 ist, fast 580 Punkte hoch. Zwei Drittel des
+       Bildschirms fuer ein einziges Bild, dessen obere Haelfte zudem
+       leerer Chatverlauf ist. 58vw ergeben 226 zu 452 und lassen Platz
+       fuer das, was darunter kommt. */
+    max-width: 58vw;
     /* KEIN preserve-3d: es hebt die Stapelreihenfolge im Telefon auf, und
        die weissen Blasen verlieren den Tiefenkampf gegen die Chatflaeche;
        sie belegten dann Platz, wurden aber nicht gemalt. Die Drehung der

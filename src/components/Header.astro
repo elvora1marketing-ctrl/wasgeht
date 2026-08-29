@@ -84,17 +84,22 @@ const hier = nav.findIndex((item) => isActive(item.href));
       </nav>
 
       <div class="flex items-center gap-2">
-        <!-- Der eine Haupt-CTA. Auf Mobil verkuerzt, aber immer sichtbar.
-             Auf farbiger Leiste weiss: die Akzentfarbe geht auf der
-             Magenta-Tafel sonst unter. -->
+        <!-- Der eine Haupt-CTA. Auf farbiger Leiste weiss: die Akzentfarbe
+             geht auf der Magenta-Tafel sonst unter.
+
+             NUR AB TABLET. Auf dem Telefon stand er hier oben rechts, an
+             der Stelle, die der Daumen am schlechtesten erreicht -- und
+             bei 320 Punkten Breite passte er nicht mehr neben Logo und
+             Menue: die Kopfleiste lief waagerecht ueber und die ganze
+             Seite liess sich seitlich schieben. Auf dem Telefon steht der
+             Aufruf jetzt unten in der `Handyleiste`. -->
         <ShimmerCta
           href={cta.primary.href}
           ton={dunkel ? 'hell' : 'marke'}
           size="md"
-          class="kopf-cta"
+          class="kopf-cta max-md:hidden"
         >
-          <span class="md:hidden">{cta.primary.labelShort}</span>
-          <span class="max-md:hidden">{cta.primary.label}</span>
+          {cta.primary.label}
         </ShimmerCta>
 
         <!-- Mobiles Menue ohne JavaScript -->
