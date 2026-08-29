@@ -1,0 +1,443 @@
+---
+/**
+ * Der Schaltplan: was hereinkommt, was die Assistenz daraus macht.
+ *
+ * Portiert aus der Vorlage („animated beam"). Dort misst React zur
+ * Laufzeit die Lage zweier Elemente, rechnet daraus einen Bézierpfad und
+ * laesst Framer Motion einen Verlauf daran entlangwandern -- mit
+ * `ResizeObserver`, damit es beim Umbrechen neu rechnet.
+ *
+ * DAS IST HIER NICHT NOETIG UND WAERE SOGAR SCHLECHTER. Die Lage der
+ * Punkte steht fest, ich lege sie ja selbst fest. Also stehen die Pfade
+ * direkt im SVG, in einem `viewBox`, der mitskaliert -- kein Messen, kein
+ * Nachrechnen beim Umbrechen, keine Bibliothek.
+ *
+ * DAS LICHT LAEUFT UEBER `stroke-dashoffset`, nicht ueber einen wandernden
+ * Verlauf: ein kurzer Strich auf einer langen Luecke, der am Pfad
+ * entlanggeschoben wird. Der Kniff dabei ist `pathLength="100"` an jedem
+ * Pfad -- damit rechnet der Browser jede Weglaenge auf 100 Einheiten um,
+ * und derselbe Strichwert ergibt auf dem kurzen wie auf dem langen Weg
+ * dieselbe Lichtlaenge und dasselbe Tempo. Ohne das waere das Licht auf
+ * den kurzen Wegen schneller, und die ganze Anlage wirkte ungleichmaessig.
+ *
+ * WAS ER ZEIGT
+ *
+ * Links, was hereinkommt: WhatsApp, ein verpasster Anruf, das Formular,
+ * eine Suche bei Google. In der Mitte die Assistenz. Rechts, was
+ * herauskommt: ein Termin im Kalender, eine Erinnerung, eine Notiz auf
+ * Ihrem Telefon.
+ *
+ * Das ist die Antwort auf die Frage, die ein Chatverlauf nicht beantwortet:
+ * WO das alles zusammenlaeuft. Der Verlauf zeigt einen Kanal, dieser Plan
+ * zeigt, dass es vier sind und dass sie in dieselbe Stelle muenden.
+ *
+ * ZWEI FASSUNGEN, EINE QUELLE. Quer fuer breite Schirme, hoch fuer das
+ * Telefon -- ein querformatiges Schaubild auf 390 Punkten Breite waere
+ * briefmarkengross. Beide entstehen aus derselben Liste weiter unten,
+ * nur mit anderen Koordinaten.
+ */
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' }: Props = Astro.props;
+
+/* Zeichen im 20er-Raster, wie ueberall auf der Seite. */
+const zeichen = {
+  whatsapp:
+    'M10 3a7 7 0 0 0-6 10.6L3 17.5l4-1A7 7 0 1 0 10 3zM7.4 7.3c-.1 0-.3 0-.5.2-.2.2-.6.6-.6 1.3s.5 1.4.6 1.6c.1.1 1.1 1.7 2.6 2.3 1.3.5 1.6.4 1.9.4.3 0 1-.4 1.1-.8.2-.4.2-.8.1-.9l-1.4-.7c-.2 0-.3 0-.4.1l-.5.6c-.1.2-.2.2-.4.1a5 5 0 0 1-2.3-2c-.1-.2 0-.3.1-.4l.3-.4.1-.3v-.3l-.5-1.2c-.1-.4-.2-.3-.3-.3z',
+  anruf:
+    'M6.5 3h-3v3a10.5 10.5 0 0 0 10.5 10.5h3v-3l-3.5-1.5-2 2A8.5 8.5 0 0 1 7 7l2-2zM13 3l4 4M17 3l-4 4',
+  formular: 'M4 4h12a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zM3.5 5.5 10 11l6.5-5.5',
+  google: 'M9 4a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM13 13l4 4',
+  assistenz:
+    'M10 2.5 16.5 6v4.5c0 3.6-2.7 6-6.5 7-3.8-1-6.5-3.4-6.5-7V6zM7.4 10l1.8 1.9L13 8',
+  kalender:
+    'M4 5h12a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zM3 9h14M7 3v3M13 3v3',
+  erinnerung:
+    'M10 3a4.5 4.5 0 0 0-4.5 4.5c0 3-1.5 4.5-1.5 4.5h12s-1.5-1.5-1.5-4.5A4.5 4.5 0 0 0 10 3zM8.5 15a1.5 1.5 0 0 0 3 0',
+  telefon: 'M6.5 2.5h7a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1zM8.75 15h2.5',
+};
+
+/** Was hereinkommt. Die Farben sind die der Kanaele auf der Startseite. */
+const herein = [
+  { art: 'whatsapp' as const, name: 'WhatsApp', farbe: '#1aa851' },
+  { art: 'anruf' as const, name: 'Verpasster Anruf', farbe: '#a93d28' },
+  { art: 'formular' as const, name: 'Formular', farbe: '#2b2f7a' },
+  { art: 'google' as const, name: 'Google', farbe: '#a63082' },
+];
+
+/** Was herauskommt. */
+const heraus = [
+  { art: 'kalender' as const, name: 'Termin im Kalender', farbe: '#2b2f7a' },
+  { art: 'erinnerung' as const, name: 'Erinnerung', farbe: '#a63082' },
+  { art: 'telefon' as const, name: 'Notiz auf Ihrem Telefon', farbe: '#a93d28' },
+];
+
+type Punkt = { x: number; y: number };
+
+/**
+ * Baut die Koordinaten einer Fassung.
+ *
+ * `quer` legt die Eingaenge links, die Ausgaenge rechts. `hoch` legt sie
+ * oben und unten. Alles andere -- Pfade, Zeichen, Farben -- ergibt sich
+ * daraus und steht nur einmal im Markup weiter unten.
+ */
+function bauen(quer: boolean) {
+  const breite = quer ? 560 : 320;
+  const hoehe = quer ? 300 : 452;
+  const mitte: Punkt = { x: breite / 2, y: hoehe / 2 };
+
+  const streuen = (anzahl: number, laenge: number, rand: number) =>
+    Array.from({ length: anzahl }, (_, i) =>
+      anzahl === 1 ? laenge / 2 : rand + (i * (laenge - 2 * rand)) / (anzahl - 1),
+    );
+
+  const ein: Punkt[] = quer
+    ? streuen(herein.length, hoehe, 42).map((y) => ({ x: 46, y }))
+    : streuen(herein.length, breite, 38).map((x) => ({ x, y: 36 }));
+
+  const aus: Punkt[] = quer
+    ? streuen(heraus.length, hoehe, 62).map((y) => ({ x: breite - 46, y }))
+    : streuen(heraus.length, breite, 52).map((x) => ({ x, y: hoehe - 36 }));
+
+  /* Eine Kurve mit EINEM Kontrollpunkt. Er sitzt auf halber Strecke, aber
+     auf der Hoehe des Ausgangspunkts -- dadurch verlaesst der Weg den
+     Punkt waagerecht (bzw. senkrecht) und biegt erst danach zur Mitte.
+     Eine gerade Linie zwischen zwei Punkten sieht aus wie ein Diagramm,
+     eine Kurve wie eine Leitung. */
+  const pfad = (a: Punkt, b: Punkt) =>
+    quer
+      ? `M ${a.x},${a.y} Q ${(a.x + b.x) / 2},${a.y} ${b.x},${b.y}`
+      : `M ${a.x},${a.y} Q ${a.x},${(a.y + b.y) / 2} ${b.x},${b.y}`;
+
+  /* WICHTIG FUER DIE LESERICHTUNG: die Eingangswege sind von aussen zur
+     Mitte gezeichnet, die Ausgangswege von der Mitte nach aussen. Damit
+     laeuft dasselbe Licht auf beiden immer VOM Anfang ZUM Ende des Pfades
+     -- also herein und wieder heraus -- und es braucht keine zweite
+     Animation in Gegenrichtung.
+
+     Die Startzeiten erzaehlen die Reihenfolge: erst treffen die vier
+     Kanaele nacheinander ein, dann faengt die Mitte an auszugeben. Liefen
+     alle sieben gleichzeitig los, saehe man ein Flimmern statt eines
+     Ablaufs. */
+  const takt = 0.35;
+
+  return {
+    breite,
+    hoehe,
+    mitte,
+    wege: [
+      ...ein.map((p, i) => ({
+        d: pfad(p, mitte),
+        farbe: herein[i]!.farbe,
+        los: i * takt,
+      })),
+      ...aus.map((p, i) => ({
+        d: pfad(mitte, p),
+        farbe: heraus[i]!.farbe,
+        los: 1.9 + i * takt,
+      })),
+    ],
+    knoten: [
+      ...ein.map((p, i) => ({ ...p, ...herein[i]! })),
+      ...aus.map((p, i) => ({ ...p, ...heraus[i]! })),
+    ],
+  };
+}
+
+const fassungen = [
+  { name: 'quer', ...bauen(true) },
+  { name: 'hoch', ...bauen(false) },
+];
+---
+
+{/* `data-chat` ist hier kein Chat, sondern die Anmeldung beim EINEN
+    Beobachter in `Base.astro`: er setzt `data-laeuft`, sobald das Element
+    zu sehen ist. Ein zweiter Beobachter nur fuer den Schaltplan waere eine
+    zweite Stelle, an der dieselbe Regel steht. */}
+<div class:list={['plan', className]} data-chat>
+  {
+    fassungen.map((f) => (
+      <svg
+        class={`plan-bild plan-${f.name}`}
+        viewBox={`0 0 ${f.breite} ${f.hoehe}`}
+        fill="none"
+        role="img"
+        aria-label={
+          `Schaubild: ${herein.map((k) => k.name).join(', ')} laufen bei der ` +
+          `Assistenz zusammen; daraus entstehen ${heraus.map((k) => k.name).join(', ')}.`
+        }
+      >
+        {/* Erst alle Wege, dann alle Punkte: so liegen die Punkte oben und
+            die Leitungen verschwinden sauber unter ihnen. */}
+        {f.wege.map((w) => (
+          <>
+            <path class="plan-weg" d={w.d} stroke="currentColor" stroke-linecap="round" />
+            <path
+              class="plan-licht"
+              d={w.d}
+              stroke={w.farbe}
+              stroke-linecap="round"
+              pathLength="100"
+              style={`--los:${w.los.toFixed(2)}s`}
+            />
+          </>
+        ))}
+
+        {/* Die Mitte. Groesser als die anderen, mit einem Ring, der
+            langsam atmet -- hier laeuft alles zusammen, und das Ding
+            arbeitet auch dann, wenn gerade nichts hereinkommt. */}
+        <circle class="plan-puls" cx={f.mitte.x} cy={f.mitte.y} r="30" />
+        <circle class="plan-mitte" cx={f.mitte.x} cy={f.mitte.y} r="26" />
+        <g
+          class="plan-mitte-zeichen"
+          transform={`translate(${f.mitte.x - 11} ${f.mitte.y - 11}) scale(1.1)`}
+        >
+          <path
+            d={zeichen.assistenz}
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </g>
+
+        {f.knoten.map((k) => (
+          <>
+            <circle
+              class="plan-knoten"
+              cx={k.x}
+              cy={k.y}
+              r="19"
+              style={`--farbe:${k.farbe}`}
+            />
+            <g
+              transform={`translate(${k.x - 10} ${k.y - 10})`}
+              style={`--farbe:${k.farbe}`}
+              class="plan-knoten-zeichen"
+            >
+              <path
+                d={zeichen[k.art]}
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </g>
+          </>
+        ))}
+      </svg>
+    ))
+  }
+
+  {/* Die Beschriftung steht als Text daneben, nicht im Bild. Schrift im
+      SVG skaliert mit dem Schaubild und waere auf dem Telefon
+      unleserlich klein -- und fuer eine Sprachausgabe waere sie in
+      dieser Reihenfolge ohnehin wirr. */}
+  <div class="plan-legende">
+    <div class="plan-spalte">
+      <p class="plan-titel kennung">Kommt herein</p>
+      <ul>
+        {herein.map((k) => (
+          <li>
+            <span class="plan-punkt" style={`--farbe:${k.farbe}`} aria-hidden="true" />
+            {k.name}
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="plan-spalte">
+      <p class="plan-titel kennung">Geht heraus</p>
+      <ul>
+        {heraus.map((k) => (
+          <li>
+            <span class="plan-punkt" style={`--farbe:${k.farbe}`} aria-hidden="true" />
+            {k.name}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</div>
+
+<style>
+  .plan {
+    display: grid;
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+    align-items: center;
+  }
+
+  @media (width >= 64rem) {
+    .plan {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 15rem);
+    }
+  }
+
+  .plan-bild {
+    width: 100%;
+    height: auto;
+    /* Farbe der ruhenden Leitungen. Nicht `--color-border-strong`: das ist
+       die Farbe fuer Kartenraender auf grossen Flaechen und verschwindet
+       als 1,5 Punkte duenne Linie ueber weissem Grund fast vollstaendig. */
+    color: var(--color-ink-faint);
+    overflow: visible;
+  }
+
+  .plan-quer {
+    display: none;
+  }
+
+  @media (width >= 48rem) {
+    .plan-quer {
+      display: block;
+    }
+    .plan-hoch {
+      display: none;
+    }
+  }
+
+  /* Die ruhende Leitung muss man sehen, auch wenn gerade kein Licht
+     darauf laeuft -- sonst schweben sieben Kreise ohne Zusammenhang im
+     Raum und der Plan erklaert nichts mehr, sobald die Animation aus ist
+     (reduzierte Bewegung, Ausdruck, Bildschirmfoto). Der erste Entwurf
+     stand auf 0,55 und war auf hellem Grund praktisch weg. */
+  .plan-weg {
+    stroke-width: 1.5;
+    opacity: 0.38;
+  }
+
+  /* Ein kurzer Strich auf einer langen Luecke, der am Weg entlanggeschoben
+     wird. `pathLength="100"` steht am Element: damit ist jede Weglaenge auf
+     100 Einheiten normiert, und dieselben Zahlen ergeben auf dem kurzen wie
+     auf dem langen Weg dieselbe Lichtlaenge und dasselbe Tempo.
+
+     DIE ZAHLEN MUESSEN GENAU SO STEHEN. Das Muster ist 18 + 100 = 118 lang,
+     der Weg 100. Bei Versatz 18 liegt der Strich auf -18 bis 0, also gerade
+     noch vor dem Anfang; bei -100 auf 100 bis 118, also gerade hinter dem
+     Ende. Dazwischen wandert genau EIN Strich ueber den Weg. Der erste
+     Entwurf lief von 118 auf 0 -- rechnerisch derselbe Startpunkt wie 0,
+     weshalb an beiden Enden gleichzeitig ein Strich klebte. */
+  .plan-licht {
+    stroke-width: 2.5;
+    stroke-dasharray: 18 100;
+    stroke-dashoffset: 18;
+    opacity: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .plan-licht,
+    .plan-puls {
+      /* KEINE KURZSCHREIBWEISE. Die Einzeleigenschaften stehen hier
+         absichtlich ausgeschrieben -- so wie ueberall auf dieser Seite, wo
+         Animationen laufen. */
+      animation-duration: 5.4s;
+      animation-iteration-count: infinite;
+      /* Laeuft erst, wenn der Plan zu sehen ist. Sonst ist der Ablauf
+         vorbei, bevor jemand hinsieht -- und bis dahin rechnet der Browser
+         sieben Pfadanimationen ins Leere, auf dem Telefon spuerbar. */
+      animation-play-state: paused;
+    }
+
+    [data-laeuft] .plan-licht,
+    [data-laeuft] .plan-puls {
+      animation-play-state: running;
+    }
+
+    .plan-licht {
+      animation-name: licht-laufen;
+      animation-timing-function: cubic-bezier(0.45, 0, 0.35, 1);
+      animation-delay: var(--los, 0s);
+    }
+
+    .plan-puls {
+      animation-name: mitte-atmen;
+      animation-timing-function: ease-in-out;
+      transform-origin: center;
+      transform-box: fill-box;
+    }
+  }
+
+  /* Der Lauf nimmt die ersten 45 Prozent des Takts ein, danach ist der Weg
+     dunkel. Diese Pause ist der Unterschied zwischen einem Schaubild, das
+     etwas erzaehlt, und einer Lichterkette. */
+  @keyframes licht-laufen {
+    0% { stroke-dashoffset: 18; opacity: 0; }
+    4% { opacity: 1; }
+    40% { opacity: 1; }
+    45% { stroke-dashoffset: -100; opacity: 0; }
+    100% { stroke-dashoffset: -100; opacity: 0; }
+  }
+
+  @keyframes mitte-atmen {
+    0%, 100% { transform: scale(1); opacity: 0.32; }
+    50% { transform: scale(1.16); opacity: 0.1; }
+  }
+
+  .plan-puls {
+    fill: color-mix(in oklab, var(--color-accent) 22%, transparent);
+  }
+
+  .plan-mitte {
+    fill: var(--color-surface);
+    stroke: var(--color-accent);
+    stroke-width: 1.5;
+  }
+
+  .plan-mitte-zeichen {
+    color: var(--color-accent);
+  }
+
+  .plan-knoten {
+    fill: var(--color-surface);
+    stroke: color-mix(in oklab, var(--farbe) 60%, transparent);
+    stroke-width: 1.5;
+  }
+
+  .plan-knoten-zeichen {
+    color: var(--farbe);
+  }
+
+  /* --- Beschriftung ------------------------------------------------------- */
+  .plan-legende {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  @media (width >= 30rem) and (width < 64rem) {
+    .plan-legende {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .plan-titel {
+    margin: 0 0 0.6rem;
+    color: var(--color-ink-faint);
+  }
+
+  .plan-spalte ul {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.9375rem;
+    color: var(--color-ink);
+  }
+
+  .plan-spalte li {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .plan-punkt {
+    width: 0.5rem;
+    height: 0.5rem;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: var(--farbe);
+  }
+</style>

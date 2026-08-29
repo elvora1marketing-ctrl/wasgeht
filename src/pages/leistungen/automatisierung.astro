@@ -7,6 +7,7 @@ import ModuleVisual from '~/components/ModuleVisual.astro';
 import Band from '~/components/Band.astro';
 import Liste from '~/components/Liste.astro';
 import Telefonkarussell from '~/components/Telefonkarussell.astro';
+import Schaltplan from '~/components/Schaltplan.astro';
 import { modulGespraeche, modulGespraechFolge } from '~/lib/modulchats';
 import Geraet from '~/components/Geraet.astro';
 import Iphone from '~/components/Iphone.astro';
@@ -133,9 +134,26 @@ const painPoints = [
     </div>
   </Band>
 
-  {/* ===================== Die Module ===================== */}
+  {/* ===================== Der Schaltplan =====================
+
+      Steht ABSICHTLICH ZWISCHEN Problem und Modulliste. Der Chatverlauf
+      darueber zeigt EINEN Kanal von innen; die Modulliste darunter zeigt
+      sieben Einzelteile. Dazwischen fehlte die Antwort auf die Frage, die
+      sich beim Lesen zwangslaeufig stellt: wo laeuft das alles zusammen?
+      Ohne diese Sektion wirken die Module wie sieben lose Werkzeuge statt
+      wie eine Anlage. */}
   <Band
     ton="gedaempft"
+    kennung="Wie es zusammenläuft"
+    heading="Vier Wege herein, eine Stelle, die sie annimmt"
+    intro="Ob WhatsApp, ein verpasster Anruf, das Formular oder Google: alles landet an derselben Stelle. Dort wird geantwortet, ein Termin eingetragen, nachgefasst — und Sie bekommen die Notiz aufs Telefon."
+  >
+    <Schaltplan class="aufziehen" />
+  </Band>
+
+  {/* ===================== Die Module ===================== */}
+  <Band
+    ton="hell"
     kennung="Die Module"
     heading="Sieben Module, die bereits laufen"
     intro="Nichts davon ist ein Konzept oder eine Absichtserklärung. Alles hier ist im Einsatz und lässt sich für Ihren Betrieb einrichten."
