@@ -1,0 +1,276 @@
+---
+import type { GeplanteWirkung, WirkungArt } from '~/lib/chat';
+
+/**
+ * Das Protokoll der Automatisierung, neben dem Verlauf.
+ *
+ * WARUM ES DAS GIBT
+ *
+ * Eine Blase mit „Eingetragen: Donnerstag, 18:00 Uhr" ist eine Behauptung.
+ * Man sieht einen Chat, und Chats kann jeder von Hand tippen. Was man
+ * nicht sieht, ist die Arbeit dahinter: dass ein Kalender abgefragt, ein
+ * Termin geschrieben, eine Erinnerung gesetzt und eine Notiz weiter-
+ * gereicht wurde -- in derselben Sekunde, in der die Antwort herausging.
+ *
+ * Genau das ist aber das Produkt. Hier läuft es mit, Schritt für Schritt,
+ * zeitgleich mit den Blasen. Aus „ein Bot schreibt zurück" wird „ein
+ * System arbeitet".
+ *
+ * WARUM ES BEWUSST NICHT AUSSIEHT WIE DER CHAT
+ *
+ * Der Verlauf ist warm, rund und in der Grundschrift. Das Protokoll ist
+ * schmal, eckig und in der Mono. Zwei Dinge, die dasselbe erzählen, dürfen
+ * nicht gleich aussehen -- sonst liest man das zweite gar nicht mehr. Der
+ * Bruch zwischen beiden ist die Aussage: vorne der Mensch, hinten die
+ * Maschine.
+ *
+ * ZEITEN AUS DERSELBEN QUELLE. `planen()` rechnet sie zusammen mit den
+ * Blasen aus, sie können also nicht auseinanderlaufen. Zur Laufzeit
+ * rechnet nichts nach, es läuft kein Skript mit.
+ */
+interface Props {
+  wirkungen: GeplanteWirkung[];
+  /** Sekunde, in der die Abschlusszeile steht. */
+  fertig: number;
+  /** Zeile ganz unten. Der Satz, auf den das Ganze hinausläuft. */
+  bilanz?: string;
+  class?: string;
+}
+
+const {
+  wirkungen,
+  fertig,
+  bilanz = 'Ihr Aufwand: nichts.',
+  class: className = '',
+}: Props = Astro.props;
+
+/* Ein Zeichen je Art. Im 20er-Raster wie überall auf der Seite. */
+const zeichen: Record<WirkungArt, string> = {
+  erkannt: 'M2.5 10s2.8-4.5 7.5-4.5S17.5 10 17.5 10s-2.8 4.5-7.5 4.5S2.5 10 2.5 10zM10 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4z',
+  kalender: 'M4 5h12a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zM3 9h14M7 3v3M13 3v3M7.5 12.5l1.5 1.5 3-3',
+  erinnerung: 'M10 3a4.5 4.5 0 0 0-4.5 4.5c0 3-1.5 4.5-1.5 4.5h12s-1.5-1.5-1.5-4.5A4.5 4.5 0 0 0 10 3zM8.5 15a1.5 1.5 0 0 0 3 0',
+  notiz: 'M5 3h7l3 3v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM11.5 3v3.5H15M6.5 10h7M6.5 13h4.5',
+  weitergabe: 'M3 10h10M10 6l4 4-4 4M15.5 4.5v11',
+  suche: 'M9 4a5 5 0 1 0 0 10A5 5 0 0 0 9 4zM13 13l4 4',
+  kontakt: 'M10 4a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM4 17c0-3 2.7-5 6-5s6 2 6 5',
+};
+---
+
+{
+  wirkungen.length > 0 && (
+    <div
+      class:list={['mraum', className]}
+      data-chat
+      style={`--fertig:${fertig.toFixed(2)}s`}
+    >
+      <p class="mraum-kopf kennung">
+        <span class="mraum-lampe" aria-hidden="true" />
+        Im Hintergrund
+      </p>
+
+      {/* `aria-hidden`, und das ist Absicht: für eine Sprachausgabe ist das
+          Protokoll eine Wiederholung dessen, was im Verlauf ohnehin steht,
+          nur in Stichworten. Zweimal dieselbe Information vorgelesen ist
+          nicht mehr Zugänglichkeit, sondern weniger. */}
+      <ol class="mraum-liste" aria-hidden="true">
+        {wirkungen.map((w) => (
+          <li class="mraum-zeile" style={`--ab:${w.ab.toFixed(2)}s`}>
+            <span class="mraum-marke">
+              <svg
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d={zeichen[w.art]} />
+              </svg>
+            </span>
+            <span class="mraum-text">{w.text}</span>
+          </li>
+        ))}
+      </ol>
+
+      <p class="mraum-bilanz">{bilanz}</p>
+    </div>
+  )
+}
+
+<style>
+  .mraum {
+    --spur: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+    max-width: 22rem;
+    padding: 0.9rem 1rem 0.95rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    /* Kühl und leicht getönt gegen das Weiß der Seite: das hier ist ein
+       anderer Ort als der Chat, und das soll man sehen, bevor man liest. */
+    background: color-mix(in oklab, #2b2f7a 3.5%, var(--color-surface));
+  }
+
+  .mraum-kopf {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0;
+    color: var(--color-ink-faint);
+  }
+
+  /* Eine Lampe, die im Takt der Maschine blinkt -- langsam, nicht als
+     Alarm. Sie läuft durchgehend, auch wenn gerade kein Eintrag kommt:
+     das Ding ist an, auch wenn es nichts zu tun gibt. */
+  .mraum-lampe {
+    width: 0.4rem;
+    height: 0.4rem;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: var(--color-success);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .mraum-lampe {
+      animation: mraum-lampe 2.6s ease-in-out infinite;
+    }
+  }
+
+  @keyframes mraum-lampe {
+    0%, 100% { opacity: 1; }
+    55% { opacity: 0.25; }
+  }
+
+  .mraum-liste {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    margin: 0.15rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Die Schiene, an der die Einträge hängen. Sie macht aus einer Liste
+     eine Kette: eins nach dem anderen, alles zusammenhängend. */
+  .mraum-liste::before {
+    content: '';
+    position: absolute;
+    left: calc(var(--spur) / 2 - 0.5px);
+    top: 0.55rem;
+    bottom: 0.55rem;
+    width: 1px;
+    background: var(--color-border);
+  }
+
+  .mraum-zeile {
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--spur) minmax(0, 1fr);
+    align-items: start;
+    gap: 0.6rem;
+  }
+
+  .mraum-marke {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--spur);
+    height: var(--spur);
+    border-radius: 999px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-strong);
+    color: #2b2f7a;
+  }
+
+  .mraum-marke svg {
+    width: 0.8rem;
+    height: 0.8rem;
+  }
+
+  .mraum-text {
+    padding-top: 0.1rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1.45;
+    color: var(--color-ink);
+  }
+
+  .mraum-bilanz {
+    margin: 0.35rem 0 0;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--color-border);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+    color: var(--color-success);
+  }
+
+  /* --- Ablauf --------------------------------------------------------------
+   * Gesteuert wie die Verläufe: `data-laeuft` setzt der Beobachter in
+   * `Base.astro`, sobald das Ding zu sehen ist. Ohne Skript und vor dem
+   * Start steht das Protokoll vollständig da -- besser ein fertiges
+   * Protokoll als ein leerer Kasten.
+   *
+   * Die Einträge kommen NICHT weich hereingeglitten wie die Chatblasen.
+   * Sie klacken an: kurz, hart, mit einem Aufblitzen der Marke. Eine
+   * Maschine bewegt sich nicht geschmeidig, sie schaltet. */
+  :global(html[data-js]) .mraum[data-chat]:not([data-laeuft]):not([data-fertig]) .mraum-zeile,
+  :global(html[data-js]) .mraum[data-chat]:not([data-laeuft]):not([data-fertig]) .mraum-bilanz {
+    opacity: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .mraum[data-laeuft] .mraum-zeile {
+      animation-name: mraum-schalten;
+      animation-duration: 0.22s;
+      animation-timing-function: steps(3, jump-start);
+      animation-fill-mode: both;
+      animation-delay: var(--ab);
+    }
+
+    .mraum[data-laeuft] .mraum-zeile .mraum-marke {
+      animation-name: mraum-blitz;
+      animation-duration: 0.5s;
+      animation-timing-function: ease-out;
+      animation-fill-mode: both;
+      animation-delay: var(--ab);
+    }
+
+    .mraum[data-laeuft] .mraum-bilanz {
+      animation-name: mraum-schalten;
+      animation-duration: 0.3s;
+      animation-timing-function: ease-out;
+      animation-fill-mode: both;
+      animation-delay: var(--fertig);
+    }
+  }
+
+  @keyframes mraum-schalten {
+    from {
+      opacity: 0;
+      transform: translateX(-0.4rem);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Die Marke leuchtet einmal in der Markenfarbe auf und beruhigt sich.
+     Das ist der Moment, in dem der Schritt passiert. */
+  @keyframes mraum-blitz {
+    0% {
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+      color: #fff;
+    }
+    100% {
+      background: var(--color-surface);
+      border-color: var(--color-border-strong);
+      color: #2b2f7a;
+    }
+  }
+</style>

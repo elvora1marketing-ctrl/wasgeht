@@ -1,6 +1,8 @@
 ---
 import Iphone from './Iphone.astro';
 import Chat from './Chat.astro';
+import Maschinenraum from './Maschinenraum.astro';
+import { planen } from '~/lib/chat';
 import type { Gespraech } from '~/lib/chat';
 
 /**
@@ -38,6 +40,14 @@ interface Props {
   bildunterschrift?: string;
   /** Breite des vorderen Telefons. */
   breite?: string;
+  /**
+   * Das Protokoll der Automatisierung unter dem Gerät.
+   *
+   * Zeigt, was die Assistenz in jedem Moment GETAN hat -- nicht, was sie
+   * geschrieben hat. Ohne das ist der Verlauf nur ein Chat, und einen
+   * Chat kann jeder von Hand tippen.
+   */
+  protokoll?: boolean;
   class?: string;
 }
 
@@ -46,10 +56,17 @@ const {
   gespraeche,
   bildunterschrift,
   breite = '15.5rem',
+  protokoll = false,
   class: className = '',
 }: Props = Astro.props;
 
 const drei = gespraeche.slice(0, 3);
+
+/* Die Zeiten des Protokolls kommen aus derselben Rechnung wie die Blasen.
+   Jeder Verlauf wird EINZELN geplant, damit seine Zeiten bei null
+   anfangen -- im Karussell läuft immer nur einer, und der beginnt beim
+   Umschalten von vorn. */
+const plaene = protokoll ? drei.map((g) => planen([g], 'kunde').folge[0]) : [];
 
 /* Wohin die Pfeile je Zustand zeigen: im Kreis. */
 const zurueck = [2, 0, 1];
@@ -85,6 +102,20 @@ const vor = [1, 2, 0];
       }
     </ol>
   </div>
+
+  {
+    protokoll && (
+      <div class="karussell-protokolle">
+        {plaene.map((p, i) => (
+          <Maschinenraum
+            class={`karussell-protokoll karussell-protokoll-${i}`}
+            wirkungen={p.wirkungen}
+            fertig={p.fertig}
+          />
+        ))}
+      </div>
+    )
+  }
 
   <div class="karussell-steuer">
     {/* Je Zustand ein anderes Ziel, deshalb drei Fassungen je Pfeil.
@@ -401,5 +432,38 @@ const vor = [1, 2, 0];
     text-transform: uppercase;
     color: var(--color-ink-faint);
     text-align: center;
+  }
+
+  /* --- Das Protokoll unter dem Geraet -------------------------------------
+   * Alle drei liegen uebereinander in derselben Rasterzelle, sichtbar ist
+   * nur das zum vorderen Telefon. Dieselbe Technik wie bei den Geraeten
+   * selbst -- und dieselbe `:has()`-Abfrage, damit beim Umschalten Telefon
+   * und Protokoll GARANTIERT dasselbe zeigen. Zwei getrennte Regeln
+   * liefen frueher oder spaeter auseinander, und dann steht neben dem
+   * einen Verlauf das Protokoll eines anderen.
+   *
+   * Die Hoehe richtet sich nach dem laengsten der drei: sonst springt der
+   * Inhalt darunter beim Umschalten. */
+  .karussell-protokolle {
+    display: grid;
+    justify-items: center;
+    width: 100%;
+    margin-top: 0.25rem;
+  }
+
+  .karussell-protokoll {
+    grid-area: 1 / 1;
+    transition: opacity 0.28s ease-out;
+  }
+
+  /* Nur das aktive nimmt Klicks an; die verdeckten liegen darunter. */
+  .karussell:has(.karussell-wahl:nth-of-type(1):checked) .karussell-protokoll-1,
+  .karussell:has(.karussell-wahl:nth-of-type(1):checked) .karussell-protokoll-2,
+  .karussell:has(.karussell-wahl:nth-of-type(2):checked) .karussell-protokoll-0,
+  .karussell:has(.karussell-wahl:nth-of-type(2):checked) .karussell-protokoll-2,
+  .karussell:has(.karussell-wahl:nth-of-type(3):checked) .karussell-protokoll-0,
+  .karussell:has(.karussell-wahl:nth-of-type(3):checked) .karussell-protokoll-1 {
+    opacity: 0;
+    pointer-events: none;
   }
 </style>

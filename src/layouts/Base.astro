@@ -242,22 +242,39 @@ const {
           return 0;
         }
 
+        /* Zu jedem Telefon gehoert das Protokoll mit derselben Nummer.
+           Beide muessen GEMEINSAM starten und stoppen, sonst laeuft neben
+           dem einen Verlauf das Protokoll eines anderen -- und genau das
+           ist zuerst passiert: das Protokoll liegt ausserhalb des
+           Telefons, wurde vom Beobachter nie erfasst und blieb dauerhaft
+           ein leerer Kasten mit einer Schiene darin. */
+        function stuecke(k, i) {
+          return [].slice.call(k.querySelectorAll(
+            '.karussell-telefon-' + i + ' [data-chat], .karussell-protokoll-' + i));
+        }
+
         function karussellStellen(k) {
           var aktiv = vorderesIndex(k);
-          var telefone = k.querySelectorAll('.karussell-telefon');
-          [].forEach.call(telefone, function (t, i) {
-            [].forEach.call(t.querySelectorAll('[data-chat]'), function (c) {
+          var anzahl = k.querySelectorAll('.karussell-telefon').length;
+
+          for (var i = 0; i < anzahl; i++) {
+            var teile = stuecke(k, i);
+            for (var j = 0; j < teile.length; j++) {
+              var c = teile[j];
               if (i === aktiv) {
                 c.removeAttribute('data-fertig');
                 loeschen(c, 'data-laeuft');
+                /* Erzwingt eine Neuberechnung. Ohne sie fasst der Browser
+                   Entfernen und Setzen zu nichts zusammen und die
+                   Animation laeuft einfach weiter, statt neu zu starten. */
                 void c.offsetWidth;
                 starten(c);
               } else {
                 loeschen(c, 'data-laeuft');
                 setzen(c, 'data-fertig');
               }
-            });
-          });
+            }
+          }
         }
 
         karussells.forEach(function (k) {

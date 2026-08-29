@@ -23,14 +23,67 @@ export type Rolle = 'kunde' | 'assistenz';
  */
 export type Blickwinkel = 'kunde' | 'betrieb';
 
+/**
+ * Was die Automatisierung im Hintergrund getan hat.
+ *
+ * DER GRUND, WARUM ES DAS GIBT: Eine Blase mit dem Text „Eingetragen:
+ * Donnerstag, 18:00 Uhr" ist eine BEHAUPTUNG. Man sieht einen Chat, und
+ * Chats kann jeder von Hand tippen. Was man nicht sieht, ist die Arbeit:
+ * dass ein Kalender abgefragt, ein Termin geschrieben, eine Erinnerung
+ * gesetzt und eine Notiz weitergereicht wurde -- alles in derselben
+ * Sekunde, in der die Antwort herausging.
+ *
+ * Genau das ist aber das Produkt. Deshalb laeuft neben dem Verlauf ein
+ * Protokoll mit, das jeden dieser Schritte in dem Moment zeigt, in dem er
+ * passiert. Aus „ein Bot schreibt zurueck" wird „ein System arbeitet".
+ */
+export type WirkungArt =
+  | 'erkannt'
+  | 'kalender'
+  | 'erinnerung'
+  | 'notiz'
+  | 'weitergabe'
+  | 'suche'
+  | 'kontakt';
+
+export interface Wirkung {
+  art: WirkungArt;
+  /** Was getan wurde, in der Sprache des Betriebs und nicht der Technik. */
+  text: string;
+}
+
 export interface Nachricht {
   von: Rolle;
   text: string;
   /** Uhrzeit an der Blase. */
   zeit: string;
+  /**
+   * Was die Assistenz in diesem Moment getan hat. Steht im Protokoll
+   * neben dem Verlauf, zeitgleich mit der Blase.
+   */
+  wirkung?: Wirkung | Wirkung[];
 }
 
+/**
+ * Der Rhythmus eines Verlaufs.
+ *
+ * VORHER LIEF ALLES IM GLEICHEN TAKT. Drei Telefone nebeneinander, jedes
+ * mit derselben Vorlaufzeit, derselben Tippdauer, denselben Pausen -- und
+ * dadurch mit derselben Melodie. Nach dem ersten Verlauf kannte man den
+ * zweiten schon, und Wiederholung ist das Gegenteil von Aufmerksamkeit.
+ *
+ * Ein Notfall um Viertel nach acht wird anders getippt als eine Frage um
+ * kurz nach sechs Uhr morgens. Die drei Profile bilden das ab:
+ *
+ * `dringend`  Kurze Saetze, schnelles Tippen, kaum Pausen. Es brennt.
+ * `sachlich`  Der Normalfall. Ruhig, aber ohne Trödeln.
+ * `bedacht`   Jemand schreibt abends nebenbei, denkt zwischendurch nach.
+ */
+export type Takt = 'dringend' | 'sachlich' | 'bedacht';
+
 export interface Gespraech {
+  /** Rhythmus dieses Verlaufs. Ohne Angabe `sachlich`. */
+  takt?: Takt;
   /** Name im Kopf des Verlaufs. */
   name?: string;
   /** Zeile unter dem Namen. */
@@ -44,6 +97,11 @@ export interface Gespraech {
   /** Ersetzt die errechneten Anfangsbuchstaben, etwa bei Rufnummern. */
   kuerzel?: string;
   nachrichten: Nachricht[];
+}
+
+/** Ein Protokolleintrag mit dem Zeitpunkt, an dem er erscheint. */
+export interface GeplanteWirkung extends Wirkung {
+  ab: number;
 }
 
 export interface GeplanteNachricht extends Nachricht {
@@ -65,6 +123,8 @@ export interface GeplantesGespraech {
   bild?: string;
   kuerzel: string;
   nachrichten: GeplanteNachricht[];
+  /** Das Protokoll der Automatisierung, in derselben Zeitrechnung. */
+  wirkungen: GeplanteWirkung[];
   /** Sekunde, in der dieser Verlauf auf den Schirm kommt. */
   von: number;
   /** Sekunde, in der die letzte Nachricht steht. */
@@ -84,18 +144,62 @@ export interface GeplantesGespraech {
    noch langsamer wirkt es zaeh, und die Aussage der Vorfuehrung ist ja
    gerade, dass die Antwort schnell da ist. */
 
-/** Ruhe, bevor die erste Nachricht kommt. */
-const VORLAUF = 0.55;
-/** Grundzeit der Tippanzeige, unabhängig von der Länge. */
-const TIPP_GRUND = 0.9;
-/** Zuschlag je Zeichen, damit ein langer Text nicht sofort fertig ist. */
-const TIPP_JE_ZEICHEN = 0.018;
-/** Deckel, sonst wartet man bei langen Antworten zu lange. */
-const TIPP_DECKEL = 2.8;
-/** Pause, nachdem das Gegenüber geschrieben hat. */
-const PAUSE_LINKS = 1.35;
-/** Pause, nachdem die eigene Seite geschrieben hat. */
-const PAUSE_RECHTS = 1.45;
+/**
+ * Die Stellschrauben, je Takt einmal.
+ *
+ * Alle Werte sind gegenueber der ersten Fassung um rund ein Drittel
+ * gestreckt: der Ablauf lief zu hastig, die Blasen sprangen schneller
+ * herein, als man sie lesen konnte. Ein Verlauf, den man nicht mitlesen
+ * kann, zeigt nichts -- er flackert nur.
+ *
+ * `sachlich` ist dieser gestreckte Normalfall. `dringend` liegt rund ein
+ * Viertel darunter, `bedacht` ein Viertel darueber, mit spuerbar
+ * laengeren Denkpausen beim Kunden.
+ */
+interface Stellschrauben {
+  /** Ruhe, bevor die erste Nachricht kommt. */
+  vorlauf: number;
+  /** Grundzeit der Tippanzeige, unabhaengig von der Laenge. */
+  tippGrund: number;
+  /** Zuschlag je Zeichen, damit ein langer Text nicht sofort fertig ist. */
+  tippJeZeichen: number;
+  /** Deckel, sonst wartet man bei langen Antworten zu lange. */
+  tippDeckel: number;
+  /** Pause, nachdem das Gegenueber geschrieben hat. */
+  pauseLinks: number;
+  /** Pause, nachdem die eigene Seite geschrieben hat. */
+  pauseRechts: number;
+}
+
+const TAKTE: Record<Takt, Stellschrauben> = {
+  dringend: {
+    vorlauf: 0.3,
+    tippGrund: 0.55,
+    tippJeZeichen: 0.013,
+    tippDeckel: 1.9,
+    pauseLinks: 0.85,
+    pauseRechts: 0.7,
+  },
+  sachlich: {
+    vorlauf: 0.55,
+    tippGrund: 0.9,
+    tippJeZeichen: 0.018,
+    tippDeckel: 2.8,
+    pauseLinks: 1.35,
+    pauseRechts: 1.45,
+  },
+  bedacht: {
+    vorlauf: 0.9,
+    tippGrund: 1.05,
+    tippJeZeichen: 0.021,
+    tippDeckel: 3.2,
+    pauseLinks: 1.55,
+    /* Die lange Pause steht bewusst NACH der Nachricht des Kunden: er
+       legt das Telefon weg, liest die Antwort erst spaeter. Genau das
+       ist der Punkt der Assistenz -- sie wartet nicht mit. */
+    pauseRechts: 2.3,
+  },
+};
 
 /** Wie lange ein fertiger Verlauf stehen bleibt, bevor der nächste kommt. */
 export const HALTEN = 2.1;
@@ -133,20 +237,21 @@ export function planen(
   let start = 0;
 
   const folge = gespraeche.map((gespraech) => {
-    let uhr = VORLAUF;
+    const s = TAKTE[gespraech.takt ?? 'sachlich'];
+    let uhr = s.vorlauf;
 
     const nachrichten: GeplanteNachricht[] = gespraech.nachrichten.map((n) => {
       const links = n.von === linksRolle;
 
       if (!links) {
         const eintrag = { ...n, links, ab: uhr, tippenAb: 0, tippenDauer: 0 };
-        uhr += PAUSE_RECHTS;
+        uhr += s.pauseRechts;
         return eintrag;
       }
 
-      const tippenDauer = Math.min(TIPP_DECKEL, TIPP_GRUND + n.text.length * TIPP_JE_ZEICHEN);
+      const tippenDauer = Math.min(s.tippDeckel, s.tippGrund + n.text.length * s.tippJeZeichen);
       const eintrag = { ...n, links, tippenAb: uhr, tippenDauer, ab: uhr + tippenDauer };
-      uhr += tippenDauer + PAUSE_LINKS;
+      uhr += tippenDauer + s.pauseLinks;
       return eintrag;
     });
 
@@ -160,6 +265,20 @@ export function planen(
       tippenDauer: n.tippenDauer * tempo,
     }));
 
+    /* Das Protokoll kommt aus denselben Zeiten wie die Blasen -- es kann
+       also gar nicht auseinanderlaufen. Der kleine Nachlauf ist Absicht:
+       erst steht die Antwort da, einen Wimpernschlag spaeter zeigt das
+       Protokoll, was dafuer im Hintergrund passiert ist. Andersherum
+       saehe es aus, als kuendige die Maschine ihre eigene Antwort an. */
+    const wirkungen: GeplanteWirkung[] = [];
+    for (const n of skaliert) {
+      if (!n.wirkung) continue;
+      const liste = Array.isArray(n.wirkung) ? n.wirkung : [n.wirkung];
+      liste.forEach((w, i) => {
+        wirkungen.push({ ...w, ab: n.ab + 0.28 + i * 0.42 });
+      });
+    }
+
     const name = gespraech.name ?? 'Elvora';
     const letzte = skaliert[skaliert.length - 1];
     const fertig = letzte ? letzte.ab + 0.34 : start;
@@ -171,6 +290,7 @@ export function planen(
       bild: gespraech.bild,
       kuerzel: gespraech.kuerzel ?? kuerzelAus(name),
       nachrichten: skaliert,
+      wirkungen,
       von: start,
       fertig,
       bis: start + uhr * tempo + HALTEN,
