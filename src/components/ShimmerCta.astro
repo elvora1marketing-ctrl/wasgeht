@@ -1,0 +1,378 @@
+---
+/**
+ * DER Handlungsaufruf. Einer für die ganze Seite.
+ *
+ * Portiert aus der React-Vorlage „shimmer-button". Hier gibt es kein React
+ * und kein shadcn/ui, und die Vorlage braucht beides auch nicht: sie ist
+ * reines CSS. Der einzige React-Anteil war das Durchreichen der
+ * Einstellungen als Stil-Variablen, und das kann Astro genauso.
+ *
+ * Auch die vorgeschlagene Ergänzung der `tailwind.config.js` entfällt.
+ * Tailwind v4 hat keine mehr -- konfiguriert wird über `@theme` in der
+ * CSS. Die beiden Bildfolgen stehen deshalb direkt hier, bei dem
+ * Element, das sie braucht.
+ *
+ * WIE DER SCHIMMER ENTSTEHT
+ *
+ * Hinter dem Knopf dreht sich ein Kegelverlauf: ein heller Keil auf
+ * durchsichtigem Grund, der sich einmal pro Runde herumdreht. Der Keil
+ * sitzt in einem quadratischen Wagen, der gleichzeitig von links nach
+ * rechts und zurück fährt. Darüber liegt eine zweite Fläche in der
+ * Knopffarbe, die um 0,05em kleiner ist als der Knopf. Sie deckt den
+ * Verlauf ab -- bis auf einen haarfeinen Rand.
+ *
+ * Zu sehen ist also nur, was an diesem Rand vorbeikommt: ein Lichtpunkt,
+ * der am Umriss entlangwandert. Kein Blinken, kein Sprung, nichts, was
+ * den Text stört.
+ *
+ * WARUM DAS AUF EINEM AUFRUF ARBEITET
+ *
+ * Bewegung im Randblick zieht den Blick, das ist Reflex und nicht
+ * Geschmack. Ein Lichtpunkt, der ruhig am Rand entlangläuft, holt diesen
+ * Reflex ab, ohne dass irgendetwas unruhig aussieht -- und die
+ * Beschriftung bleibt in jedem Augenblick vollständig lesbar. Genau
+ * daran ist die vorige Fassung gescheitert.
+ *
+ * OHNE EINE ZEILE JAVASCRIPT. Läuft im Compositor, kostet nichts, und
+ * bei `prefers-reduced-motion` steht es einfach still.
+ */
+interface Props {
+  /** Verweis. Ohne ihn wird ein `<button>` gerendert. */
+  href?: string;
+  type?: 'button' | 'submit';
+  /**
+   * `marke`    -- Markenverlauf mit weißem Licht. Der Haupt-Aufruf.
+   * `hell`     -- Weiß mit Licht in der Akzentfarbe, für dunkle Tafeln.
+   *               Weißes Licht auf weißem Grund sähe man nicht.
+   * `whatsapp` -- WhatsApp-Grün. Für den zweiten Weg, der auf dieser
+   *               Seite überall angeboten wird.
+   */
+  ton?: 'marke' | 'hell' | 'whatsapp';
+  size?: 'sm' | 'md' | 'lg';
+  /** Über die volle Breite. */
+  breit?: boolean;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  href,
+  type = 'button',
+  ton = 'marke',
+  size = 'lg',
+  breit = false,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const Tag = href ? 'a' : 'button';
+---
+
+<Tag
+  class:list={['scta', `scta-${ton}`, `scta-${size}`, breit && 'scta-breit', className]}
+  {...(href ? { href } : { type })}
+  {...rest}
+>
+  {/* Der Wagen mit dem Lichtkeil. Liegt HINTER dem Knopfgrund (negative
+      Stapelnummer) und wird gleich darauf vom Deckel wieder verdeckt --
+      bis auf den Rand. */}
+  <span class="scta-funken" aria-hidden="true">
+    <span class="scta-wagen">
+      <span class="scta-keil"></span>
+    </span>
+  </span>
+
+  <span class="scta-text"><slot /></span>
+
+  {/* Ein Hauch Licht von unten in die Fläche hinein, wie bei einem
+      gewölbten Knopf. Wird beim Überfahren stärker und beim Drücken noch
+      stärker -- das ist die körperliche Rückmeldung. */}
+  <span class="scta-glanz" aria-hidden="true"></span>
+
+  {/* Der Deckel. Er MUSS nach dem Licht kommen und eine kleinere
+      Stapelnummer haben als der Text, sonst deckt er die Beschriftung mit
+      ab. */}
+  <span class="scta-deckel" aria-hidden="true"></span>
+</Tag>
+
+<style>
+  .scta {
+    /* Öffnungswinkel des Lichtkeils. Enger heißt schärferer Punkt. */
+    --spreizung: 90deg;
+    --lichtfarbe: #ffffff;
+    --rundung: 999px;
+    --tempo: 3s;
+    /* Wie weit der Deckel hinter dem Rand zurückbleibt, also die Dicke
+       der Lichtlinie. In `em`, damit sie mit der Schriftgröße mitwächst:
+       der große Aufruf bekommt eine kräftigere Linie als der kleine, und
+       das ist genau richtig.
+
+       KRÄFTIGER ALS IN DER VORLAGE (dort 0.05em). Die ist auf einen
+       schwarzen Knopf gerechnet, auf dem weißes Licht hart abstickt. Auf
+       dem Markenmagenta ist der Abstand kleiner, und bei 0.05em war die
+       Linie in normaler Größe kaum noch auszumachen -- man sah sie erst
+       im Vergrößerungsglas, und dann arbeitet sie nicht. */
+    --schnitt: 0.085em;
+    --grund: var(--color-accent);
+    --rand: rgb(255 255 255 / 0.12);
+
+    position: relative;
+    /* EIGENER STAPEL. Ohne das rutschen die Teile mit negativer
+       Stapelnummer hinter den Seitenhintergrund und der Schimmer ist
+       schlicht weg. */
+    z-index: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    /* Beschneidet den Wagen auf die Knopfform. */
+    overflow: hidden;
+    border: 1px solid var(--rand);
+    border-radius: var(--rundung);
+    background: var(--grund);
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transform: translateZ(0);
+    transition: transform 0.25s ease-out, box-shadow 0.25s ease-out;
+  }
+
+  .scta:hover {
+    transform: translateY(-1px);
+  }
+
+  .scta:active {
+    transform: translateY(1px);
+    transition-duration: 0.075s;
+  }
+
+  .scta:disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  /* --- Größen ------------------------------------------------------------- */
+  .scta-sm {
+    height: 2.5rem;
+    padding-inline: 1.1rem;
+    font-size: 0.875rem;
+  }
+
+  .scta-md {
+    height: 2.75rem;
+    padding-inline: 1.4rem;
+    font-size: 0.9375rem;
+  }
+
+  .scta-lg {
+    height: 3.25rem;
+    padding-inline: 1.9rem;
+    font-size: 1rem;
+  }
+
+  .scta-breit {
+    width: 100%;
+  }
+
+  /* Auf schmalen Schirmen immer über die volle Breite. Stand vorher an
+     jeder Verwendungsstelle einzeln als `max-sm:w-full` -- ein Dutzend
+     Mal dieselbe Entscheidung, und einmal war sie vergessen. */
+  @media (width < 40rem) {
+    .scta {
+      width: 100%;
+    }
+  }
+
+  /* --- Töne ---------------------------------------------------------------
+   * Der Grund ist überall ein Verlauf mit einem Lichtsaum oben, nicht eine
+   * flache Farbe. Das ist der Unterschied zwischen einer eingefärbten
+   * Fläche und etwas, das nach einer Taste aussieht, die man drücken
+   * kann. */
+  .scta-marke {
+    --grund:
+      linear-gradient(to bottom, rgb(255 255 255 / 0.16), rgb(255 255 255 / 0) 45%),
+      linear-gradient(160deg, #c2479f, #93307b);
+    --lichtfarbe: #ffffff;
+    color: #fff;
+    box-shadow: 0 1px 2px rgb(74 14 58 / 0.24), 0 8px 22px -10px rgb(74 14 58 / 0.45);
+  }
+
+  .scta-marke:hover {
+    box-shadow: 0 1px 2px rgb(74 14 58 / 0.26), 0 14px 30px -10px rgb(74 14 58 / 0.55);
+  }
+
+  /* WEISSES LICHT AUF WEISSEM GRUND SIEHT MAN NICHT. Auf den dunklen
+     Tafeln läuft der Punkt deshalb in der Akzentfarbe -- und bindet den
+     hellen Knopf nebenbei wieder an die Marke. */
+  .scta-hell {
+    --grund:
+      linear-gradient(to bottom, rgb(255 255 255 / 0.9), rgb(255 255 255 / 0) 50%),
+      linear-gradient(160deg, #ffffff, #eceaf1);
+    --lichtfarbe: var(--color-accent, #b23a94);
+    --rand: rgb(22 25 58 / 0.1);
+    color: var(--color-ink);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.2), 0 8px 22px -10px rgb(0 0 0 / 0.35);
+  }
+
+  .scta-hell:hover {
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.22), 0 14px 30px -10px rgb(0 0 0 / 0.45);
+  }
+
+  .scta-whatsapp {
+    --grund:
+      linear-gradient(to bottom, rgb(255 255 255 / 0.22), rgb(255 255 255 / 0) 45%),
+      linear-gradient(160deg, #2ee06f, #1aa851);
+    --lichtfarbe: #ffffff;
+    --rand: rgb(4 40 22 / 0.18);
+    /* Dunkler Text auf dem hellen Grün. Weiß auf #25d366 kommt nicht auf
+       den Kontrast, den eine Schaltfläche braucht. */
+    color: #06251a;
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgb(6 46 24 / 0.24), 0 8px 22px -10px rgb(6 46 24 / 0.45);
+  }
+
+  .scta-whatsapp:hover {
+    box-shadow: 0 1px 2px rgb(6 46 24 / 0.26), 0 14px 30px -10px rgb(6 46 24 / 0.55);
+  }
+
+  /* --- Der Schimmer -------------------------------------------------------- */
+  .scta-funken {
+    position: absolute;
+    inset: 0;
+    z-index: -30;
+    overflow: visible;
+    /* Weichzeichnen, damit aus der harten Kante des Verlaufs ein Licht
+       wird. Zwei Pixel reichen; mehr und der Punkt verschmiert zu einem
+       allgemeinen Leuchten, das man nicht mehr wandern sieht. */
+    filter: blur(2px);
+    /* Macht die Fläche zum Bezugsrahmen für `cqw`/`cqh` weiter unten.
+       Ohne `size` (statt `inline-size`) fehlt die Höhe und der Wagen
+       fällt auf null zusammen. */
+    container-type: size;
+  }
+
+  /* Quadratisch und so hoch wie der Knopf -- damit der Keil beim Drehen
+     in jeder Stellung von oben bis unten reicht. */
+  .scta-wagen {
+    position: absolute;
+    inset: 0;
+    height: 100cqh;
+    aspect-ratio: 1;
+  }
+
+  /* Übergroß, weil ein Rechteck beim Drehen über seine Ecken hinausragt.
+     Bliebe der Verlauf auf die eigene Fläche beschränkt, blitzte in den
+     Zwischenstellungen der Grund durch. */
+  .scta-keil {
+    position: absolute;
+    inset: -100%;
+    background: conic-gradient(
+      from calc(270deg - (var(--spreizung) * 0.5)),
+      transparent 0,
+      var(--lichtfarbe) var(--spreizung),
+      transparent var(--spreizung)
+    );
+  }
+
+  /* Der Deckel. Etwas kleiner als der Knopf, in derselben Farbe: was von
+     ihm nicht bedeckt wird, ist die Lichtlinie. */
+  .scta-deckel {
+    position: absolute;
+    inset: var(--schnitt);
+    z-index: -20;
+    border-radius: var(--rundung);
+    background: var(--grund);
+  }
+
+  .scta-glanz {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--rundung);
+    box-shadow: inset 0 -8px 10px rgb(255 255 255 / 0.12);
+    transition: box-shadow 0.3s ease-in-out;
+    pointer-events: none;
+  }
+
+  .scta:hover .scta-glanz {
+    box-shadow: inset 0 -6px 10px rgb(255 255 255 / 0.25);
+  }
+
+  .scta:active .scta-glanz {
+    box-shadow: inset 0 -10px 10px rgb(255 255 255 / 0.25);
+  }
+
+  /* Auf dem hellen Knopf zieht ein weißer Schein nach innen gar nichts.
+     Dort ist es ein Hauch Schatten, sonst wirkt er flach. */
+  .scta-hell .scta-glanz {
+    box-shadow: inset 0 -8px 10px rgb(22 25 58 / 0.07);
+  }
+
+  .scta-hell:hover .scta-glanz {
+    box-shadow: inset 0 -6px 10px rgb(22 25 58 / 0.12);
+  }
+
+  .scta-hell:active .scta-glanz {
+    box-shadow: inset 0 -10px 10px rgb(22 25 58 / 0.12);
+  }
+
+  .scta-text {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    /* Über allem. Ohne eigene Stapelnummer läge der Deckel darüber. */
+    z-index: 1;
+  }
+
+  /* Zeichen im Aufruf, etwa das WhatsApp-Zeichen. */
+  .scta-text :global(svg) {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+  }
+
+  /* --- Bewegung ------------------------------------------------------------
+   * Zwei Bildfolgen, die zusammen den Punkt am Rand entlangschicken:
+   * `fahren` schiebt den Wagen quer durch den Knopf und wieder zurück,
+   * `kreisen` dreht den Keil darin. Die Drehung hält bei 90 und 270 Grad
+   * kurz an -- dadurch verweilt das Licht an den Seiten, statt gleichmäßig
+   * durchzurauschen, und das ist der Unterschied zwischen „etwas dreht
+   * sich" und „da wandert ein Glanzlicht".
+   *
+   * Die Drehung braucht die doppelte Zeit der Fahrt. Bei gleicher Dauer
+   * stünde der Keil an denselben Stellen wie beim letzten Mal und das
+   * Muster wiederholte sich sichtbar. */
+  @media (prefers-reduced-motion: no-preference) {
+    .scta-wagen {
+      animation: scta-fahren var(--tempo) ease-in-out infinite alternate;
+    }
+
+    .scta-keil {
+      animation: scta-kreisen calc(var(--tempo) * 2) linear infinite;
+    }
+  }
+
+  @keyframes scta-fahren {
+    to {
+      transform: translate(calc(100cqw - 100%), 0);
+    }
+  }
+
+  @keyframes scta-kreisen {
+    0% {
+      transform: translateZ(0) rotate(0);
+    }
+    15%,
+    35% {
+      transform: translateZ(0) rotate(90deg);
+    }
+    65%,
+    85% {
+      transform: translateZ(0) rotate(270deg);
+    }
+    100% {
+      transform: translateZ(0) rotate(360deg);
+    }
+  }
+</style>

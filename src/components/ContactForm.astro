@@ -1,5 +1,5 @@
 ---
-import Button from './Button.astro';
+import ShimmerCta from './ShimmerCta.astro';
 import { forms, services, site } from '~/config/site';
 
 /**
@@ -148,9 +148,7 @@ const labelBase = 'block text-[0.9375rem] font-medium text-ink';
   </p>
 
   <div class="flex flex-col items-start gap-3">
-    <Button type="submit" size="lg" magnet class="max-sm:w-full" data-form-submit>
-      Anfrage senden
-    </Button>
+    <ShimmerCta type="submit" size="lg" data-form-submit>Anfrage senden</ShimmerCta>
     <p class="text-sm text-ink-faint">
       Die Assistenz bestätigt sofort, persönlich melde ich mich am selben Tag.
     </p>

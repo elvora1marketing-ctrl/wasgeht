@@ -1,7 +1,7 @@
 ---
 import Base from './Base.astro';
 import Band from '~/components/Band.astro';
-import GlitchCta from '~/components/GlitchCta.astro';
+import ShimmerCta from '~/components/ShimmerCta.astro';
 import PanelHero from '~/components/PanelHero.astro';
 import { services } from '~/config/site';
 import Faq from '~/components/Faq.astro';
@@ -50,7 +50,7 @@ const nummer = String(index + 1).padStart(2, '0');
     breadcrumbs={[{ label: 'Leistungen', href: '/leistungen/' }, { label }]}
   >
     <div class="mt-4 flex flex-col items-start gap-2">
-      <GlitchCta href={cta.primary.href} label={cta.primary.label} ton="hell" size="lg" />
+      <ShimmerCta href={cta.primary.href} ton="hell" size="lg">{cta.primary.label}</ShimmerCta>
       <p class="text-sm text-white/70">{cta.primary.note}</p>
     </div>
   </PanelHero>

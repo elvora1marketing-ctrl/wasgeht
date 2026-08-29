@@ -2,7 +2,7 @@
 import Base from '~/layouts/Base.astro';
 import PanelHero from '~/components/PanelHero.astro';
 import Band from '~/components/Band.astro';
-import GlitchCta from '~/components/GlitchCta.astro';
+import ShimmerCta from '~/components/ShimmerCta.astro';
 import CtaBand from '~/components/CtaBand.astro';
 import { services, automationModules, serviceArea, cta } from '~/config/site';
 
@@ -298,7 +298,7 @@ const reihenfolge = [
         Viertelstunde. Danach wissen Sie es, auch wenn wir nie wieder
         miteinander sprechen.
       </p>
-      <GlitchCta href={cta.primary.href} label={cta.primary.label} size="lg" />
+      <ShimmerCta href={cta.primary.href} size="lg">{cta.primary.label}</ShimmerCta>
     </div>
   </Band>
 

@@ -1,7 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import Service from '~/layouts/Service.astro';
-import GlitchCta from '~/components/GlitchCta.astro';
+import ShimmerCta from '~/components/ShimmerCta.astro';
 import ModuleVisual from '~/components/ModuleVisual.astro';
 import Band from '~/components/Band.astro';
 import Liste from '~/components/Liste.astro';
@@ -209,7 +209,7 @@ const painPoints = [
       </div>
 
       <div class="individuell-handlung">
-        <GlitchCta href={cta.primary.href} label={cta.primary.label} size="lg" />
+        <ShimmerCta href={cta.primary.href} size="lg">{cta.primary.label}</ShimmerCta>
         <p class="individuell-notiz">{cta.primary.note}</p>
         <p class="individuell-notiz">
           Eingerichtet für Betriebe in {serviceArea.display}.

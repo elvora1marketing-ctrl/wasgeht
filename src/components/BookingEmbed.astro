@@ -1,5 +1,6 @@
 ---
 import Button from './Button.astro';
+import ShimmerCta from './ShimmerCta.astro';
 import { booking } from '~/config/site';
 
 /**
@@ -24,9 +25,7 @@ const embedHost = new URL(booking.origin).host;
     </p>
 
     <div class="mt-6 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
-      <Button type="button" size="lg" magnet data-cal-trigger class="max-sm:w-full">
-        Kalender öffnen
-      </Button>
+      <ShimmerCta type="button" size="lg" data-cal-trigger>Kalender öffnen</ShimmerCta>
       <Button href={booking.url} variant="quiet" target="_blank" rel="noopener noreferrer">
         Oder in einem neuen Tab öffnen
       </Button>

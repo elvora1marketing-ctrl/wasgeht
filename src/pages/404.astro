@@ -1,6 +1,6 @@
 ---
 import Base from '~/layouts/Base.astro';
-import Button from '~/components/Button.astro';
+import ShimmerCta from '~/components/ShimmerCta.astro';
 import { nav, services } from '~/config/site';
 
 const ziele = [...services.map((s) => ({ label: s.label, href: s.href })), ...nav];
@@ -38,7 +38,7 @@ const ziele = [...services.map((s) => ({ label: s.label, href: s.href })), ...na
       </ul>
 
       <div class="mt-12">
-        <Button href="/">Zur Startseite</Button>
+        <ShimmerCta href="/" size="md">Zur Startseite</ShimmerCta>
       </div>
     </div>
   </section>

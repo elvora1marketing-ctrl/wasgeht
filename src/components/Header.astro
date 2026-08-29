@@ -1,6 +1,6 @@
 ---
 import Logo from './Logo.astro';
-import Button from './Button.astro';
+import ShimmerCta from './ShimmerCta.astro';
 import { nav, cta, contact, contactLinks } from '~/config/site';
 
 /**
@@ -87,14 +87,15 @@ const hier = nav.findIndex((item) => isActive(item.href));
         <!-- Der eine Haupt-CTA. Auf Mobil verkuerzt, aber immer sichtbar.
              Auf farbiger Leiste weiss: die Akzentfarbe geht auf der
              Magenta-Tafel sonst unter. -->
-        <Button
+        <ShimmerCta
           href={cta.primary.href}
-          variant={dunkel ? 'aufFarbe' : 'primary'}
-          class="max-md:h-10 max-md:px-4 max-md:text-sm"
+          ton={dunkel ? 'hell' : 'marke'}
+          size="md"
+          class="kopf-cta"
         >
           <span class="md:hidden">{cta.primary.labelShort}</span>
           <span class="max-md:hidden">{cta.primary.label}</span>
-        </Button>
+        </ShimmerCta>
 
         <!-- Mobiles Menue ohne JavaScript -->
         <details class="group relative md:hidden">

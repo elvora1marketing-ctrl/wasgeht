@@ -1,5 +1,5 @@
 ---
-import Button from './Button.astro';
+import ShimmerCta from './ShimmerCta.astro';
 import Telefonkarussell from './Telefonkarussell.astro';
 import { contactLinks } from '~/config/site';
 import { empfangGespraeche } from '~/lib/empfang';
@@ -59,15 +59,16 @@ const { variant = 'panel', class: className = '' }: Props = Astro.props;
       </div>
 
       <div class="wa-handlung">
-        <Button
+        <ShimmerCta
           href={contactLinks.whatsapp}
+          ton="whatsapp"
           size="lg"
-          class="max-sm:w-full"
           target="_blank"
           rel="noopener noreferrer"
         >
+          <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 2a8 8 0 0 0-6.9 12l-1 3.7 3.8-1A8 8 0 1 0 10 2zm0 1.6a6.4 6.4 0 1 1-3.3 11.9l-.3-.2-2.2.6.6-2.1-.2-.3A6.4 6.4 0 0 1 10 3.6zM7.4 6.3c-.1 0-.3 0-.5.2-.2.2-.6.6-.6 1.4s.6 1.6.7 1.8c.1.1 1.2 2 3 2.7 1.5.6 1.8.5 2.1.5.4 0 1.1-.4 1.3-.9.2-.5.2-.9.1-1l-.4-.2-1.2-.6c-.2 0-.3-.1-.4.1l-.6.7c-.1.2-.2.2-.4.1-.2-.1-.9-.3-1.6-1a6 6 0 0 1-1.1-1.4c-.1-.2 0-.3.1-.4l.3-.4.2-.3v-.4l-.6-1.4c-.1-.4-.3-.3-.4-.3z" /></svg>
           Auf WhatsApp schreiben
-        </Button>
+        </ShimmerCta>
         <p class="wa-notiz">Antwort in der Regel sofort</p>
       </div>
     </div>

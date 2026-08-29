@@ -1,7 +1,7 @@
 ---
 import Base from '~/layouts/Base.astro';
 import Band from '~/components/Band.astro';
-import GlitchCta from '~/components/GlitchCta.astro';
+import ShimmerCta from '~/components/ShimmerCta.astro';
 import Portrait from '~/components/Portrait.astro';
 import Scramble from '~/components/Scramble.astro';
 import Sterne from '~/components/Sterne.astro';
@@ -207,12 +207,9 @@ const kachelZeichen: Record<string, string> = {
                 der eine Knopf ueber die volle Breite gezogen und der
                 andere daneben nur so breit wie sein Text. Beide Breiten
                 kommen jetzt aus derselben Abfrage weiter unten. */}
-            <GlitchCta
-              href={cta.primary.href}
-              label={cta.primary.label}
-              size="lg"
-              class="hero-cta"
-            />
+            <ShimmerCta href={cta.primary.href} size="lg" class="hero-cta">
+              {cta.primary.label}
+            </ShimmerCta>
 
             {/* DER ZWEITE WEG IST JETZT EIN KNOPF, KEIN TEXTLINK MEHR.
                 Als unterstrichene graue Zeile sah er aus wie eine
@@ -224,19 +221,19 @@ const kachelZeichen: Record<string, string> = {
                 gefaerbter Knopf wuerde mit dem ersten um denselben Blick
                 streiten; das gruene Zeichen auf ruhigem Grund wird sofort
                 als WhatsApp erkannt und bleibt trotzdem untergeordnet. */}
-            <a
-              class="hero-whatsapp"
+            <ShimmerCta
               href={contactLinks.whatsapp}
+              ton="whatsapp"
+              size="lg"
+              class="hero-whatsapp"
               target="_blank"
               rel="noopener noreferrer"
             >
-              <span class="hero-whatsapp-zeichen" aria-hidden="true">
-                <svg viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M10 2a8 8 0 0 0-6.9 12l-1 3.7 3.8-1A8 8 0 1 0 10 2zm0 1.6a6.4 6.4 0 1 1-3.3 11.9l-.3-.2-2.2.6.6-2.1-.2-.3A6.4 6.4 0 0 1 10 3.6zM7.4 6.3c-.1 0-.3 0-.5.2-.2.2-.6.6-.6 1.4s.6 1.6.7 1.8c.1.1 1.2 2 3 2.7 1.5.6 1.8.5 2.1.5.4 0 1.1-.4 1.3-.9.2-.5.2-.9.1-1l-.4-.2-1.2-.6c-.2 0-.3-.1-.4.1l-.6.7c-.1.2-.2.2-.4.1-.2-.1-.9-.3-1.6-1a6 6 0 0 1-1.1-1.4c-.1-.2 0-.3.1-.4l.3-.4.2-.3v-.4l-.6-1.4c-.1-.4-.3-.3-.4-.3z" />
-                </svg>
-              </span>
+              <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M10 2a8 8 0 0 0-6.9 12l-1 3.7 3.8-1A8 8 0 1 0 10 2zm0 1.6a6.4 6.4 0 1 1-3.3 11.9l-.3-.2-2.2.6.6-2.1-.2-.3A6.4 6.4 0 0 1 10 3.6zM7.4 6.3c-.1 0-.3 0-.5.2-.2.2-.6.6-.6 1.4s.6 1.6.7 1.8c.1.1 1.2 2 3 2.7 1.5.6 1.8.5 2.1.5.4 0 1.1-.4 1.3-.9.2-.5.2-.9.1-1l-.4-.2-1.2-.6c-.2 0-.3-.1-.4.1l-.6.7c-.1.2-.2.2-.4.1-.2-.1-.9-.3-1.6-1a6 6 0 0 1-1.1-1.4c-.1-.2 0-.3.1-.4l.3-.4.2-.3v-.4l-.6-1.4c-.1-.4-.3-.3-.4-.3z" />
+          </svg>
               Auf WhatsApp schreiben
-            </a>
+            </ShimmerCta>
           </div>
 
           <p class="hero-notiz">{cta.primary.note}</p>
@@ -400,7 +397,7 @@ const kachelZeichen: Record<string, string> = {
         So sähe ein Vormittag in Ihrem Betrieb aus. In 15 Minuten schauen wir,
         welcher der drei Wege bei Ihnen gerade die meisten Anfragen liegen lässt.
       </p>
-      <GlitchCta href={cta.primary.href} label={cta.primary.label} size="lg" />
+      <ShimmerCta href={cta.primary.href} size="lg">{cta.primary.label}</ShimmerCta>
     </div>
   </Band>
 
@@ -555,12 +552,9 @@ const kachelZeichen: Record<string, string> = {
           zwei Aufmerksamkeitsmittel auf einem Element heben sich
           gegenseitig auf. */}
       <div class="schluss-knopf">
-        <GlitchCta
-          href={cta.primary.href}
-          label={cta.primary.label}
-          size="lg"
-          class="schluss-cta"
-        />
+        <ShimmerCta href={cta.primary.href} size="lg" class="schluss-cta">
+          {cta.primary.label}
+        </ShimmerCta>
       </div>
 
       {/* HIER STANDEN „15 MINUTEN · UNVERBINDLICH · OHNE VERKAUFSGESPRÄCH".
@@ -675,47 +669,9 @@ const kachelZeichen: Record<string, string> = {
      Aufmerksamkeitsmittel auf einem Element heben sich gegenseitig auf:
      man sieht dann beides und keines richtig. */
 
-  /* Der zweite Weg: eigener Knopf, aber ohne Flaeche. Er soll einladen,
-     nicht mitbieten. Auf gleicher Hoehe wie der erste (`h-13` dort =
-     3.25rem), sonst sieht die Zeile aus wie ein Setzfehler. */
-  .hero-whatsapp {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.625rem;
-    height: 3.25rem;
-    padding-inline: 1.5rem;
-    border: 1px solid var(--color-border-strong);
-    border-radius: var(--radius-button);
-    background: var(--color-surface);
-    color: var(--color-ink);
-    font-size: 1rem;
-    font-weight: 500;
-    text-decoration: none;
-    white-space: nowrap;
-    transition: border-color 0.2s, background 0.2s, transform 0.2s, box-shadow 0.2s;
-  }
-
-  .hero-whatsapp:hover {
-    transform: translateY(-1px);
-    border-color: #25d366;
-    background: color-mix(in oklab, #25d366 7%, var(--color-surface));
-    box-shadow: 0 6px 16px -8px rgb(37 211 102 / 0.5);
-  }
-
-  .hero-whatsapp:active {
-    transform: translateY(0);
-  }
-
-  .hero-whatsapp-zeichen {
-    display: inline-flex;
-    color: #25d366;
-  }
-
-  .hero-whatsapp-zeichen svg {
-    width: 1.375rem;
-    height: 1.375rem;
-  }
+  /* HIER STANDEN 40 ZEILEN FUER EINEN EIGENEN WHATSAPP-KNOPF:
+     Umriss, gruenes Zeichen, eigene Hoehe, eigene Rueckmeldung. Er ist
+     demselben Aufruf gewichen wie jeder andere Knopf der Seite. */
 
   /* Untereinander, sobald die beiden Knoepfe nebeneinander nicht mehr in
      eine Zeile passen. Beide dann ueber die volle Breite -- ein voller
@@ -1490,11 +1446,11 @@ const kachelZeichen: Record<string, string> = {
      MIT `:global`. Astro haengt seine Bereichskennung an das
      WURZELELEMENT einer eingebundenen Komponente -- das ist hier
      `<glitch-cta>`, der Knopf darin bekommt sie nicht. Ohne `:global`
-     schriebe Astro `.gcta[data-astro-cid-…]`, einen Selektor, auf den
+     schriebe Astro `.scta[data-astro-cid-…]`, einen Selektor, auf den
      kein Element der Seite passt. Genau daran war der Aufruf vorher
      wirkungslos gross: er sah aus wie jeder andere Knopf und stand
      verloren in der Flaeche. */
-  .schluss-knopf :global(.gcta) {
+  .schluss-knopf :global(.scta) {
     height: 3.75rem;
     padding-inline: 2.5rem;
     font-size: 1.0625rem;
@@ -1505,7 +1461,7 @@ const kachelZeichen: Record<string, string> = {
       display: flex;
       width: 100%;
     }
-    .schluss-knopf :global(.gcta) {
+    .schluss-knopf :global(.scta) {
       padding-inline: 1.25rem;
     }
   }

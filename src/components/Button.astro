@@ -13,22 +13,6 @@
  */
 interface Props {
   href?: string;
-  /**
-   * Der Knopf neigt sich leicht zum Zeiger.
-   *
-   * Uebernommen aus einer Vorlage, deren uebriger Teil hier nichts zu
-   * suchen hatte: dort zerreisst sich der Knopf und seine Buchstaben
-   * verrutschen zu Kauderwelsch. Auf einem Aufruf, der Vertrauen braucht,
-   * sagt das „hier ist etwas kaputt", und im Moment der Entscheidung muss
-   * die Beschriftung lesbar bleiben.
-   *
-   * Das Magnetische daran ist aber gut: ein Element, das auf die Naehe des
-   * Zeigers reagiert, wirkt greifbar, noch bevor man es beruehrt. Es
-   * veraendert weder Text noch Form und stoert deshalb nichts.
-   *
-   * Nur mit feinem Zeigegeraet und nur ohne `prefers-reduced-motion`.
-   */
-  magnet?: boolean;
   type?: 'button' | 'submit';
   variant?: 'primary' | 'secondary' | 'quiet' | 'aufFarbe';
   size?: 'md' | 'lg';
@@ -43,7 +27,6 @@ const {
   variant = 'primary',
   size = 'md',
   fullWidth = false,
-  magnet = false,
   class: className = '',
   ...rest
 } = Astro.props;
@@ -97,9 +80,8 @@ const classes = [
   .join(' ');
 
 const Tag = href ? 'a' : 'button';
-const zusatz = magnet ? { 'data-magnet': '' } : {};
 ---
 
-<Tag class={classes} {...(href ? { href } : { type })} {...zusatz} {...rest}>
+<Tag class={classes} {...(href ? { href } : { type })} {...rest}>
   <slot />
 </Tag>
