@@ -1,0 +1,118 @@
+---
+import Maschinenraum from './Maschinenraum.astro';
+import { planen, type Gespraech } from '~/lib/chat';
+
+/**
+ * Ein Gerät und das Protokoll seiner Automatisierung, als EINE Einheit.
+ *
+ * WARUM ES DIESE HÜLLE GIBT
+ *
+ * Das Protokoll steht neben dem Gerät, nicht darin -- es gehört ja gerade
+ * NICHT auf den Bildschirm des Kunden, sondern dahinter. Damit sind es im
+ * Markup zwei Geschwister, und der Beobachter in `Base.astro` hätte sie
+ * als zwei unabhängige Vorführungen behandelt: zwei Beobachter, zwei
+ * Startzeitpunkte, und früher oder später steht neben der dritten Blase
+ * der fünfte Protokolleintrag.
+ *
+ * Diese Hülle trägt selbst `data-chat`. Der Beobachter erfasst damit nur
+ * SIE, und `setzen()` reicht den Startbefehl an alles darin weiter --
+ * Gerät und Protokoll beginnen in derselben Sekunde und können nicht
+ * auseinanderlaufen.
+ *
+ * ZUM GLEICHEN AUFBAU ÜBERALL: Aufschlag, Kontaktseite und jedes einzelne
+ * Modul benutzen dieselbe Hülle. Vorher hatte jede Stelle ihre eigene
+ * Lösung, und drei eigene Lösungen für dieselbe Sache sehen aus wie drei
+ * verschiedene Websites.
+ */
+interface Props {
+  /**
+   * Der Verlauf, der im Gerät läuft. Aus ihm wird das Protokoll
+   * berechnet -- mit denselben Zeiten wie die Blasen, aus derselben
+   * Funktion. Fehlt er oder trägt er keine Wirkungen, bleibt das
+   * Protokoll weg und es steht nur das Gerät da.
+   */
+  gespraech?: Gespraech;
+  /** Zeile ganz unten im Protokoll. */
+  bilanz?: string;
+  /**
+   * Protokoll neben statt unter dem Gerät, sobald genug Platz ist.
+   * Für die Modulzeilen, wo Bild und Text ohnehin nebeneinander stehen.
+   */
+  daneben?: boolean;
+  class?: string;
+}
+
+const {
+  gespraech,
+  bilanz,
+  daneben = false,
+  class: className = '',
+}: Props = Astro.props;
+
+const plan = gespraech ? planen([gespraech], 'kunde').folge[0] : undefined;
+const hatProtokoll = Boolean(plan && plan.wirkungen.length);
+---
+
+<div
+  class:list={['vorfuehrung', daneben && 'vorfuehrung-daneben', className]}
+  data-chat
+>
+  <div class="vorfuehrung-geraet">
+    <slot />
+  </div>
+
+  {
+    hatProtokoll && (
+      <Maschinenraum
+        class="vorfuehrung-protokoll"
+        wirkungen={plan!.wirkungen}
+        fertig={plan!.fertig}
+        {...(bilanz ? { bilanz } : {})}
+      />
+    )
+  }
+</div>
+
+<style>
+  .vorfuehrung {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .vorfuehrung-geraet {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  /* Nebeneinander erst ab einer Breite, bei der beides seine Form behält.
+     Darunter steht das Protokoll unter dem Gerät -- ein 22rem breiter
+     Kasten neben einem 16rem breiten Telefon ergäbe auf dem Telefon zwei
+     Spalten von je einer Handbreit. */
+  @media (width >= 64rem) {
+    .vorfuehrung-daneben {
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+    }
+
+    .vorfuehrung-daneben .vorfuehrung-geraet {
+      width: auto;
+      /* NICHT SCHRUMPFEN. Ohne das teilen sich Gerät und Protokoll den
+         Platz gleichmäßig, und das Telefon wird schmaler als der Kasten
+         daneben -- die Vorführung tritt dann hinter ihre eigene Fußnote
+         zurück. */
+      flex-shrink: 0;
+    }
+
+    /* Schmaler als freistehend: neben einem 16rem breiten Telefon ist ein
+       22rem breiter Kasten das größere von beidem. */
+    .vorfuehrung-daneben .vorfuehrung-protokoll {
+      max-width: 17rem;
+    }
+  }
+</style>

@@ -1,12 +1,13 @@
 ---
 import { Image } from 'astro:assets';
+import Vorfuehrung from '~/components/Vorfuehrung.astro';
 import Service from '~/layouts/Service.astro';
 import ShimmerCta from '~/components/ShimmerCta.astro';
 import ModuleVisual from '~/components/ModuleVisual.astro';
 import Band from '~/components/Band.astro';
 import Liste from '~/components/Liste.astro';
 import Telefonkarussell from '~/components/Telefonkarussell.astro';
-import { modulGespraechFolge } from '~/lib/modulchats';
+import { modulGespraeche, modulGespraechFolge } from '~/lib/modulchats';
 import Geraet from '~/components/Geraet.astro';
 import Iphone from '~/components/Iphone.astro';
 import { automationModules, cta, serviceArea, versprechen } from '~/config/site';
@@ -126,6 +127,7 @@ const painPoints = [
         gespraeche={modulGespraechFolge}
         bildunterschrift="Nachgestellt"
         breite="14.5rem"
+        protokoll
         class="problem-stapel"
       />
     </div>
@@ -163,23 +165,31 @@ const painPoints = [
                   "Schematische Darstellung" -- damit wird aus der Zeichnung
                   kein erfundener Beleg. */}
               <div class:list={['modul-bild', flip && 'modul-bild-links']}>
-                {rahmenArt(module.slug) === 'handy' ? (
-                  <Iphone bildunterschrift={shot ? 'Aus dem laufenden Betrieb' : 'Nachgestellt'} breite="16rem">
-                    {shot ? (
-                      <Image src={shot} alt={module.screenshotAlt} widths={[400, 800]} loading="lazy" class="w-full" />
-                    ) : (
-                      <ModuleVisual slug={module.slug} />
-                    )}
-                  </Iphone>
-                ) : (
-                  <Geraet art="rechner" bildunterschrift={shot ? 'Aus dem laufenden Betrieb' : 'Nachgestellt'}>
-                    {shot ? (
-                      <Image src={shot} alt={module.screenshotAlt} widths={[400, 800]} loading="lazy" class="w-full" />
-                    ) : (
-                      <ModuleVisual slug={module.slug} />
-                    )}
-                  </Geraet>
-                )}
+                {/* DIE HUELLE MACHT AUS GERAET UND PROTOKOLL EINE EINHEIT.
+                    Ohne sie waeren es zwei Geschwister, die der Beobachter
+                    getrennt startet -- und dann steht neben der dritten
+                    Blase der fuenfte Protokolleintrag. Das Protokoll
+                    entfaellt bei Modulen ohne Verlauf und bei echten
+                    Aufnahmen von selbst: dort gibt es keine Wirkungen. */}
+                <Vorfuehrung daneben gespraech={shot ? undefined : modulGespraeche[module.slug]}>
+                  {rahmenArt(module.slug) === 'handy' ? (
+                    <Iphone bildunterschrift={shot ? 'Aus dem laufenden Betrieb' : 'Nachgestellt'} breite="16rem">
+                      {shot ? (
+                        <Image src={shot} alt={module.screenshotAlt} widths={[400, 800]} loading="lazy" class="w-full" />
+                      ) : (
+                        <ModuleVisual slug={module.slug} />
+                      )}
+                    </Iphone>
+                  ) : (
+                    <Geraet art="rechner" bildunterschrift={shot ? 'Aus dem laufenden Betrieb' : 'Nachgestellt'}>
+                      {shot ? (
+                        <Image src={shot} alt={module.screenshotAlt} widths={[400, 800]} loading="lazy" class="w-full" />
+                      ) : (
+                        <ModuleVisual slug={module.slug} />
+                      )}
+                    </Geraet>
+                  )}
+                </Vorfuehrung>
               </div>
             </li>
           );
