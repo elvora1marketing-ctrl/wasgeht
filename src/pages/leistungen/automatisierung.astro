@@ -150,7 +150,18 @@ const painPoints = [
 
           return (
             <li id={module.slug} class="modul" style={`--rang:${index}`}>
-              <div class:list={['modul-text', flip && 'modul-text-rechts']}>
+              <div
+                class:list={[
+                  'modul-text',
+                  flip && 'modul-text-rechts',
+                  /* Text und Geraet kommen aus entgegengesetzten
+                     Richtungen aufeinander zu, und zwar so, dass jedes
+                     von seiner eigenen Seite hereinkommt. Bei sieben
+                     Zeilen untereinander ist das der Unterschied
+                     zwischen einer Liste und einem Rhythmus. */
+                  flip ? 'hereinziehen' : 'hereinziehen-links',
+                ]}
+              >
                 <p class="modul-kennung kennung">
                   <span class="modul-ziffer ziffern">{String(index + 1).padStart(2, '0')}</span>
                   {module.name}
@@ -164,7 +175,13 @@ const painPoints = [
                   traegt "Aus dem laufenden Betrieb", eine Zeichnung traegt
                   "Schematische Darstellung" -- damit wird aus der Zeichnung
                   kein erfundener Beleg. */}
-              <div class:list={['modul-bild', flip && 'modul-bild-links']}>
+              <div
+                class:list={[
+                  'modul-bild',
+                  flip && 'modul-bild-links',
+                  flip ? 'hereinziehen-links' : 'hereinziehen',
+                ]}
+              >
                 {/* DIE HUELLE MACHT AUS GERAET UND PROTOKOLL EINE EINHEIT.
                     Ohne sie waeren es zwei Geschwister, die der Beobachter
                     getrennt startet -- und dann steht neben der dritten

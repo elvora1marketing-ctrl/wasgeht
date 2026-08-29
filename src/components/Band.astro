@@ -257,25 +257,77 @@ const hatKopf = Boolean(kennung || heading || intro);
   }
 
   /* --- Bewegung ---------------------------------------------------------
-     Eingebaut statt an jeder Verwendungsstelle angeschrieben. Kopf und
-     Koerper kommen nacheinander, damit die Ueberschrift zuerst steht. */
+     Eingebaut statt an jeder Verwendungsstelle angeschrieben.
+
+     VIER TEILE, VIER BEWEGUNGEN, NACHEINANDER.
+
+     Vorher blendeten Kopf und Koerper als je EIN Block auf. Das ist
+     sauber und vollkommen unauffaellig -- und weil es auf jedem Abschnitt
+     jeder Seite genau gleich lief, sah man es nach dem zweiten Mal nicht
+     mehr. Bewegung, die man erwartet, ist keine Bewegung mehr.
+
+     Jetzt bauen sich die Teile in der Reihenfolge auf, in der man sie
+     liest: die Kennung schiebt sich von links herein, die Haarlinie
+     zieht sich auf, die Ueberschrift wird von links nach rechts
+     freigelegt, und erst danach kommt der Inhalt.
+
+     Die Strecken ueberlappen absichtlich. Sauber nacheinander abgespielt
+     wirkt es wie eine Diaschau; mit Ueberlappung wie EINE Bewegung, die
+     durch den Abschnitt laeuft. */
   @media (prefers-reduced-motion: no-preference) {
     @supports (animation-timeline: view()) {
-      .band-kopf,
+      .band-kennung,
+      .band-kopf hr,
+      .band-schlag,
+      .band-intro,
       .band-koerper-abstand {
-        animation-name: auftauchen;
         animation-timing-function: linear;
         animation-fill-mode: both;
         animation-timeline: view();
       }
 
-      .band-kopf {
-        animation-range: entry 8% entry 52%;
+      .band-kennung {
+        animation-name: heranruecken-links;
+        animation-range: entry 6% entry 40%;
+      }
+
+      /* Die Linie zieht sich von links auf, statt einzublenden. Sie ist
+         ein Strich -- ein Strich wird gezogen. */
+      .band-kopf hr {
+        animation-name: linie-ziehen;
+        animation-range: entry 10% entry 46%;
+        transform-origin: left;
+      }
+
+      .band-kopf-mitte hr {
+        transform-origin: center;
+      }
+
+      .band-schlag {
+        animation-name: freilegen;
+        animation-range: entry 12% entry 58%;
+      }
+
+      .band-intro {
+        animation-name: auftauchen;
+        animation-range: entry 18% entry 62%;
       }
 
       .band-koerper-abstand {
-        animation-range: entry 14% entry 62%;
+        animation-name: auftauchen;
+        animation-range: entry 22% entry 68%;
       }
+    }
+  }
+
+  @keyframes linie-ziehen {
+    from {
+      transform: scaleX(0);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
     }
   }
 </style>

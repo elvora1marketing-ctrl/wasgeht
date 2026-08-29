@@ -295,7 +295,17 @@ const kachelZeichen: Record<string, string> = {
     <ol class="klemmt">
       {
         verluste.map((v, i) => (
-          <li class="klemme einblenden" style={`--verzug:${i};--farbe:${v.farbe}`}>
+          <li
+            class:list={[
+              'klemme',
+              /* ABWECHSELND VON BEIDEN SEITEN. Kommen alle drei aus
+                 derselben Richtung, sieht die Kette aus wie ein Stapel
+                 Karten, den eine Hand austeilt. Im Wechsel schliesst sie
+                 sich sichtbar zusammen. */
+              i % 2 === 0 ? 'hereinziehen-links' : 'hereinziehen',
+            ]}
+            style={`--verzug:${i};--farbe:${v.farbe}`}
+          >
             <span class="klemme-zeichen" aria-hidden="true">
               <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"
                 stroke-linecap="round" stroke-linejoin="round">
@@ -419,7 +429,7 @@ const kachelZeichen: Record<string, string> = {
       Reihenfolge hat; drei Eigenschaften haben keine. */}
   <Band ton="gedaempft" textur="punkte" kennung="Der Mensch dahinter">
     <div class="mensch">
-      <div class="mensch-buehne hereinziehen">
+      <div class="mensch-buehne aufziehen">
         <div class="mensch-ring" aria-hidden="true"></div>
         <Portrait
           rund
