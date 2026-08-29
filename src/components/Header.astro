@@ -15,8 +15,12 @@ import { nav, cta, contact, contactLinks } from '~/config/site';
  * Eindruck. Sie uebernimmt deshalb die Farbe der jeweiligen Tafel und laeuft
  * nahtlos in sie hinein.
  *
- * Bewusst ohne Umschlagen auf Weiss beim Weiterscrollen: das ginge nur mit
- * einem Scroll-Beobachter, und dafuer lohnt kein Skript.
+ * ABSETZEN BEIM SCROLLEN: geht inzwischen ohne Beobachter. Solange die
+ * Seite ganz oben steht, liegt die Leiste flach auf der Kopftafel; sobald
+ * man zu lesen anfaengt, hebt sie sich mit einem weichen Schatten ab und
+ * die Navigationsinsel zieht sich leicht zusammen. Getrieben von
+ * `animation-timeline: scroll()`, also von der Scrollposition selbst --
+ * kein Beobachter, kein Skript, kein Nachrechnen bei jedem Scrollschritt.
  */
 interface Props {
   /** Farbe der Kopftafel dieser Seite. Ohne Angabe bleibt die Leiste weiss. */
@@ -61,7 +65,9 @@ const hier = nav.findIndex((item) => isActive(item.href));
         class="kopf-nav hidden md:block"
         data-hier={hier >= 0 ? String(hier) : undefined}
       >
+        <span class="kopf-insel" aria-hidden="true"></span>
         <span class="kopf-pille" aria-hidden="true"></span>
+        <span class="kopf-kerbe" aria-hidden="true"></span>
 
         <ul class="kopf-liste">
           {
@@ -252,15 +258,107 @@ const hier = nav.findIndex((item) => isActive(item.href));
     border-bottom-color: var(--color-border);
   }
 
-  /* --- Navigation als Pillen ------------------------------------------- */
+  /* --- Navigation als Insel mit Kerbe -----------------------------------
+   *
+   * Nach der Vorlage („adaptive notch navigation bar"). Uebernommen ist
+   * das Aussehen, nicht der Aufbau: die Vorlage legt die ganze Seite in
+   * einen `fixed`-Rahmen mit eigenem Scrollbereich und misst mit
+   * framer-motion. Das wuerde hier das native Scrollen ersetzen -- und
+   * damit alle Scroll-Animationen und die Daumenleiste am unteren Rand.
+   *
+   * Stattdessen: die Leiste bleibt, was sie ist, und die Navigation wird
+   * zur Insel. Der Eintrag, auf dem man steht, sitzt in einer Kerbe --
+   * einer runden Ausbuchtung an der Unterkante, aus der ein Punkt in den
+   * Markenfarben herausschaut. Beim Zeigen wandert beides zum jeweils
+   * anderen Eintrag.
+   *
+   * `--i` IST DEUTLICH MEHR ALS EINE ZAHL. Ueber `@property` ist sie als
+   * `<number>` angemeldet, und erst dadurch laesst sie sich ueberblenden:
+   * Pille, Kerbe und Punkt haengen alle an derselben Zahl und wandern
+   * deshalb zwangslaeufig im Gleichschritt. Ohne die Anmeldung springt
+   * eine Custom Property hart von einem Wert zum naechsten, und die Kerbe
+   * waere im Ziel, waehrend die Pille noch unterwegs ist. */
+  @property --i {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+  }
+
   .kopf-nav {
     position: relative;
+    isolation: isolate;
     --i: 0;
+    /* Mitte des aktuellen Eintrags, gemessen an der Inselbreite. Drei
+       gleich breite Spalten, also liegt Eintrag i bei (i + 0.5)/3. */
+    --kerbe-x: calc((var(--i) + 0.5) * 100% / 3);
+    transition: --i 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* DREI SCHICHTEN, KEINE NEGATIVEN STAPELNUMMERN. Die Insel traegt nur
+     Flaeche und Rand, darueber liegt die Pille, darueber der Punkt,
+     darueber die Schrift. Vorher lag die Pille auf `z-index: -1` hinter
+     dem Text -- das funktioniert nur, solange der Elternteil keine eigene
+     Zeichenebene aufmacht. Eine Maske macht genau das, und die Pille waere
+     verschwunden. Derselbe Fehler steckte schon einmal in der
+     Daumenleiste. */
+  .kopf-insel,
+  .kopf-pille {
+    position: absolute;
+    inset-block: 0;
+    border-radius: 999px;
+  }
+
+  .kopf-insel {
+    inset-inline: 0;
+    z-index: 0;
+    /* Deutlich getoent, nicht `--color-surface-subtle`. Der unterscheidet
+       sich vom Weiss der Leiste um zwei Prozent -- die Delle liegt dann
+       zwar da, aber sie zeigt nahezu dieselbe Farbe wie ihre Umgebung und
+       ist schlicht nicht zu sehen. */
+    background: color-mix(in oklab, var(--color-ink) 5%, var(--color-surface));
+    box-shadow: inset 0 0 0 1px var(--color-border);
+
+    /* DIE KERBE IST EIN LOCH IN DER INSEL, KEIN AUFGESETZTER BOGEN.
+       Der Kreis sitzt genau auf der Unterkante, sichtbar ist also seine
+       obere Haelfte -- eine Delle, durch die die Farbe der Kopfleiste
+       durchscheint. Ein aufgesetzter Bogen muesste dieselbe Farbe treffen
+       und waere auf jeder Seite mit einer anderen Kopftafel falsch. */
+    mask-image: radial-gradient(
+      circle 0.6rem at var(--kerbe-x) 100%,
+      transparent 0 0.6rem,
+      #000 calc(0.6rem + 0.5px)
+    );
+    /* ZIEHT DIE KANTE DER DELLE NACH. Der Innenschatten oben zeichnet den
+       Rand der Insel -- aber die Maske schneidet ihn an der Delle weg,
+       und die Delle stuende ohne Kontur da. `drop-shadow` arbeitet nach
+       der Maske und folgt deren Umriss, also auch der Ausbuchtung. */
+    filter: drop-shadow(0 1px 0 var(--color-border-strong));
+  }
+
+  /* Die Pille steht immer genau ueber der Kerbe, also sitzt deren Loch bei
+     ihr fest in der Mitte. Ohne diese zweite Maske deckt die Pille die
+     Delle an genau der Stelle zu, an der sie zu sehen sein soll. */
+  .kopf-pille {
+    mask-image: radial-gradient(
+      circle 0.6rem at 50% 100%,
+      transparent 0 0.6rem,
+      #000 calc(0.6rem + 0.5px)
+    );
+    filter: drop-shadow(0 1px 0 var(--color-border-strong));
+  }
+
+  /* Ohne aktive Seite (Startseite) gibt es nichts zu kerben, solange
+     niemand hinzeigt. */
+  .kopf-nav:not([data-hier]):not(:hover) .kopf-insel {
+    mask-image: none;
   }
 
   /* Gleich breite Spalten. Nur so kann die Pille um genau eine Spaltenbreite
-     je Eintrag verschoben werden, ohne dass jemand Breiten misst. */
+     je Eintrag verschoben werden, ohne dass jemand Breiten misst. Die
+     Schrift steht ueber allen drei Schichten. */
   .kopf-liste {
+    position: relative;
+    z-index: 3;
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: 1fr;
@@ -279,24 +377,53 @@ const hier = nav.findIndex((item) => isActive(item.href));
     color: var(--color-ink);
   }
 
+  /* Die Pille liegt IN der Insel und ist heller als sie -- der Eintrag,
+     auf dem man steht, wirkt dadurch angehoben statt eingefaerbt. */
   .kopf-pille {
-    position: absolute;
-    inset-block: 0;
     inset-inline-start: 0;
-    z-index: -1;
+    z-index: 1;
     width: calc(100% / 3);
-    border-radius: 999px;
-    background: var(--color-surface-subtle);
-    box-shadow: inset 0 0 0 1px var(--color-border);
+    background: var(--color-surface);
+    box-shadow:
+      inset 0 0 0 1px var(--color-border),
+      0 1px 2px rgb(16 18 24 / 0.06);
     opacity: 0;
     transform: translateX(calc(var(--i) * 100%));
-    transition:
-      transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
-      opacity 0.2s;
+    transition: opacity 0.2s;
+  }
+
+  /* Der Punkt sitzt MIT SEINER MITTE AUF DER UNTERKANTE: obere Haelfte in
+     der Delle, untere Haelfte darunter im Freien. Genau daraus wird die
+     Kerbe ueberhaupt erst sichtbar -- eine Delle allein zeigt nur weiss
+     auf weiss und ist auf heller Leiste schlicht nicht zu erkennen. Der
+     erste Entwurf hatte einen 0,4rem-Punkt tief im Loch: technisch
+     richtig, praktisch unsichtbar.
+
+     Der weisse Ring haelt ihn frei von der Inselflaeche, auch dort, wo die
+     Rundung der Delle nicht auf den Punkt passt. */
+  .kopf-kerbe {
+    position: absolute;
+    z-index: 2;
+    bottom: -0.3rem;
+    inset-inline-start: var(--kerbe-x);
+    width: 0.7rem;
+    height: 0.7rem;
+    translate: -50% 0;
+    border-radius: 999px;
+    box-shadow: 0 0 0 2.5px var(--kopf-grund, var(--color-surface));
+    background: linear-gradient(
+      to right,
+      var(--color-brand-start, #5c67db),
+      var(--color-brand-end, #f45e3d)
+    );
+    opacity: 0;
+    transition: opacity 0.2s;
   }
 
   .kopf-nav[data-hier] .kopf-pille,
-  .kopf-nav:hover .kopf-pille {
+  .kopf-nav:hover .kopf-pille,
+  .kopf-nav[data-hier] .kopf-kerbe,
+  .kopf-nav:hover .kopf-kerbe {
     opacity: 1;
   }
 
@@ -314,8 +441,18 @@ const hier = nav.findIndex((item) => isActive(item.href));
   /* Ohne `:has()` faellt nur das Wandern weg, die Pille steht dann fest auf
      der aktuellen Seite. Das ist die Aussage, auf die es ankommt. */
   @media (prefers-reduced-motion: reduce) {
-    .kopf-pille {
+    .kopf-nav,
+    .kopf-pille,
+    .kopf-kerbe {
       transition: none;
+    }
+  }
+
+  /* Ohne Maskenunterstuetzung faellt nur die Delle weg. Insel, Pille und
+     Punkt stehen weiter -- die Aussage „hier sind Sie" bleibt. */
+  @supports not (mask-image: radial-gradient(circle, #000, #000)) {
+    .kopf-kerbe {
+      bottom: -0.2rem;
     }
   }
 
@@ -345,9 +482,31 @@ const hier = nav.findIndex((item) => isActive(item.href));
     color: #fff;
   }
 
+  .kopf[data-ton='dunkel'] .kopf-insel {
+    background: rgb(255 255 255 / 0.08);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.14);
+    filter: drop-shadow(0 1px 0 rgb(255 255 255 / 0.22));
+  }
+
   .kopf[data-ton='dunkel'] .kopf-pille {
-    background: rgb(255 255 255 / 0.16);
-    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.2);
+    filter: drop-shadow(0 1px 0 rgb(255 255 255 / 0.28));
+  }
+
+  .kopf[data-ton='dunkel'] .kopf-pille {
+    background: rgb(255 255 255 / 0.2);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.24);
+  }
+
+  /* Auf farbiger Tafel traegt der Punkt keine Markenfarben: die Tafel IST
+     schon in Markenfarbe, ein Farbverlauf darauf ergaebe Matsch. */
+  .kopf[data-ton='dunkel'] .kopf-kerbe {
+    background: #fff;
+  }
+
+  /* Der Ring nimmt die Farbe der Kopftafel an -- er soll den Punkt
+     freistellen, nicht als weisser Kringel danebenstehen. */
+  .kopf[data-ton='dunkel'] .kopf-kerbe {
+    box-shadow: 0 0 0 2.5px var(--kopf-grund);
   }
 
   .kopf[data-ton='dunkel'] .kopf-knopf {
@@ -357,6 +516,48 @@ const hier = nav.findIndex((item) => isActive(item.href));
 
   .kopf[data-ton='dunkel'] .kopf-knopf:hover {
     color: #fff;
+  }
+
+  /* --- Adaptiv: die Leiste setzt sich ab, sobald man liest -------------
+   *
+   * KEINE KURZSCHREIBWEISE `animation:`, dieselbe Regel wie beim
+   * Fortschrittsbalken zwei Bloecke weiter oben: der Verdichter zieht sie
+   * sonst mit `animation-timeline` zu einer Zeile zusammen, die kein
+   * Browser kennt, und der Effekt faellt still aus.
+   *
+   * ES WIRD NICHTS ANIMIERT, WAS EINEN UMBRUCH AUSLOEST. Die Hoehe der
+   * Leiste bleibt, wie sie ist -- sie klebt im Fluss, jede Hoehenaenderung
+   * waere ein Neuumbruch des ganzen Dokuments bei jedem Scrollschritt.
+   * Bewegt werden nur Schatten und eine Skalierung, beides Sache des
+   * Compositors. */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: scroll()) {
+      .kopf {
+        animation-name: kopf-absetzen;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: scroll();
+        animation-range: 0 9rem;
+      }
+
+      .kopf-nav {
+        animation-name: insel-zusammenziehen;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: scroll();
+        animation-range: 0 9rem;
+      }
+    }
+  }
+
+  @keyframes kopf-absetzen {
+    from { box-shadow: 0 0 0 0 rgb(16 18 24 / 0); }
+    to { box-shadow: 0 6px 20px -12px rgb(16 18 24 / 0.5); }
+  }
+
+  @keyframes insel-zusammenziehen {
+    from { transform: scale(1); }
+    to { transform: scale(0.94); }
   }
 
   /* Die aufgeklappte Liste bleibt hell: dort steht Text auf Weiss, und ein
