@@ -64,9 +64,22 @@ const zeichen = {
     'M6.5 3h-3v3a10.5 10.5 0 0 0 10.5 10.5h3v-3l-3.5-1.5-2 2A8.5 8.5 0 0 1 7 7l2-2z',
 };
 
-const belege = [
+/* AUSGESCHRIEBENER TYP, KEINE ABLEITUNG. Ohne ihn leitet TypeScript aus
+   der Liste eine Vereinigung ab -- ein Eintrag MIT `href`, drei ohne --
+   und `b.href` weiter unten waere dann ein Zugriff auf eine Eigenschaft,
+   die es auf einem Teil der Vereinigung nicht gibt. `astro check` bricht
+   daran ab. */
+type Beleg = {
+  art: keyof typeof zeichen;
+  titel: string;
+  text: string;
+  href?: string;
+  aktion?: string;
+};
+
+const belege: Beleg[] = [
   {
-    art: 'blitz' as const,
+    art: 'blitz',
     titel: 'Antwortet in Sekunden',
     text: 'Auch abends, am Wochenende und mitten im Termin.',
     /* Der einzige Beleg mit einem Weg dahinter. Wer ihn nimmt, prueft
@@ -75,17 +88,17 @@ const belege = [
     aktion: 'Selbst ausprobieren',
   },
   {
-    art: 'person' as const,
+    art: 'person',
     titel: 'Ein Ansprechpartner',
     text: 'Vom ersten Gespräch bis zum laufenden Betrieb. Derselbe.',
   },
   {
-    art: 'ort' as const,
+    art: 'ort',
     titel: `Aus ${address.city}`,
     text: 'Vor Ort im Ruhrgebiet. Kein Callcenter, keine Agenturkette.',
   },
   {
-    art: 'telefon' as const,
+    art: 'telefon',
     titel: 'Ihre Nummer bleibt',
     text: 'Nichts wird umgestellt, nichts gekündigt, nichts ersetzt.',
   },

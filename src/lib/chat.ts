@@ -171,33 +171,47 @@ interface Stellschrauben {
   pauseRechts: number;
 }
 
+/*
+ * ALLE WERTE SIND GEGENUEBER DEM ERSTEN ENTWURF ETWA HALBIERT.
+ *
+ * Der laengste Verlauf im Aufschlag lief 23,7 Sekunden. Das ist keine
+ * Vorfuehrung mehr, das ist ein Film -- und solange er laeuft, steht auf
+ * der Seite ein leeres Telefon neben einem leeren Kasten. Wer in der
+ * Zeit weiterscrollt, und das tun fast alle, sieht die Vorfuehrung nie.
+ *
+ * Ausserdem war der `vorlauf` mit bis zu 0,9 Sekunden die teuerste Zahl
+ * hier: eine knappe Sekunde, in der auf einem grossen Telefonbildschirm
+ * NICHTS steht, direkt im ersten Sichtbereich. Der Blick faellt genau
+ * dann darauf.
+ *
+ * Die Unterschiede zwischen den drei Takten bleiben erhalten -- ein
+ * dringender Verlauf laeuft weiter spuerbar haetiger als ein bedachter.
+ * Gestaucht ist der Massstab, nicht das Verhaeltnis.
+ */
 const TAKTE: Record<Takt, Stellschrauben> = {
   dringend: {
-    vorlauf: 0.3,
-    tippGrund: 0.55,
-    tippJeZeichen: 0.013,
-    tippDeckel: 1.9,
-    pauseLinks: 0.85,
-    pauseRechts: 0.7,
+    vorlauf: 0.2,
+    tippGrund: 0.34,
+    tippJeZeichen: 0.0075,
+    tippDeckel: 1.1,
+    pauseLinks: 0.42,
+    pauseRechts: 0.36,
   },
   sachlich: {
-    vorlauf: 0.55,
-    tippGrund: 0.9,
-    tippJeZeichen: 0.018,
-    tippDeckel: 2.8,
-    pauseLinks: 1.35,
-    pauseRechts: 1.45,
+    vorlauf: 0.3,
+    tippGrund: 0.5,
+    tippJeZeichen: 0.0105,
+    tippDeckel: 1.5,
+    pauseLinks: 0.66,
+    pauseRechts: 0.72,
   },
   bedacht: {
-    vorlauf: 0.9,
-    tippGrund: 1.05,
-    tippJeZeichen: 0.021,
-    tippDeckel: 3.2,
-    pauseLinks: 1.55,
-    /* Die lange Pause steht bewusst NACH der Nachricht des Kunden: er
-       legt das Telefon weg, liest die Antwort erst spaeter. Genau das
-       ist der Punkt der Assistenz -- sie wartet nicht mit. */
-    pauseRechts: 2.3,
+    vorlauf: 0.42,
+    tippGrund: 0.6,
+    tippJeZeichen: 0.0125,
+    tippDeckel: 1.75,
+    pauseLinks: 0.8,
+    pauseRechts: 1.15,
   },
 };
 

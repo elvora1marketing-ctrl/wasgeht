@@ -75,19 +75,29 @@ const zeichen: Record<WirkungArt, string> = {
       <ol class="mraum-liste" aria-hidden="true">
         {wirkungen.map((w) => (
           <li class="mraum-zeile" style={`--ab:${w.ab.toFixed(2)}s`}>
-            <span class="mraum-marke">
-              <svg
-                viewBox="0 0 20 20"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d={zeichen[w.art]} />
-              </svg>
+            {/* EINE HUELLE UM BEIDES. Sie ist der Grund, warum der Kasten
+                mitwaechst statt von Anfang an in voller Hoehe leer
+                dazustehen: die Zeile ist ein Raster mit einer Zeile von
+                `0fr`, und was darin liegt, wird auf null geklemmt. Ohne
+                diese Huelle muesste das Klemmen an Marke und Text einzeln
+                haengen -- und die beiden stehen mit `align-items: start`
+                nebeneinander, wachsen also aus der geklemmten Zeile
+                heraus, statt sich klemmen zu lassen. */}
+            <span class="mraum-inhalt">
+              <span class="mraum-marke">
+                <svg
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d={zeichen[w.art]} />
+                </svg>
+              </span>
+              <span class="mraum-text">{w.text}</span>
             </span>
-            <span class="mraum-text">{w.text}</span>
           </li>
         ))}
       </ol>
@@ -143,11 +153,13 @@ const zeichen: Record<WirkungArt, string> = {
     55% { opacity: 0.25; }
   }
 
+  /* OHNE `gap`. Der Abstand steckt jetzt IN der Zeile: eine
+     zusammengefaltete Zeile ist null hoch, ihr Abstand nach unten waere
+     es nicht -- fuenf Abstaende ergaeben wieder einen leeren Streifen. */
   .mraum-liste {
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 0.55rem;
     margin: 0.15rem 0 0;
     padding: 0;
     list-style: none;
@@ -160,7 +172,7 @@ const zeichen: Record<WirkungArt, string> = {
     position: absolute;
     left: calc(var(--spur) / 2 - 0.5px);
     top: 0.55rem;
-    bottom: 0.55rem;
+    bottom: 0.95rem;
     width: 1px;
     background: var(--color-border);
   }
@@ -168,9 +180,16 @@ const zeichen: Record<WirkungArt, string> = {
   .mraum-zeile {
     position: relative;
     display: grid;
+  }
+
+  .mraum-inhalt {
+    display: grid;
     grid-template-columns: var(--spur) minmax(0, 1fr);
     align-items: start;
     gap: 0.6rem;
+    min-height: 0;
+    padding-bottom: 0.55rem;
+    overflow: hidden;
   }
 
   .mraum-marke {
@@ -217,15 +236,41 @@ const zeichen: Record<WirkungArt, string> = {
    * Die Einträge kommen NICHT weich hereingeglitten wie die Chatblasen.
    * Sie klacken an: kurz, hart, mit einem Aufblitzen der Marke. Eine
    * Maschine bewegt sich nicht geschmeidig, sie schaltet. */
+  /* NICHT UNSICHTBAR, SONDERN BLASS -- UND DAS IST DER GANZE PUNKT.
+   *
+   * Vorher standen die Eintraege auf `opacity: 0`. Der Kasten hatte damit
+   * von der ersten Sekunde an seine volle Hoehe und war dabei leer: ein
+   * grosses graues Rechteck neben dem Telefon, im ersten Sichtbereich,
+   * und das ueber die ganze Laufzeit des Verlaufs. Genau das sah kaputt
+   * aus.
+   *
+   * Der Kasten wachsen zu lassen waere die nahe liegende Antwort und ist
+   * die falsche: die drei Protokolle des Karussells liegen uebereinander
+   * in derselben Rasterzelle, der Kasten ist also ohnehin so hoch wie das
+   * laengste von ihnen -- und ein Kasten, der waehrend des Ablaufs
+   * waechst, schiebt Pfeile und Statuszeile darunter im Sekundentakt
+   * herum.
+   *
+   * Also andersherum: die Schritte stehen von Anfang an da, blass. Was
+   * passiert, ist das AUFLEUCHTEN. Das nimmt dem Kasten die Leere, zeigt
+   * beim ersten Blick, WIE VIELE Schritte im Hintergrund laufen, und
+   * verschiebt nichts. */
+  .mraum-zeile,
+  .mraum-bilanz {
+    transition: opacity 0.2s;
+  }
+
   :global(html[data-js]) .mraum[data-chat]:not([data-laeuft]):not([data-fertig]) .mraum-zeile,
   :global(html[data-js]) .mraum[data-chat]:not([data-laeuft]):not([data-fertig]) .mraum-bilanz {
-    opacity: 0;
+    opacity: 0.3;
   }
+
+
 
   @media (prefers-reduced-motion: no-preference) {
     .mraum[data-laeuft] .mraum-zeile {
       animation-name: mraum-schalten;
-      animation-duration: 0.22s;
+      animation-duration: 0.28s;
       animation-timing-function: steps(3, jump-start);
       animation-fill-mode: both;
       animation-delay: var(--ab);
@@ -250,8 +295,8 @@ const zeichen: Record<WirkungArt, string> = {
 
   @keyframes mraum-schalten {
     from {
-      opacity: 0;
-      transform: translateX(-0.4rem);
+      opacity: 0.3;
+      transform: translateX(-0.3rem);
     }
     to {
       opacity: 1;
