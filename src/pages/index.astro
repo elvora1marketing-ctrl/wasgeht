@@ -5,6 +5,8 @@ import ShimmerCta from '~/components/ShimmerCta.astro';
 import Portrait from '~/components/Portrait.astro';
 import Scramble from '~/components/Scramble.astro';
 import Stimmen from '~/components/Stimmen.astro';
+import Belegleiste from '~/components/Belegleiste.astro';
+import Faq from '~/components/Faq.astro';
 import ReviewBadge from '~/components/ReviewBadge.astro';
 import Telefonkarussell from '~/components/Telefonkarussell.astro';
 import Textrolle from '~/components/Textrolle.astro';
@@ -18,7 +20,58 @@ import {
   owner,
   contactLinks,
   reviews,
+  versprechen,
 } from '~/config/site';
+
+/**
+ * Die Einwaende, die zwischen Lesen und Anfragen stehen.
+ *
+ * DAS IST KEIN HILFEBEREICH. Auf einer Seite, die Anfragen bringen soll,
+ * ist die Fragenliste das letzte Stueck Arbeit vor dem Klick: sie raeumt
+ * genau die Gedanken weg, die jemanden im Moment davor doch noch abhalten.
+ * Deshalb steht sie unmittelbar VOR dem Aufruf und nicht am Seitenende --
+ * und deshalb stehen hier auch nicht die haeufigsten Fragen, sondern die
+ * teuersten: die, deren unbeantwortete Fassung eine Anfrage kostet.
+ *
+ * Die Reihenfolge folgt dem, was zuerst hochkommt: erst der Verdacht, es
+ * muesse alles umgestellt werden, dann die Sorge um die eigenen Kunden,
+ * zuletzt der eigene Aufwand.
+ *
+ * Die Antworten sind dieselben wie auf den Unterseiten. Zwei Fassungen
+ * derselben Antwort laufen frueher oder spaeter auseinander, und dann
+ * steht an einer Stelle der Seite etwas anderes als an der naechsten.
+ */
+const einwaende = [
+  {
+    question: 'Ich habe schon eine Website. Muss die weg?',
+    answer:
+      'Nicht zwangsläufig. Oft ist die Seite in Ordnung und wird nur nicht gefunden — dann ist die Sichtbarkeit das Thema, nicht die Website. Was bei Ihnen der Fall ist, sehen wir im Erstgespräch an Ihrer Seite selbst.',
+  },
+  {
+    question: 'Muss ich meine Telefonnummer wechseln?',
+    answer:
+      'Nein. Die Assistenz setzt auf Ihrer bestehenden Geschäftsnummer auf. Ihre Kunden merken keinen Unterschied, außer dass jetzt jemand erreichbar ist.',
+  },
+  {
+    question: 'Merken meine Kunden, dass da eine Assistenz antwortet?',
+    answer:
+      'Es wird nicht verschleiert. Die Assistenz meldet sich sachlich, beantwortet, was sie sicher beantworten kann, und reicht alles Weitere an Sie weiter. Erfahrungsgemäß ist Kunden eine sofortige Antwort deutlich lieber als ein Rückruf am nächsten Tag.',
+  },
+  {
+    question: 'Was passiert, wenn die Assistenz etwas nicht weiß?',
+    answer:
+      'Dann rät sie nicht, sondern übergibt an Sie. Sie bekommen den Verlauf mitsamt allem, was bis dahin erfasst wurde, und steigen ohne Informationsverlust ein.',
+  },
+  {
+    question: 'Was muss ich selbst dafür tun?',
+    answer: versprechen.aufwand,
+  },
+  {
+    question: 'Wie schnell läuft das?',
+    answer:
+      'Ein einzelnes Modul ist meist innerhalb weniger Tage aktiv. Wir fangen mit dem an, das bei Ihnen sofort etwas ändert, und bauen von dort weiter.',
+  },
+];
 
 const title = 'Elvora: Mehr Anfragen für Betriebe in Essen';
 const description =
@@ -139,7 +192,10 @@ const kachelZeichen: Record<string, string> = {
 
 ---
 
-<Base title={title} description={description}>
+{/* `faq` gibt die Einwaende ans strukturierte Datenblatt weiter. Google
+    zeigt sie damit unter Umstaenden direkt im Suchergebnis -- und wer die
+    Antwort schon dort liest, kommt vorbereitet statt gar nicht. */}
+<Base title={title} description={description} faq={einwaende}>
   {/* ===================== Aufschlag =====================
       Zwei Spalten: links die Aussage, rechts die Vorfuehrung.
 
@@ -276,6 +332,19 @@ const kachelZeichen: Record<string, string> = {
     </div>
   </section>
 
+  {/* ===================== Belege =====================
+
+      DIREKT UNTER DEM VERSPRECHEN, NICHT IRGENDWO IN DER MITTE.
+
+      Der Aufschlag behauptet etwas. Die naechste Frage im Kopf ist immer
+      dieselbe -- „warum sollte ich das glauben?" -- und wer sie erst nach
+      fuenf Bildschirmen beantwortet, hat die Haelfte der Leute schon
+      verloren. Auf Seiten, die Anfragen bringen sollen, steht der Beleg
+      an drei Stellen: hier unter dem Versprechen, weiter unten nach der
+      Erklaerung (die Stimmen) und noch einmal unmittelbar vor dem Aufruf
+      (die Einwaende). Das ist die erste davon. */}
+  <Belegleiste />
+
   {/* ===================== Wo es klemmt ===================== */}
   <Band
     ton="gedaempft"
@@ -405,8 +474,8 @@ const kachelZeichen: Record<string, string> = {
         ueberzeugt ist, soll nicht erst bis zum Fuss scrollen muessen. */}
     <div class="zwischenruf">
       <p class="zwischenruf-satz">
-        So sähe ein Vormittag in Ihrem Betrieb aus. In 15 Minuten schauen wir,
-        welcher der drei Wege bei Ihnen gerade die meisten Anfragen liegen lässt.
+        So sähe ein Vormittag in Ihrem Betrieb aus. Schauen wir gemeinsam,
+        welcher Weg bei Ihnen gerade die meisten Anfragen liegen lässt.
       </p>
       <ShimmerCta href={cta.primary.href} size="lg">{cta.primary.label}</ShimmerCta>
     </div>
@@ -509,6 +578,27 @@ const kachelZeichen: Record<string, string> = {
       </Band>
     )
   }
+
+  {/* ===================== Einwaende =====================
+
+      DIE LETZTE HUERDE VOR DEM KLICK.
+
+      Bis hierhin ist die Sache erklaert und belegt. Was jetzt noch
+      dazwischensteht, sind keine Argumente mehr, sondern Bedenken: „muss
+      dann alles umgestellt werden", „was denken meine Kunden", „wie viel
+      Arbeit habe ich damit". Wer die unbeantwortet laesst, verliert die
+      Anfrage genau hier -- einen Bildschirm vor dem Knopf.
+
+      Ohne JavaScript aufklappbar, wie ueberall auf der Seite: die Antwort
+      steht im Quelltext und wird auch gefunden, wenn niemand klickt. */}
+  <Band
+    ton="hell"
+    kennung="Bevor Sie fragen"
+    heading="Was die meisten an dieser Stelle noch wissen wollen"
+    intro="Sechs Fragen, die fast immer kommen — beantwortet, bevor Sie sie stellen müssen."
+  >
+    <Faq items={einwaende} heading="" />
+  </Band>
 
   {/* ===================== Abschluss =====================
       WARUM NICHT MEHR DUNKEL UND NICHT MEHR ZWEISPALTIG

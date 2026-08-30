@@ -19,12 +19,17 @@ interface Props {
 }
 
 const { items, heading = 'Häufige Fragen' }: Props = Astro.props;
+
+/* Leerer Titel heisst: der Abschnitt traegt schon eine Ueberschrift. Ein
+   leeres `<h2>` waere sonst eine Ueberschrift ohne Text -- fuer eine
+   Sprachausgabe eine Sprungmarke ins Nichts. */
+const mitTitel = heading.trim().length > 0;
 ---
 
 {
   items.length > 0 && (
     <div class="fragen">
-      <h2 class="fragen-schlag">{heading}</h2>
+      {mitTitel && <h2 class="fragen-schlag">{heading}</h2>}
 
       <div class="fragen-liste">
         {items.map((item, i) => (
@@ -65,6 +70,13 @@ const { items, heading = 'Häufige Fragen' }: Props = Astro.props;
 
   .fragen-liste {
     margin-top: clamp(2rem, 4vw, 3rem);
+  }
+
+  /* Ohne eigene Ueberschrift steht die Liste direkt unter dem Bandkopf,
+     der seinen Abstand schon mitbringt. Der zweite Abstand ergaebe eine
+     Luecke, in der nichts steht. */
+  .fragen:not(:has(.fragen-schlag)) .fragen-liste {
+    margin-top: 0;
   }
 
   .frage {

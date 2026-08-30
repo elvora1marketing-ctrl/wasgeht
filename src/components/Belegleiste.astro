@@ -1,0 +1,346 @@
+---
+import Sterne from './Sterne.astro';
+import { reviews, address, contactLinks } from '~/config/site';
+
+/**
+ * Die Belegleiste: was direkt unter dem Aufschlag beantwortet werden muss.
+ *
+ * WARUM SIE GANZ OBEN STEHT
+ *
+ * Der Aufschlag macht ein Versprechen. Die naechste Frage im Kopf des
+ * Lesers ist immer dieselbe -- „warum sollte ich das glauben?" -- und wer
+ * darauf erst nach fuenf Bildschirmen antwortet, hat die Haelfte der Leute
+ * schon verloren. Auf Verkaufsseiten sitzt der Beleg deshalb an drei
+ * Stellen: direkt unter dem Versprechen, in der Mitte nach der Erklaerung
+ * und noch einmal unmittelbar vor dem Aufruf zur Handlung. Das hier ist
+ * die erste davon.
+ *
+ * WARUM HIER KEINE KUNDENSTIMMEN STEHEN
+ *
+ * Weil es noch keine gibt. Erfundene Stimmen sind eine irrefuehrende
+ * geschaeftliche Handlung nach § 5 UWG, abmahnfaehig, und zwar unabhaengig
+ * davon, wie plausibel sie klingen. Sobald `reviews.enabled` in `site.ts`
+ * auf true steht, tritt an die erste Stelle dieser Leiste die Bewertung
+ * mitsamt einer echten Stimme -- ohne dass hier etwas geaendert werden
+ * muss.
+ *
+ * WAS STATTDESSEN DASTEHT, IST NICHT ERSATZWEISE IRGENDETWAS.
+ *
+ * Vier Aussagen, die heute schon stimmen und die jeder in dreissig
+ * Sekunden nachpruefen kann. Die erste ist die staerkste, die dieser
+ * Betrieb hat: die Assistenz laeuft, und man kann ihr auf der Stelle
+ * schreiben. Das ist kein Versprechen ueber die Leistung, das IST die
+ * Leistung -- und wer sie ausprobiert, hat sich damit selbst gemeldet.
+ *
+ * Die vierte nimmt das Risiko: „Ihre Nummer bleibt." Vor einer Zusage
+ * steht immer die Sorge, wofuer man sich damit einhandelt; wer sie
+ * vorwegnimmt, raeumt den letzten Grund weg, es zu lassen.
+ */
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' }: Props = Astro.props;
+
+/** Die erste, echte Stimme -- sobald es sie gibt. */
+const stimme = reviews.enabled && reviews.items.length > 0 ? reviews.items[0] : undefined;
+const wertung = reviews.enabled && reviews.count > 0;
+
+const ratingText = reviews.rating.toLocaleString('de-DE', {
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+});
+
+/**
+ * Die Zeichen sind dieselben wie im Schaltplan: 20er-Raster, 1,5 Punkte
+ * Strichstaerke. Ein zweiter Zeichensatz auf derselben Seite faellt sofort
+ * auf, auch wenn niemand sagen koennte, woran es liegt.
+ */
+const zeichen = {
+  blitz: 'M11 2.5 4.5 11h4l-.5 6.5L15.5 9h-4z',
+  person: 'M10 3.5a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM3.5 17c.6-3 3.3-5 6.5-5s5.9 2 6.5 5',
+  ort: 'M10 2.5c-3 0-5.2 2.3-5.2 5.2 0 3.9 5.2 9.8 5.2 9.8s5.2-5.9 5.2-9.8c0-2.9-2.2-5.2-5.2-5.2zM10 9.4a1.9 1.9 0 1 0 0-3.8 1.9 1.9 0 0 0 0 3.8z',
+  telefon:
+    'M6.5 3h-3v3a10.5 10.5 0 0 0 10.5 10.5h3v-3l-3.5-1.5-2 2A8.5 8.5 0 0 1 7 7l2-2z',
+};
+
+const belege = [
+  {
+    art: 'blitz' as const,
+    titel: 'Antwortet in Sekunden',
+    text: 'Auch abends, am Wochenende und mitten im Termin.',
+    /* Der einzige Beleg mit einem Weg dahinter. Wer ihn nimmt, prueft
+       nicht nur nach -- er hat sich damit gemeldet. */
+    href: contactLinks.whatsapp,
+    aktion: 'Selbst ausprobieren',
+  },
+  {
+    art: 'person' as const,
+    titel: 'Ein Ansprechpartner',
+    text: 'Vom ersten Gespräch bis zum laufenden Betrieb. Derselbe.',
+  },
+  {
+    art: 'ort' as const,
+    titel: `Aus ${address.city}`,
+    text: 'Vor Ort im Ruhrgebiet. Kein Callcenter, keine Agenturkette.',
+  },
+  {
+    art: 'telefon' as const,
+    titel: 'Ihre Nummer bleibt',
+    text: 'Nichts wird umgestellt, nichts gekündigt, nichts ersetzt.',
+  },
+];
+---
+
+<section class:list={['belegleiste', className]} aria-label="Belege">
+  <div class="container-content belegleiste-inner">
+    {
+      stimme && (
+        <figure class="beleg-stimme">
+          {wertung && (
+            <span class="beleg-stimme-wertung">
+              <Sterne wert={reviews.rating} groesse={0.95} />
+              <span class="beleg-stimme-zahl">{ratingText}</span>
+              <span class="beleg-stimme-quelle">
+                aus {reviews.count} {reviews.quelle}
+              </span>
+            </span>
+          )}
+
+          <blockquote class="beleg-stimme-satz">{stimme.text}</blockquote>
+
+          <figcaption class="beleg-stimme-wer">
+            {stimme.author}
+            {stimme.business && <span> · {stimme.business}</span>}
+          </figcaption>
+        </figure>
+      )
+    }
+
+    <ul class="belege">
+      {
+        belege.map((b, i) => {
+          /* Der Beleg mit Weg wird zum Link, die anderen bleiben Text.
+             Ein Element, das aussieht wie ein Knopf und nichts tut, kostet
+             mehr Vertrauen, als es Aufmerksamkeit bringt. */
+          const Huelle = b.href ? 'a' : 'div';
+
+          return (
+            <li class="beleg-punkt" style={`--verzug:${i}`}>
+              <Huelle
+                class:list={['beleg-inhalt', b.href && 'beleg-inhalt-weg']}
+                {...(b.href
+                  ? { href: b.href, target: '_blank', rel: 'noopener noreferrer' }
+                  : {})}
+              >
+                <span class="beleg-zeichen" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d={zeichen[b.art]} />
+                  </svg>
+                </span>
+
+                <span class="beleg-worte">
+                  <span class="beleg-titel">{b.titel}</span>
+                  <span class="beleg-text">{b.text}</span>
+                  {b.aktion && (
+                    <span class="beleg-aktion">
+                      {b.aktion}
+                      <svg
+                        viewBox="0 0 20 20"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.7"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M4 10h11M11 6l4 4-4 4" />
+                      </svg>
+                    </span>
+                  )}
+                </span>
+              </Huelle>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .belegleiste {
+    border-block: 1px solid var(--color-border);
+    background: var(--color-surface-subtle);
+  }
+
+  .belegleiste-inner {
+    display: grid;
+    gap: 1.5rem;
+    padding-block: 1.5rem;
+  }
+
+  @media (width >= 64rem) {
+    /* Mit echter Stimme bekommt die den groesseren Teil: eine Stimme
+       schlaegt vier Eigenschaften, sobald es sie gibt. */
+    .belegleiste-inner:has(.beleg-stimme) {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: 2.5rem;
+      align-items: center;
+    }
+  }
+
+  /* --- Die vier Belege --------------------------------------------------- */
+  .belege {
+    display: grid;
+    /* ZWEI SPALTEN AUF DEM TELEFON, NICHT VIER ZEILEN. Untereinander waere
+       diese Leiste dort fast einen halben Bildschirm hoch und schoebe die
+       Vorfuehrung aus dem Blick -- also genau das, was sie belegen soll. */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem 1.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (width >= 64rem) {
+    .belege {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0 1.75rem;
+    }
+
+    /* Haarlinien zwischen den Spalten. Sie machen aus vier Aussagen eine
+       Leiste; ohne sie schwimmen sie als vier lose Blöcke. */
+    .beleg-punkt + .beleg-punkt {
+      border-inline-start: 1px solid var(--color-border);
+      padding-inline-start: 1.75rem;
+    }
+  }
+
+  .beleg-inhalt {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .beleg-zeichen {
+    display: flex;
+    flex-shrink: 0;
+    margin-top: 0.05rem;
+    color: var(--color-accent);
+  }
+
+  .beleg-zeichen svg {
+    width: 1.05rem;
+    height: 1.05rem;
+  }
+
+  .beleg-worte {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+
+  .beleg-titel {
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--color-ink);
+  }
+
+  .beleg-text {
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: var(--color-ink-muted);
+  }
+
+  .beleg-aktion {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 0.15rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-accent);
+  }
+
+  .beleg-aktion svg {
+    width: 0.85rem;
+    height: 0.85rem;
+    transition: transform 0.25s ease;
+  }
+
+  .beleg-inhalt-weg:hover .beleg-aktion svg {
+    transform: translateX(2px);
+  }
+
+  .beleg-inhalt-weg:hover .beleg-titel {
+    color: var(--color-accent);
+  }
+
+  /* --- Die echte Stimme, sobald es sie gibt ------------------------------ */
+  .beleg-stimme {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    margin: 0;
+  }
+
+  .beleg-stimme-wertung {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--color-ink-faint);
+  }
+
+  .beleg-stimme-zahl {
+    font-family: var(--font-heading);
+    font-size: 1.125rem;
+    line-height: 1;
+    color: var(--color-ink);
+  }
+
+  .beleg-stimme-satz {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: var(--color-ink);
+  }
+
+  .beleg-stimme-wer {
+    font-size: 0.8125rem;
+    color: var(--color-ink-faint);
+  }
+
+  /* Auf dem Telefon tragen die Titel allein. Vier zusaetzliche Zeilen
+     Erklaerung waeren dort mehr Text als der Aufschlag darueber.
+
+     Die Aufforderung faellt dort ebenfalls weg -- nicht aus Platzgruenden,
+     sondern weil sie eine dritte Zeile in genau EINE der vier Kacheln
+     setzt und das Raster damit schief zieht. Der Weg bleibt: die ganze
+     Kachel ist der Link, und ihr Titel steht in der Akzentfarbe. Auf dem
+     Telefon ist ein farbiger Titel ohnehin das verstaendlichere Zeichen
+     fuer „hier kann man tippen" als ein kleiner Pfeil. */
+  @media (width < 48rem) {
+    .beleg-text,
+    .beleg-aktion {
+      display: none;
+    }
+
+    .beleg-inhalt-weg .beleg-titel {
+      color: var(--color-accent);
+    }
+  }
+</style>
