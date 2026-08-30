@@ -2,7 +2,7 @@
 import type { GeplanteWirkung, WirkungArt } from '~/lib/chat';
 
 /**
- * Das Protokoll der Automatisierung, neben dem Verlauf.
+ * Der Maschinenraum: was die Automatisierung tut, während sie es tut.
  *
  * WARUM ES DAS GIBT
  *
@@ -16,13 +16,18 @@ import type { GeplanteWirkung, WirkungArt } from '~/lib/chat';
  * zeitgleich mit den Blasen. Aus „ein Bot schreibt zurück" wird „ein
  * System arbeitet".
  *
- * WARUM ES BEWUSST NICHT AUSSIEHT WIE DER CHAT
+ * WARUM ER DUNKEL IST
  *
- * Der Verlauf ist warm, rund und in der Grundschrift. Das Protokoll ist
- * schmal, eckig und in der Mono. Zwei Dinge, die dasselbe erzählen, dürfen
- * nicht gleich aussehen -- sonst liest man das zweite gar nicht mehr. Der
- * Bruch zwischen beiden ist die Aussage: vorne der Mensch, hinten die
- * Maschine.
+ * Er war es nicht. Er war eine hellgraue Karte mit Mono-Text -- und sah
+ * damit aus wie eine Fußnote, wie ein Fehlerprotokoll, wie etwas, das man
+ * überliest. Der Inhalt war stark, die Verpackung sagte „Nebensache".
+ *
+ * Jetzt ist er eine Konsole: dunkel, mit Nummern, laufender Statuszeile
+ * und einer Schiene, an der die Schritte einrasten. Das ist nicht Zierde,
+ * sondern die Aussage des Abschnitts. Neben dem Telefon stehen dadurch
+ * zwei klar getrennte Welten -- vorne hell, rund und menschlich der Chat,
+ * dahinter dunkel, eckig und maschinell die Arbeit. Der Bruch zwischen
+ * beiden IST das Produkt.
  *
  * ZEITEN AUS DERSELBEN QUELLE. `planen()` rechnet sie zusammen mit den
  * Blasen aus, sie können also nicht auseinanderlaufen. Zur Laufzeit
@@ -63,9 +68,18 @@ const zeichen: Record<WirkungArt, string> = {
       data-chat
       style={`--fertig:${fertig.toFixed(2)}s`}
     >
-      <p class="mraum-kopf kennung">
+      <p class="mraum-kopf">
         <span class="mraum-lampe" aria-hidden="true" />
-        Im Hintergrund
+        <span class="mraum-titel">Im Hintergrund</span>
+
+        {/* „laeuft" bis zur letzten Wirkung, danach „fertig". Beides steht
+            uebereinander und wird per Zeitachse getauscht -- eine Zeile,
+            die sich waehrend des Ablaufs aendert, ist der billigste Beweis
+            dafuer, dass hier gerade wirklich etwas passiert. */}
+        <span class="mraum-status" aria-hidden="true">
+          <span class="mraum-status-wort mraum-status-laeuft">läuft</span>
+          <span class="mraum-status-wort mraum-status-fertig">fertig</span>
+        </span>
       </p>
 
       {/* `aria-hidden`, und das ist Absicht: für eine Sprachausgabe ist das
@@ -73,17 +87,14 @@ const zeichen: Record<WirkungArt, string> = {
           nur in Stichworten. Zweimal dieselbe Information vorgelesen ist
           nicht mehr Zugänglichkeit, sondern weniger. */}
       <ol class="mraum-liste" aria-hidden="true">
-        {wirkungen.map((w) => (
+        {wirkungen.map((w, i) => (
           <li class="mraum-zeile" style={`--ab:${w.ab.toFixed(2)}s`}>
-            {/* EINE HUELLE UM BEIDES. Sie ist der Grund, warum der Kasten
-                mitwaechst statt von Anfang an in voller Hoehe leer
-                dazustehen: die Zeile ist ein Raster mit einer Zeile von
-                `0fr`, und was darin liegt, wird auf null geklemmt. Ohne
-                diese Huelle muesste das Klemmen an Marke und Text einzeln
-                haengen -- und die beiden stehen mit `align-items: start`
-                nebeneinander, wachsen also aus der geklemmten Zeile
-                heraus, statt sich klemmen zu lassen. */}
             <span class="mraum-inhalt">
+              {/* Die Nummer macht aus einer Liste einen Ablauf. Ohne sie
+                  sind es sechs Stichworte, mit ihr sind es sechs Schritte
+                  in einer Reihenfolge. */}
+              <span class="mraum-ziffer">{String(i + 1).padStart(2, '0')}</span>
+
               <span class="mraum-marke">
                 <svg
                   viewBox="0 0 20 20"
@@ -96,85 +107,146 @@ const zeichen: Record<WirkungArt, string> = {
                   <path d={zeichen[w.art]} />
                 </svg>
               </span>
+
               <span class="mraum-text">{w.text}</span>
             </span>
           </li>
         ))}
       </ol>
 
-      <p class="mraum-bilanz">{bilanz}</p>
+      <p class="mraum-bilanz">
+        <span class="mraum-haken" aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4.5 10.5 8.5 14.5 15.5 6" />
+          </svg>
+        </span>
+        {bilanz}
+      </p>
     </div>
   )
 }
 
 <style>
+  /* --- Die Konsole ---------------------------------------------------------
+   *
+   * Die Farben stehen hier als feste Werte, nicht als Marken-Variablen.
+   * Der Kasten ist an jeder Stelle der Seite derselbe -- neben dem Telefon
+   * auf Weiss, in einem gedaempften Band, zwischen den Modulzeilen. Wuerde
+   * er die Flaechenfarbe der Umgebung aufnehmen, waere er mal eine Konsole
+   * und mal eine graue Karte. Er ist immer eine Konsole. */
   .mraum {
     --spur: 1.5rem;
+    --nummer: 1.35rem;
+    --grund: #14162b;
+    --linie: rgb(255 255 255 / 0.09);
+    --matt: rgb(255 255 255 / 0.34);
+    --hell: rgb(255 255 255 / 0.93);
+    --gruen: #4fd39a;
+
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
     width: 100%;
     max-width: 22rem;
-    padding: 0.9rem 1rem 0.95rem;
-    border: 1px solid var(--color-border);
+    padding: 0.85rem 1rem 0.9rem;
+    border: 1px solid var(--linie);
     border-radius: var(--radius-card);
-    /* Kühl und leicht getönt gegen das Weiß der Seite: das hier ist ein
-       anderer Ort als der Chat, und das soll man sehen, bevor man liest. */
-    background: color-mix(in oklab, #2b2f7a 3.5%, var(--color-surface));
+    background: var(--grund);
+    /* Hebt die Konsole von der Seite ab, statt sie daraufzukleben. Sehr
+       weich und sehr dunkel: ein harter Schatten sieht nach Aufkleber aus. */
+    box-shadow: 0 18px 44px -26px rgb(12 14 30 / 0.75);
   }
 
+  /* Eine Spur Markenfarbe im oberen Rand. Sie ist das Einzige, was den
+     Kasten mit dem Rest der Seite verbindet -- ohne sie steht ein fremdes
+     schwarzes Rechteck darin. */
+  .mraum {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+
+  .mraum::before {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      var(--color-brand-start, #5c67db),
+      var(--color-brand-mid, #b23a94),
+      transparent
+    );
+    opacity: 0.75;
+  }
+
+  /* --- Kopfzeile ---------------------------------------------------------- */
   .mraum-kopf {
     display: flex;
     align-items: center;
-    gap: 0.45rem;
-    margin: 0;
-    color: var(--color-ink-faint);
+    gap: 0.5rem;
+    margin: 0 0 0.7rem;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--matt);
   }
 
-  /* Eine Lampe, die im Takt der Maschine blinkt -- langsam, nicht als
-     Alarm. Sie läuft durchgehend, auch wenn gerade kein Eintrag kommt:
-     das Ding ist an, auch wenn es nichts zu tun gibt. */
+  .mraum-titel {
+    flex: 1;
+  }
+
   .mraum-lampe {
     width: 0.4rem;
     height: 0.4rem;
     flex-shrink: 0;
     border-radius: 999px;
-    background: var(--color-success);
+    background: var(--gruen);
+    box-shadow: 0 0 0 3px rgb(79 211 154 / 0.16);
   }
 
-  @media (prefers-reduced-motion: no-preference) {
-    .mraum-lampe {
-      animation: mraum-lampe 2.6s ease-in-out infinite;
-    }
+  /* Beide Woerter liegen uebereinander in derselben Rasterzelle: die Zeile
+     wird beim Wechsel nicht breiter oder schmaler. */
+  .mraum-status {
+    display: grid;
+    color: var(--gruen);
   }
 
-  @keyframes mraum-lampe {
-    0%, 100% { opacity: 1; }
-    55% { opacity: 0.25; }
+  .mraum-status-wort {
+    grid-area: 1 / 1;
   }
 
-  /* OHNE `gap`. Der Abstand steckt jetzt IN der Zeile: eine
-     zusammengefaltete Zeile ist null hoch, ihr Abstand nach unten waere
-     es nicht -- fuenf Abstaende ergaeben wieder einen leeren Streifen. */
+  .mraum-status-fertig {
+    opacity: 0;
+  }
+
+  /* --- Die Schritte ------------------------------------------------------- */
   .mraum-liste {
     position: relative;
     display: flex;
     flex-direction: column;
-    margin: 0.15rem 0 0;
+    margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  /* Die Schiene, an der die Einträge hängen. Sie macht aus einer Liste
-     eine Kette: eins nach dem anderen, alles zusammenhängend. */
+  /* Die Schiene, an der die Schritte haengen. Sie macht aus einer Liste
+     eine Kette: eins nach dem anderen, alles zusammenhaengend. Sie sitzt
+     unter den Marken, nicht unter den Nummern. */
   .mraum-liste::before {
     content: '';
     position: absolute;
-    left: calc(var(--spur) / 2 - 0.5px);
-    top: 0.55rem;
-    bottom: 0.95rem;
+    left: calc(var(--nummer) + 0.5rem + var(--spur) / 2 - 0.5px);
+    top: 0.6rem;
+    bottom: 1rem;
     width: 1px;
-    background: var(--color-border);
+    /* Kraeftiger als die uebrigen Linien: sie ist keine Trennung, sondern
+       die Kette selbst. Auf `--linie` war sie auf dem dunklen Grund
+       schlicht nicht zu sehen, und ohne sie sind es sechs lose Zeilen. */
+    background: rgb(255 255 255 / 0.15);
   }
 
   .mraum-zeile {
@@ -184,12 +256,21 @@ const zeichen: Record<WirkungArt, string> = {
 
   .mraum-inhalt {
     display: grid;
-    grid-template-columns: var(--spur) minmax(0, 1fr);
+    grid-template-columns: var(--nummer) var(--spur) minmax(0, 1fr);
     align-items: start;
-    gap: 0.6rem;
+    gap: 0.5rem;
     min-height: 0;
-    padding-bottom: 0.55rem;
-    overflow: hidden;
+    padding-bottom: 0.5rem;
+  }
+
+  .mraum-ziffer {
+    padding-top: 0.28rem;
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    color: rgb(255 255 255 / 0.28);
+    font-variant-numeric: tabular-nums;
   }
 
   .mraum-marke {
@@ -199,9 +280,9 @@ const zeichen: Record<WirkungArt, string> = {
     width: var(--spur);
     height: var(--spur);
     border-radius: 999px;
-    background: var(--color-surface);
-    border: 1px solid var(--color-border-strong);
-    color: #2b2f7a;
+    background: rgb(255 255 255 / 0.05);
+    border: 1px solid var(--linie);
+    color: rgb(255 255 255 / 0.55);
   }
 
   .mraum-marke svg {
@@ -210,21 +291,35 @@ const zeichen: Record<WirkungArt, string> = {
   }
 
   .mraum-text {
-    padding-top: 0.1rem;
+    padding-top: 0.16rem;
     font-family: var(--font-mono);
     font-size: 0.75rem;
-    line-height: 1.45;
-    color: var(--color-ink);
+    line-height: 1.5;
+    color: var(--hell);
   }
 
+  /* --- Abschluss ---------------------------------------------------------- */
   .mraum-bilanz {
-    margin: 0.35rem 0 0;
-    padding-top: 0.6rem;
-    border-top: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0.3rem 0 0;
+    padding-top: 0.65rem;
+    border-top: 1px solid var(--linie);
     font-family: var(--font-mono);
     font-size: 0.75rem;
     letter-spacing: 0.02em;
-    color: var(--color-success);
+    color: var(--gruen);
+  }
+
+  .mraum-haken {
+    display: flex;
+    flex-shrink: 0;
+  }
+
+  .mraum-haken svg {
+    width: 0.85rem;
+    height: 0.85rem;
   }
 
   /* --- Ablauf --------------------------------------------------------------
@@ -233,69 +328,113 @@ const zeichen: Record<WirkungArt, string> = {
    * Start steht das Protokoll vollständig da -- besser ein fertiges
    * Protokoll als ein leerer Kasten.
    *
-   * Die Einträge kommen NICHT weich hereingeglitten wie die Chatblasen.
-   * Sie klacken an: kurz, hart, mit einem Aufblitzen der Marke. Eine
+   * NICHT UNSICHTBAR, SONDERN MATT -- UND DAS IST DER GANZE PUNKT.
+   *
+   * Vorher standen die Einträge auf `opacity: 0`. Der Kasten hatte damit
+   * von der ersten Sekunde an seine volle Höhe und war dabei leer: ein
+   * großes Rechteck neben dem Telefon, im ersten Sichtbereich, und das
+   * über die ganze Laufzeit des Verlaufs. Genau das sah kaputt aus.
+   *
+   * Ihn stattdessen mitwachsen zu lassen wäre die nahe liegende Antwort
+   * und ist die falsche: die drei Protokolle des Karussells liegen
+   * übereinander in derselben Rasterzelle, der Kasten ist also ohnehin so
+   * hoch wie das längste -- und ein Kasten, der während des Ablaufs
+   * wächst, schiebt Pfeile und Statuszeile im Sekundentakt herum.
+   *
+   * Also andersherum: die Schritte stehen von Anfang an da, matt. Was
+   * passiert, ist das Einrasten. Der Kasten ist nie leer, man sieht beim
+   * ersten Blick, wie viele Schritte im Hintergrund laufen, und es
+   * verschiebt sich nichts.
+   *
+   * Die Schritte kommen NICHT weich hereingeglitten wie die Chatblasen.
+   * Sie rasten ein: kurz, hart, mit einem Aufblitzen der Marke. Eine
    * Maschine bewegt sich nicht geschmeidig, sie schaltet. */
-  /* NICHT UNSICHTBAR, SONDERN BLASS -- UND DAS IST DER GANZE PUNKT.
-   *
-   * Vorher standen die Eintraege auf `opacity: 0`. Der Kasten hatte damit
-   * von der ersten Sekunde an seine volle Hoehe und war dabei leer: ein
-   * grosses graues Rechteck neben dem Telefon, im ersten Sichtbereich,
-   * und das ueber die ganze Laufzeit des Verlaufs. Genau das sah kaputt
-   * aus.
-   *
-   * Der Kasten wachsen zu lassen waere die nahe liegende Antwort und ist
-   * die falsche: die drei Protokolle des Karussells liegen uebereinander
-   * in derselben Rasterzelle, der Kasten ist also ohnehin so hoch wie das
-   * laengste von ihnen -- und ein Kasten, der waehrend des Ablaufs
-   * waechst, schiebt Pfeile und Statuszeile darunter im Sekundentakt
-   * herum.
-   *
-   * Also andersherum: die Schritte stehen von Anfang an da, blass. Was
-   * passiert, ist das AUFLEUCHTEN. Das nimmt dem Kasten die Leere, zeigt
-   * beim ersten Blick, WIE VIELE Schritte im Hintergrund laufen, und
-   * verschiebt nichts. */
-  .mraum-zeile,
-  .mraum-bilanz {
-    transition: opacity 0.2s;
-  }
-
   :global(html[data-js]) .mraum[data-chat]:not([data-laeuft]):not([data-fertig]) .mraum-zeile,
   :global(html[data-js]) .mraum[data-chat]:not([data-laeuft]):not([data-fertig]) .mraum-bilanz {
-    opacity: 0.3;
+    opacity: 0.32;
   }
 
-
-
   @media (prefers-reduced-motion: no-preference) {
+    /* KEINE KURZSCHREIBWEISE `animation:`. Der Verdichter zieht sie sonst
+       mit anderen Angaben zusammen zu einer Zeile, die kein Browser kennt
+       -- und dann fällt der Ablauf ersatzlos aus. */
     .mraum[data-laeuft] .mraum-zeile {
-      animation-name: mraum-schalten;
+      animation-name: mraum-einrasten;
       animation-duration: 0.28s;
       animation-timing-function: steps(3, jump-start);
       animation-fill-mode: both;
       animation-delay: var(--ab);
     }
 
+    /* `forwards`, NICHT `both`. Mit `both` gilt der Anfangszustand schon
+       VOR der Verzoegerung -- und der Anfangszustand des Blitzes ist die
+       leuchtende Markenfarbe. Alle sechs Marken standen dadurch von der
+       ersten Sekunde an magenta da, also genau der Zustand, der den EINEN
+       Moment markieren soll, an dem der Schritt passiert. Mit `forwards`
+       gilt bis dahin die normale Regel: matt. */
     .mraum[data-laeuft] .mraum-zeile .mraum-marke {
       animation-name: mraum-blitz;
-      animation-duration: 0.5s;
+      animation-duration: 0.6s;
       animation-timing-function: ease-out;
-      animation-fill-mode: both;
+      animation-fill-mode: forwards;
+      animation-delay: var(--ab);
+    }
+
+    .mraum[data-laeuft] .mraum-zeile .mraum-ziffer {
+      animation-name: mraum-ziffer-an;
+      animation-duration: 0.6s;
+      animation-timing-function: ease-out;
+      animation-fill-mode: forwards;
       animation-delay: var(--ab);
     }
 
     .mraum[data-laeuft] .mraum-bilanz {
-      animation-name: mraum-schalten;
-      animation-duration: 0.3s;
+      animation-name: mraum-einrasten;
+      animation-duration: 0.35s;
       animation-timing-function: ease-out;
       animation-fill-mode: both;
       animation-delay: var(--fertig);
     }
+
+    /* Die Statuszeile springt genau dann um, wenn die Bilanz steht. */
+    .mraum[data-laeuft] .mraum-status-laeuft {
+      animation-name: mraum-aus;
+      animation-duration: 0.2s;
+      animation-fill-mode: both;
+      animation-delay: var(--fertig);
+    }
+
+    .mraum[data-laeuft] .mraum-status-fertig {
+      animation-name: mraum-an;
+      animation-duration: 0.2s;
+      animation-fill-mode: both;
+      animation-delay: var(--fertig);
+    }
+
+    /* Solange gearbeitet wird, blinkt die Lampe. Danach steht sie ruhig --
+       auch das ist eine Aussage: es ist vorbei, ohne Ihr Zutun. */
+    .mraum[data-laeuft] .mraum-lampe {
+      animation-name: mraum-lampe;
+      animation-duration: 1.4s;
+      animation-timing-function: ease-in-out;
+      animation-iteration-count: infinite;
+    }
   }
 
-  @keyframes mraum-schalten {
+  /* Ohne Ablauf steht alles fertig da: dann ist auch der Status „fertig". */
+  .mraum:not([data-laeuft]) .mraum-status-laeuft,
+  .mraum[data-fertig] .mraum-status-laeuft {
+    opacity: 0;
+  }
+
+  .mraum:not([data-laeuft]) .mraum-status-fertig,
+  .mraum[data-fertig] .mraum-status-fertig {
+    opacity: 1;
+  }
+
+  @keyframes mraum-einrasten {
     from {
-      opacity: 0.3;
+      opacity: 0.32;
       transform: translateX(-0.3rem);
     }
     to {
@@ -308,14 +447,36 @@ const zeichen: Record<WirkungArt, string> = {
      Das ist der Moment, in dem der Schritt passiert. */
   @keyframes mraum-blitz {
     0% {
-      background: var(--color-accent);
-      border-color: var(--color-accent);
+      background: var(--color-brand-mid, #b23a94);
+      border-color: var(--color-brand-mid, #b23a94);
       color: #fff;
+      box-shadow: 0 0 0 4px rgb(178 58 148 / 0.28);
     }
     100% {
-      background: var(--color-surface);
-      border-color: var(--color-border-strong);
-      color: #2b2f7a;
+      background: rgb(255 255 255 / 0.05);
+      border-color: var(--linie);
+      color: rgb(255 255 255 / 0.55);
+      box-shadow: 0 0 0 0 rgb(178 58 148 / 0);
     }
+  }
+
+  @keyframes mraum-ziffer-an {
+    from { color: #fff; }
+    to { color: rgb(255 255 255 / 0.28); }
+  }
+
+  @keyframes mraum-lampe {
+    0%, 100% { opacity: 1; }
+    55% { opacity: 0.3; }
+  }
+
+  @keyframes mraum-an {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes mraum-aus {
+    from { opacity: 1; }
+    to { opacity: 0; }
   }
 </style>

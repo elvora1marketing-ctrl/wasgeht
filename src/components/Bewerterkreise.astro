@@ -87,25 +87,35 @@ const initialen = (name: string) => {
     align-items: center;
   }
 
+  /* DREI FARBEN IM WECHSEL, NICHT VIERMAL DIESELBE.
+     Vier gleich blassrosa Kreise nebeneinander lesen sich als ein Fleck.
+     Im Wechsel der drei Markenfarben werden daraus vier Personen -- und
+     die Reihe bekommt genau die Lebendigkeit, die eine Bewertungszeile
+     braucht, ohne dass ein einziges erfundenes Gesicht dabei waere. */
   .kreis {
+    --ton: var(--color-brand-mid, #b23a94);
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
+    width: 2.125rem;
+    height: 2.125rem;
     border-radius: 999px;
     border: 2px solid var(--color-surface);
-    background: var(--color-accent-soft);
-    color: var(--color-accent);
+    background: color-mix(in oklab, var(--ton) 14%, var(--color-surface));
+    color: color-mix(in oklab, var(--ton) 78%, #000);
     font-family: var(--font-mono);
-    font-size: 0.75rem;
-    font-weight: 500;
+    font-size: 0.6875rem;
+    font-weight: 600;
     letter-spacing: 0.02em;
   }
 
+  .kreis:nth-child(3n + 1) { --ton: var(--color-brand-start, #5c67db); }
+  .kreis:nth-child(3n + 2) { --ton: var(--color-brand-mid, #b23a94); }
+  .kreis:nth-child(3n + 3) { --ton: var(--color-brand-end, #f45e3d); }
+
   /* Ueberlappung. Der erste Kreis bleibt stehen, die weiteren ruecken auf. */
   .kreis + .kreis {
-    margin-inline-start: -0.625rem;
+    margin-inline-start: -0.55rem;
   }
 
   /* Der vordere Kreis liegt oben, sonst verdeckt der letzte den ersten. */
@@ -113,9 +123,13 @@ const initialen = (name: string) => {
     z-index: calc(10 - var(--rang));
   }
 
+  /* Die Zaehlmarke ist keine Person, sondern eine Zahl. Vorher stand sie
+     als schwarze Scheibe am Ende der Reihe und zog mehr Aufmerksamkeit
+     auf sich als die Bewertung selbst. */
   .kreis-rest {
-    background: var(--color-ink);
-    color: var(--color-ink-inverse);
+    background: var(--color-surface);
+    box-shadow: inset 0 0 0 1px var(--color-border-strong);
+    color: var(--color-ink-faint);
   }
 
   .kreise-invers .kreis {

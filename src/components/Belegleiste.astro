@@ -109,20 +109,20 @@ const belege: Beleg[] = [
   <div class="container-content belegleiste-inner">
     {
       stimme && (
-        <figure class="beleg-stimme">
+        <figure class="blst-stimme">
           {wertung && (
-            <span class="beleg-stimme-wertung">
+            <span class="blst-stimme-wertung">
               <Sterne wert={reviews.rating} groesse={0.95} />
-              <span class="beleg-stimme-zahl">{ratingText}</span>
-              <span class="beleg-stimme-quelle">
+              <span class="blst-stimme-zahl">{ratingText}</span>
+              <span class="blst-stimme-quelle">
                 aus {reviews.count} {reviews.quelle}
               </span>
             </span>
           )}
 
-          <blockquote class="beleg-stimme-satz">{stimme.text}</blockquote>
+          <blockquote class="blst-stimme-satz">{stimme.text}</blockquote>
 
-          <figcaption class="beleg-stimme-wer">
+          <figcaption class="blst-stimme-wer">
             {stimme.author}
             {stimme.business && <span> · {stimme.business}</span>}
           </figcaption>
@@ -139,14 +139,14 @@ const belege: Beleg[] = [
           const Huelle = b.href ? 'a' : 'div';
 
           return (
-            <li class="beleg-punkt" style={`--verzug:${i}`}>
+            <li class="blst-punkt" style={`--verzug:${i}`}>
               <Huelle
-                class:list={['beleg-inhalt', b.href && 'beleg-inhalt-weg']}
+                class:list={['blst-inhalt', b.href && 'blst-inhalt-weg']}
                 {...(b.href
                   ? { href: b.href, target: '_blank', rel: 'noopener noreferrer' }
                   : {})}
               >
-                <span class="beleg-zeichen" aria-hidden="true">
+                <span class="blst-zeichen" aria-hidden="true">
                   <svg
                     viewBox="0 0 20 20"
                     fill="none"
@@ -159,11 +159,11 @@ const belege: Beleg[] = [
                   </svg>
                 </span>
 
-                <span class="beleg-worte">
-                  <span class="beleg-titel">{b.titel}</span>
-                  <span class="beleg-text">{b.text}</span>
+                <span class="blst-worte">
+                  <span class="blst-titel">{b.titel}</span>
+                  <span class="blst-text">{b.text}</span>
                   {b.aktion && (
-                    <span class="beleg-aktion">
+                    <span class="blst-aktion">
                       {b.aktion}
                       <svg
                         viewBox="0 0 20 20"
@@ -189,6 +189,11 @@ const belege: Beleg[] = [
 </section>
 
 <style>
+  /* Praefix `blst-`, NICHT `beleg-`. Der Bewertungsbeleg im Aufschlag
+     benutzt `.beleg-text` und `.beleg-zahl` fuer etwas voellig anderes.
+     Astro haelt beide auseinander, aber zwei Komponenten mit denselben
+     Klassennamen sind eine Falle -- und in jeder Vorschau, die Stile
+     ungescoped nachtraegt, schlagen sie sofort aufeinander. */
   .belegleiste {
     border-block: 1px solid var(--color-border);
     background: var(--color-surface-subtle);
@@ -203,7 +208,7 @@ const belege: Beleg[] = [
   @media (width >= 64rem) {
     /* Mit echter Stimme bekommt die den groesseren Teil: eine Stimme
        schlaegt vier Eigenschaften, sobald es sie gibt. */
-    .belegleiste-inner:has(.beleg-stimme) {
+    .belegleiste-inner:has(.blst-stimme) {
       grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
       gap: 2.5rem;
       align-items: center;
@@ -231,13 +236,13 @@ const belege: Beleg[] = [
 
     /* Haarlinien zwischen den Spalten. Sie machen aus vier Aussagen eine
        Leiste; ohne sie schwimmen sie als vier lose Blöcke. */
-    .beleg-punkt + .beleg-punkt {
+    .blst-punkt + .blst-punkt {
       border-inline-start: 1px solid var(--color-border);
       padding-inline-start: 1.75rem;
     }
   }
 
-  .beleg-inhalt {
+  .blst-inhalt {
     display: flex;
     align-items: flex-start;
     gap: 0.6rem;
@@ -246,39 +251,39 @@ const belege: Beleg[] = [
     color: inherit;
   }
 
-  .beleg-zeichen {
+  .blst-zeichen {
     display: flex;
     flex-shrink: 0;
     margin-top: 0.05rem;
     color: var(--color-accent);
   }
 
-  .beleg-zeichen svg {
+  .blst-zeichen svg {
     width: 1.05rem;
     height: 1.05rem;
   }
 
-  .beleg-worte {
+  .blst-worte {
     display: flex;
     flex-direction: column;
     gap: 0.15rem;
     min-width: 0;
   }
 
-  .beleg-titel {
+  .blst-titel {
     font-size: 0.875rem;
     font-weight: 600;
     line-height: 1.35;
     color: var(--color-ink);
   }
 
-  .beleg-text {
+  .blst-text {
     font-size: 0.8125rem;
     line-height: 1.45;
     color: var(--color-ink-muted);
   }
 
-  .beleg-aktion {
+  .blst-aktion {
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
@@ -288,29 +293,29 @@ const belege: Beleg[] = [
     color: var(--color-accent);
   }
 
-  .beleg-aktion svg {
+  .blst-aktion svg {
     width: 0.85rem;
     height: 0.85rem;
     transition: transform 0.25s ease;
   }
 
-  .beleg-inhalt-weg:hover .beleg-aktion svg {
+  .blst-inhalt-weg:hover .blst-aktion svg {
     transform: translateX(2px);
   }
 
-  .beleg-inhalt-weg:hover .beleg-titel {
+  .blst-inhalt-weg:hover .blst-titel {
     color: var(--color-accent);
   }
 
   /* --- Die echte Stimme, sobald es sie gibt ------------------------------ */
-  .beleg-stimme {
+  .blst-stimme {
     display: flex;
     flex-direction: column;
     gap: 0.55rem;
     margin: 0;
   }
 
-  .beleg-stimme-wertung {
+  .blst-stimme-wertung {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -318,21 +323,21 @@ const belege: Beleg[] = [
     color: var(--color-ink-faint);
   }
 
-  .beleg-stimme-zahl {
+  .blst-stimme-zahl {
     font-family: var(--font-heading);
     font-size: 1.125rem;
     line-height: 1;
     color: var(--color-ink);
   }
 
-  .beleg-stimme-satz {
+  .blst-stimme-satz {
     margin: 0;
     font-size: 0.9375rem;
     line-height: 1.55;
     color: var(--color-ink);
   }
 
-  .beleg-stimme-wer {
+  .blst-stimme-wer {
     font-size: 0.8125rem;
     color: var(--color-ink-faint);
   }
@@ -347,12 +352,12 @@ const belege: Beleg[] = [
      Telefon ist ein farbiger Titel ohnehin das verstaendlichere Zeichen
      fuer „hier kann man tippen" als ein kleiner Pfeil. */
   @media (width < 48rem) {
-    .beleg-text,
-    .beleg-aktion {
+    .blst-text,
+    .blst-aktion {
       display: none;
     }
 
-    .beleg-inhalt-weg .beleg-titel {
+    .blst-inhalt-weg .blst-titel {
       color: var(--color-accent);
     }
   }
