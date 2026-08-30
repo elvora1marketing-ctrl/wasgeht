@@ -4,7 +4,7 @@ import Band from '~/components/Band.astro';
 import PanelHero from '~/components/PanelHero.astro';
 import BookingEmbed from '~/components/BookingEmbed.astro';
 import WhatsappCta from '~/components/WhatsappCta.astro';
-import { booking, contact, contactLinks } from '~/config/site';
+import { contact, contactLinks } from '~/config/site';
 
 /** Was im Gespräch passiert, nimmt die Sorge vor dem Verkaufsanruf. */
 const agenda = [
@@ -23,7 +23,12 @@ const agenda = [
 >
   <PanelHero
     eyebrow="Erstgespräch"
-    heading={`${booking.durationLabel}, die Ihnen Klarheit bringen`}
+    {/* NICHT MEHR „15 Minuten, die Ihnen Klarheit bringen". Die Dauer als
+        Ueberschrift steht auf jeder zweiten Seite dieser Art, und sie
+        verspricht das Falsche: niemand will fuenfzehn Minuten, alle wollen
+        wissen, was bei ihnen liegen bleibt. Die Dauer steht weiter im
+        Kalender, wo sie hingehoert. */}
+    heading="Kurz durchsprechen, was bei Ihnen liegen bleibt"
     intro="Kein Verkaufsgespräch, keine Vorbereitung nötig. Sie erzählen, wo es klemmt, und bekommen eine ehrliche Einschätzung. Auch dann, wenn ich Ihnen nicht helfen kann."
     color="#5c3491"
     breadcrumbs={[{ label: 'Termin' }]}
@@ -36,7 +41,7 @@ const agenda = [
       </div>
 
       <div class="termin-ablauf">
-        <h2 class="termin-titel">Was in den {booking.durationLabel} passiert</h2>
+        <h2 class="termin-titel">Was in dem Gespräch passiert</h2>
         <ol class="mt-6 flex flex-col gap-5">
           {
             agenda.map((item, index) => (

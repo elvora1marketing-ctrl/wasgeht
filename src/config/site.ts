@@ -85,7 +85,15 @@ export const booking = {
   get embedScript() {
     return `${this.origin}/embed/embed.js`;
   },
-  /** Dauer, wie sie im Umfeld des CTA kommuniziert wird. */
+  /**
+   * Die im Kalender hinterlegte Dauer.
+   *
+   * STEHT ABSICHTLICH AUF KEINER SEITE MEHR. „15 Minuten, unverbindlich,
+   * ohne Verkaufsgespraech" steht so oder so aehnlich auf jeder zweiten
+   * Seite dieser Art -- als Ueberschrift verspricht die Zahl ausserdem das
+   * Falsche: niemand will fuenfzehn Minuten, alle wollen wissen, was bei
+   * ihnen liegen bleibt. Wer die Dauer sucht, sieht sie im Kalender.
+   */
   durationLabel: '15 Minuten',
 } as const;
 

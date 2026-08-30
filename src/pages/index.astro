@@ -692,7 +692,28 @@ const kachelZeichen: Record<string, string> = {
   @media (width >= 64rem) {
     .hero-inner {
       grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
-      align-items: center;
+      /* OBEN AUSRICHTEN, NICHT MITTIG.
+       *
+       * Hier stand `center`. Die rechte Spalte ist aber sehr viel hoeher
+       * als die linke -- Telefon, darunter das Protokoll, darunter Pfeile,
+       * Statuszeile und Hinweis, zusammen an die tausend Punkte. Mittig
+       * ausgerichtet rutschte die linke Spalte um gut zweihundert Punkte
+       * nach unten: auf einem Notebook sah man ueber der Falz die
+       * Kopfleiste, ein grosses weisses Nichts und rechts ein
+       * schwebendes Telefon. Die Ueberschrift stand am unteren Rand, die
+       * beiden Knoepfe darunter waren gar nicht mehr zu sehen.
+       *
+       * Das war kein Schoenheitsfehler: der Aufruf zur Handlung stand
+       * unter der Falz, und die Aussage der Seite auch. */
+      align-items: start;
+    }
+
+    /* Optischer Ausgleich: das Telefon hat oben Rahmen und Statusleiste,
+       der Text faengt mit einer duennen Kennung an. Ohne die Kleinigkeit
+       stuenden beide bei exakt derselben Zahl und saehen trotzdem
+       versetzt aus. */
+    .hero-text {
+      padding-top: 0.5rem;
     }
   }
 
